@@ -1,0 +1,84 @@
+{
+  "id": "three_bar_reversal",
+  "school": "الشموع: انعكاس ثلاثي مؤكد",
+  "strategy": "three_bar_reversal",
+  "version": "1.0.0",
+  "indicators": [
+    "prior_ema20",
+    "prior_atr_simple"
+  ],
+  "evidence_group": "candle",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "three_bar_reversal",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "candle",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Three-bar reversal without gap assumption",
+      "rules": [
+        "Prior EMA20 slope/context; first body >=.8 prior ATR, middle body <=one third of first.",
+        "Opposite third body >=.5 prior ATR and closes beyond first body midpoint; no gap assumption."
+      ],
+      "rules_en": [
+        "Prior EMA20 slope/context; first body >=.8 prior ATR, middle body <=one third of first.",
+        "Opposite third body >=.5 prior ATR and closes beyond first body midpoint; no gap assumption."
+      ],
+      "rules_ar": [
+        "اتجاه سابق من متوسط عشرين وميله؛ جسم أول لا يقل عن 0.8 من التقلب السابق، وجسم وسط لا يتجاوز ثلثه.",
+        "جسم ثالث معاكس لا يقل عن نصف التقلب وإغلاق يتجاوز منتصف الجسم الأول؛ لا يشترط فجوات لأسواق التداول المتصل."
+      ],
+      "parameters": {
+        "indicators": [
+          "prior_ema20",
+          "prior_atr_simple"
+        ],
+        "first_body_atr": 0.8,
+        "middle_fraction": 0.3333333333333333,
+        "third_body_atr": 0.5
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.three_bar_reversal",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الشموع: انعكاس ثلاثي مؤكد",
+  "execution_enabled": true,
+  "rules_python": "@model('three_bar_reversal', 'الشموع: انعكاس ثلاثي مؤكد', 'Three-bar reversal without gap assumption', 'candle',\n       ['اتجاه سابق من متوسط عشرين وميله؛ جسم أول لا يقل عن 0.8 من التقلب السابق، وجسم وسط لا يتجاوز ثلثه.',\n        'جسم ثالث معاكس لا يقل عن نصف التقلب وإغلاق يتجاوز منتصف الجسم الأول؛ لا يشترط فجوات لأسواق التداول المتصل.'],\n       ['Prior EMA20 slope/context; first body >=.8 prior ATR, middle body <=one third of first.',\n        'Opposite third body >=.5 prior ATR and closes beyond first body midpoint; no gap assumption.'],\n       {'indicators': ['prior_ema20', 'prior_atr_simple'], 'first_body_atr': .8, 'middle_fraction': 1/3, 'third_body_atr': .5})\ndef three_bar_reversal(b, c):\n    first, middle, last = b[-3:]; prior = b[:-3]; a = st.atr(prior)\n    means = st.ema([x['close'] for x in prior], 20); midpoint = (first['open']+first['close'])/2\n    body = abs(first['close']-first['open']); small = abs(middle['close']-middle['open']) <= body/3\n    valid = a > 0 and body >= .8*a and small and abs(last['close']-last['open']) >= .5*a\n    bull = valid and means[-1] < means[-2] and first['close'] < first['open'] and first['open'] < means[-1] and last['close'] > last['open'] and last['close'] > midpoint\n    bear = valid and means[-1] > means[-2] and first['close'] > first['open'] and first['open'] > means[-1] and last['close'] < last['open'] and last['close'] < midpoint\n    lo, hi = _stops(b, 3)\n    return signal(b, bull, bear, lo, hi, {'first_body': body, 'middle_small': small, 'midpoint': midpoint, 'prior_atr': a})\n",
+  "rules_sha256": "37b0373efbe2de5e1495f6e7d9c73aeca156c5391dfdcb54beb6d85daee9e639",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "id": "wyckoff_range_expansion",
+  "name_ar": "وايكوف: توسع نطاق مع نشاط تكات",
+  "version": "1.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. وايكوف: توسع نطاق مع نشاط تكات",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc",
+    "positive_tick_volume"
+  ],
+  "minimum_bars": 65,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "wyckoff_range_expansion",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc",
+      "positive_tick_volume"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Wyckoff-inspired range expansion",
+      "rules": [
+        "Prior 40-bar range width >=3 prior ATR with close efficiency <=.25.",
+        "Fresh boundary break, body>=prior ATR, close in outer 20%, ticks>=1.5 prior median.",
+        "Price/activity event only; no complete Wyckoff phase or institutional intent inference."
+      ],
+      "rules_en": [
+        "Prior 40-bar range width >=3 prior ATR with close efficiency <=.25.",
+        "Fresh boundary break, body>=prior ATR, close in outer 20%, ticks>=1.5 prior median.",
+        "Price/activity event only; no complete Wyckoff phase or institutional intent inference."
+      ],
+      "rules_ar": [
+        "نطاق سابق من أربعين شمعة بعرض لا يقل عن ثلاثة أضعاف التقلب وكفاءة اتجاه لا تزيد عن الربع.",
+        "إغلاق جديد خارج النطاق بجسم لا يقل عن التقلب، وفي طرف عشرين بالمئة من الشمعة، ونشاط تكات لا يقل عن مرة ونصف الوسيط السابق.",
+        "هذا حدث سعري مستوحى من القوة والضعف؛ لا يقرر مرحلة التجميع أو نية المؤسسات."
+      ],
+      "parameters": {
+        "indicators": [
+          "range40",
+          "efficiency40",
+          "tick_activity"
+        ],
+        "activity_multiple": 1.5
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.wyckoff_range_expansion",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+      "source": "https://www.wyckoffanalytics.com/wyckoff-method/"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "a > 0",
+    "hi - lo >= 3 * a",
+    "efficiency <= 0.25",
+    "abs(x['close'] - x['open']) >= a",
+    "volumes[-1] >= 1.5 * statistics.median(volumes[:-1])",
+    "b[-2]['close'] <= hi < x['close']",
+    "x['close'] > x['open']",
+    "location >= 0.8",
+    "b[-2]['close'] >= lo > x['close']",
+    "x['close'] < x['open']",
+    "location <= 0.2",
+    "v <= 0"
+  ],
+  "algorithm_python": "@model('wyckoff_range_expansion', 'وايكوف: توسع نطاق مع نشاط تكات', 'Wyckoff-inspired range expansion', 'structure',\n       ['نطاق سابق من أربعين شمعة بعرض لا يقل عن ثلاثة أضعاف التقلب وكفاءة اتجاه لا تزيد عن الربع.',\n        'إغلاق جديد خارج النطاق بجسم لا يقل عن التقلب، وفي طرف عشرين بالمئة من الشمعة، ونشاط تكات لا يقل عن مرة ونصف الوسيط السابق.',\n        'هذا حدث سعري مستوحى من القوة والضعف؛ لا يقرر مرحلة التجميع أو نية المؤسسات.'],\n       ['Prior 40-bar range width >=3 prior ATR with close efficiency <=.25.',\n        'Fresh boundary break, body>=prior ATR, close in outer 20%, ticks>=1.5 prior median.',\n        'Price/activity event only; no complete Wyckoff phase or institutional intent inference.'],\n       {'indicators': ['range40', 'efficiency40', 'tick_activity'], 'activity_multiple': 1.5},\n       needs=['completed_ohlc', 'positive_tick_volume'], source='https://www.wyckoffanalytics.com/wyckoff-method/')\ndef wyckoff_range_expansion(b, c):\n    prior = b[-41:-1]; x = b[-1]; volumes = [z.get('tick_volume') for z in b[-21:]]\n    if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v <= 0 for v in volumes):\n        return st._result(status='DATA_MISSING', missing=['positive finite tick counts required for range expansion'])\n    a = st.atr(prior); hi = max(z['high'] for z in prior); lo = min(z['low'] for z in prior)\n    travel = sum(abs(q['close']-p['close']) for p, q in itertools.pairwise(prior))\n    efficiency = abs(prior[-1]['close']-prior[0]['close'])/travel if travel else 0\n    span = x['high']-x['low']; location = (x['close']-x['low'])/span if span else .5\n    active = a > 0 and hi-lo >= 3*a and efficiency <= .25 and abs(x['close']-x['open']) >= a and volumes[-1] >= 1.5*statistics.median(volumes[:-1])\n    bull = active and b[-2]['close'] <= hi < x['close'] and x['close'] > x['open'] and location >= .8\n    bear = active and b[-2]['close'] >= lo > x['close'] and x['close'] < x['open'] and location <= .2\n    result = signal(b, bull, bear, min(z['low'] for z in b[-6:]), max(z['high'] for z in b[-6:]),\n                    {'range_low': lo, 'range_high': hi, 'efficiency': efficiency, 'location': location, 'activity_ratio': volumes[-1]/statistics.median(volumes[:-1])})\n    result['assumptions'].append('range expansion uses tick activity, not actual institutional volume')\n    return result\n",
+  "source_hashes": {
+    "strategies.py": "5bb18f88d8d80740815d66e68463a0bdb275e4c8e535de511873412ba61331ba",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "config/models.yaml": "ae0b53519cd32666c7ece681fcec8c095711a26f67bb75963b6ca5d1c74c075b",
+    "config/models.schema.json": "56ad04230dd939cd1dca8caaf3a0a4f0801392851b4bf9d912ab06b2a64cdd83"
+  },
+  "source_reference": {
+    "url": "https://www.wyckoffanalytics.com/wyckoff-method/"
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "bc3e9a15c71d424857f92173dcc81aebe4acdb8dc36ae243c474d01b0a35cd51"
+}

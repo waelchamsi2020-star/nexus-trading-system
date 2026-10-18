@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "id": "geometric_triangle_breakout",
+  "name_ar": "الأنماط الهندسية",
+  "version": "1.0.0",
+  "scope_ar": "مثلث صاعد أو هابط أو متماثل من محاور مؤكدة وخطوط متقاربة؛ دخول عند اختراق جديد.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "geometric_triangle_breakout",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.geometric_triangle_breakout",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "current_index - max(highs[-1]['index'], lows[-1]['index']) <= 15",
+    "max(high_residual, low_residual) <= 0.35 * c['atr']",
+    "len(highs) < 3",
+    "len(lows) < 3",
+    "high_slope < -minimum_slope",
+    "low_slope > minimum_slope",
+    "abs(high_slope) <= flat_slope",
+    "abs(low_slope) <= flat_slope",
+    "pattern_type is not None",
+    "8 <= span <= 60",
+    "initial_height > 0",
+    "0.3 * c['atr'] <= current_height <= 0.8 * initial_height",
+    "b[-2]['close'] <= upper_previous",
+    "b[-1]['close'] > upper_now",
+    "b[-2]['close'] >= lower_previous",
+    "b[-1]['close'] < lower_now",
+    "p['kind'] == 'HIGH'",
+    "p['kind'] == 'LOW'",
+    "low_intercept + low_slope * i - 0.15 * c['atr'] <= b[i]['close'] <= high_intercept + high_slope * i + 0.15 * c['atr']"
+  ],
+  "algorithm_python": "@_register(\"geometric_triangle_breakout\", \"الأنماط الهندسية\",\n           [\"confirmed pivots\", \"least-squares trendlines\", \"converging triangle\", \"fresh close breakout\"],\n           \"structure\", 60)\ndef geometric_triangle_breakout(b, c):\n    swings = _alternating_pivots(c[\"pivots\"])\n    highs = [p for p in swings if p[\"kind\"] == \"HIGH\"][-3:]\n    lows = [p for p in swings if p[\"kind\"] == \"LOW\"][-3:]\n    if len(highs) < 3 or len(lows) < 3:\n        return _result(missing=[\"three confirmed highs and three confirmed lows\"])\n    high_slope, high_intercept, high_residual = _linear_fit(highs)\n    low_slope, low_intercept, low_residual = _linear_fit(lows)\n    start_index = min(highs[0][\"index\"], lows[0][\"index\"])\n    previous_index, current_index = len(b)-2, len(b)-1\n    upper_start = high_intercept + high_slope * start_index\n    lower_start = low_intercept + low_slope * start_index\n    upper_previous = high_intercept + high_slope * previous_index\n    lower_previous = low_intercept + low_slope * previous_index\n    upper_now = high_intercept + high_slope * current_index\n    lower_now = low_intercept + low_slope * current_index\n    initial_height, current_height = upper_start-lower_start, upper_now-lower_now\n    minimum_slope, flat_slope = .03*c[\"atr\"], .04*c[\"atr\"]\n    symmetric = high_slope < -minimum_slope and low_slope > minimum_slope\n    ascending = abs(high_slope) <= flat_slope and low_slope > minimum_slope\n    descending = high_slope < -minimum_slope and abs(low_slope) <= flat_slope\n    pattern_type = (\"symmetrical_triangle\" if symmetric else \"ascending_triangle\" if ascending else\n                    \"descending_triangle\" if descending else None)\n    span = max(highs[-1][\"index\"], lows[-1][\"index\"]) - start_index\n    recent = current_index-max(highs[-1][\"index\"], lows[-1][\"index\"]) <= 15\n    residual_ok = max(high_residual, low_residual) <= .35*c[\"atr\"]\n    converging = (pattern_type is not None and 8 <= span <= 60 and recent and residual_ok and\n                  initial_height > 0 and .3*c[\"atr\"] <= current_height <= .8*initial_height)\n    prior_closes_inside = converging and all(\n        low_intercept+low_slope*i-.15*c[\"atr\"] <= b[i][\"close\"] <=\n        high_intercept+high_slope*i+.15*c[\"atr\"]\n        for i in range(start_index, current_index)\n    )\n    bull = prior_closes_inside and b[-2][\"close\"] <= upper_previous and b[-1][\"close\"] > upper_now\n    bear = prior_closes_inside and b[-2][\"close\"] >= lower_previous and b[-1][\"close\"] < lower_now\n    side = \"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\"\n    triggered = bull or bear\n    geometry = {\n        \"pattern\": pattern_type,\n        \"upper_slope_per_bar\": high_slope,\n        \"lower_slope_per_bar\": low_slope,\n        \"upper_residual\": high_residual,\n        \"lower_residual\": low_residual,\n        \"initial_height\": initial_height,\n        \"current_height\": current_height,\n        \"upper_now\": upper_now,\n        \"lower_now\": lower_now,\n        \"latest_pivot_confirmed_at\": max(p[\"confirmed_at\"] for p in highs+lows),\n        \"prior_closes_inside\": prior_closes_inside,\n    }\n    target = b[-1][\"close\"]+initial_height if bull else b[-1][\"close\"]-initial_height if bear else None\n    return _result(\n        side, triggered, upper_now if bull else lower_now if bear else None,\n        lower_now if bull else upper_now if bear else None,\n        [_evidence(\"geometric_pattern\", geometry, b, \"converging triangle geometry\"), *highs, *lows],\n        ([\"converging triangle geometry\"] if converging and prior_closes_inside else []) +\n        ([\"fresh completed close outside triangle\"] if triggered else []),\n        ([] if triggered else [\"triangle breakout on the latest completed bar\"])\n        if converging and prior_closes_inside else [\"confirmed converging triangle\"],\n        [\"Regression lines describe confirmed OHLC pivots; they do not imply exact discretionary trendlines\"],\n        targets=[{\"price\": target, \"method\": \"triangle height projected from breakout close\", \"fraction\": 1.0}]\n        if triggered else None,\n    )\n",
+  "source_hashes": {
+    "strategies.py": "e504984abfe80e7cdc161615a17ff910077d47d82c32c3580379c9fe8882aea9",
+    "specialists.py": "bfb845771766b997aa571c2fd4bb9259a73cc34d69959b5d15d2c5f19be16880",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "f68eb90c1ccb0f4151581a9d6ce9e082f734843e25b148336485b05389e357c3"
+}

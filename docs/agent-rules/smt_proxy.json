@@ -1,0 +1,66 @@
+{
+  "id": "smt_proxy",
+  "school": "اختلاف نطاق أصلين: نموذج محلي",
+  "strategy": "smt_proxy",
+  "version": "3.0.1",
+  "indicators": [
+    "paired swing divergence"
+  ],
+  "evidence_group": "interasset",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc",
+    "explicit_partner_symbol",
+    "aligned_partner_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "smt_proxy",
+    "rule_version": "3.0.1",
+    "data_requirements": [
+      "completed_ohlc",
+      "explicit_partner_symbol",
+      "aligned_partner_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "interasset",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Paired range divergence: local model",
+      "implementation": "nexus.local_models.smt",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "Correlation at least 0.7; one asset sweeps its prior 20-bar boundary and returns while its declared partner does not sweep."
+      ],
+      "rules_ar": [
+        "ارتباط لا يقل عن 0.7؛ يسحب أصل حد عشرين شمعة ويعود داخله دون أن يسحب الأصل المقابل حده."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: اختلاف نطاق أصلين: نموذج محلي",
+  "execution_enabled": true,
+  "rules_python": "def smt(b,c):\n    pairs=aligned(b,c)\n    if pairs is None:return wait(b,\"aligned declared MT5 partner required\",missing=True)\n    own=[p[0] for p in pairs];partner=[p[1] for p in pairs]\n    x,y=own[-1],partner[-1]\n    lo=min(z[\"low\"] for z in own[-21:-1]);hi=max(z[\"high\"] for z in own[-21:-1])\n    plo=min(z[\"low\"] for z in partner[-21:-1]);phi=max(z[\"high\"] for z in partner[-21:-1])\n    corr=correlation(pairs)\n    bull=corr>=.7 and x[\"low\"]<lo<x[\"close\"] and y[\"low\"]>=plo and x[\"close\"]>own[-2][\"close\"]\n    bear=corr>=.7 and x[\"high\"]>hi>x[\"close\"] and y[\"high\"]<=phi and x[\"close\"]<own[-2][\"close\"]\n    return signal(b,bull,bear,x[\"low\"],x[\"high\"],{\"partner\": c[\"partner_symbol\"],\"correlation\": corr,\"low\": lo,\"high\": hi})\n",
+  "rules_sha256": "cf006b7e665b6ab6dac6e3686775c1cd6e77875200a7af3156053c4e28dae6c9",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

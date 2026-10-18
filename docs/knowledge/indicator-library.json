@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "library_version": "1.0.0",
+  "formulas": {
+    "sma": {
+      "version": "1.0.0",
+      "formula": "mean(last n finite values)",
+      "warmup": "n observations",
+      "implementation": "nexus.indicators.sma"
+    },
+    "ema_sma_seed": {
+      "version": "1.0.0",
+      "formula": "alpha=2/(n+1); SMA(n) seed; alpha*x+(1-alpha)*previous",
+      "warmup": "n observations",
+      "implementation": "nexus.indicators.ema"
+    },
+    "rma": {
+      "version": "1.0.0",
+      "formula": "SMA(n) seed; (previous*(n-1)+x)/n",
+      "warmup": "n observations",
+      "implementation": "nexus.indicators.rma"
+    },
+    "rsi_wilder": {
+      "version": "1.0.1",
+      "formula": "100*RMA(gain,n)/(RMA(gain,n)+RMA(loss,n)); flat=50",
+      "parameters": {
+        "period": 14
+      },
+      "warmup": "n+1 closes",
+      "implementation": "nexus.indicators.rsi_wilder",
+      "numerical_policy": "divide bounded ratio before percentage scaling; reject nonfinite MFI accumulations"
+    },
+    "atr_wilder": {
+      "version": "1.0.0",
+      "formula": "RMA(max(H-L,abs(H-Cprev),abs(L-Cprev)),n); first TR unavailable",
+      "parameters": {
+        "period": 14
+      },
+      "implementation": "nexus.indicators.atr_wilder"
+    },
+    "stochastic_sma": {
+      "version": "1.0.1",
+      "formula": "raw=100*(C-LLn)/(HHn-LLn); K=SMA(raw,3); D=SMA(K,3); flat raw=50",
+      "parameters": {
+        "period": 14,
+        "slowing": 3,
+        "signal": 3
+      },
+      "terminal_parity": false,
+      "implementation": "nexus.indicators.stochastic",
+      "numerical_policy": "divide bounded ratio before percentage scaling; reject nonfinite MFI accumulations"
+    },
+    "macd_ema_signal": {
+      "version": "1.0.0",
+      "formula": "EMA(C,12)-EMA(C,26); signal=EMA(line,9); histogram=line-signal; SMA seeds",
+      "terminal_parity": false,
+      "implementation": "nexus.indicators.macd"
+    },
+    "adx_wilder": {
+      "version": "1.0.1",
+      "formula": "exclusive +DM/-DM (ties=0); DI=100*RMA(DM,14)/ATRw; DX=100*abs(+DI--DI)/(+DI+-DI); ADX=RMA(DX,14); zero denominators=0",
+      "parameters": {
+        "period": 14
+      },
+      "implementation": "nexus.indicators.adx_wilder",
+      "numerical_policy": "divide bounded ratio before percentage scaling; reject nonfinite MFI accumulations"
+    },
+    "cci": {
+      "version": "1.0.0",
+      "formula": "(TP-SMA(TP,20))/(0.015*mean(abs(TP-SMA))); TP=(H+L+C)/3; flat=0",
+      "implementation": "nexus.indicators.cci"
+    },
+    "williams_r": {
+      "version": "1.0.1",
+      "formula": "-100*(HH14-C)/(HH14-LL14); flat=-50",
+      "implementation": "nexus.indicators.williams_r",
+      "numerical_policy": "divide bounded ratio before percentage scaling; reject nonfinite MFI accumulations"
+    },
+    "mfi_tick": {
+      "version": "1.0.1",
+      "formula": "100*sum(positive TP*ticks,14)/sum(positive and negative TP*ticks,14); ties excluded; flat=50",
+      "volume": "positive_tick_count_proxy_not_real_money_flow",
+      "implementation": "nexus.indicators.mfi_tick",
+      "numerical_policy": "divide bounded ratio before percentage scaling; reject nonfinite MFI accumulations"
+    }
+  },
+  "source_sha256": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+  "implementation": "nexus.indicators",
+  "historical_indicators": "Legacy SMA RSI/ATR and first-close-seeded EMA remain unchanged in strategies.py.",
+  "parity_policy": "Formula/seed/method/history must match before claiming terminal parity."
+}

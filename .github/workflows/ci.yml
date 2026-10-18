@@ -1,0 +1,51 @@
+name: Candidate quality gates
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-quality:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: src
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Install isolated browser and axe
+        run: |
+          python -m playwright install chromium
+          npm install --no-save axe-core@4.11.0
+      - name: Initialize generated evidence directory
+        run: New-Item -ItemType Directory -Force reports | Out-Null
+      - name: Lint, types, full tests, branch coverage, integration
+        run: python tools/quality_gate.py --coverage
+      - name: JavaScript unit checks
+        run: |
+          node tests/ui_static_check.cjs
+          node tests/session_view_check.cjs
+      - name: Critical branch coverage at least 85 percent per module
+        run: python tools/check_critical_coverage.py
+      - name: Isolated browser, accessibility, RTL and responsiveness
+        run: python tools/browser_e2e.py --axe node_modules/axe-core/axe.min.js
+      - name: Save first-party evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-quality-evidence
+          path: |
+            reports/quality-*.json
+            reports/quality-*.log
+            reports/coverage.json
+            reports/browser-e2e.json
+            reports/browser/*.png

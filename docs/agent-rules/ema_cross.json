@@ -1,0 +1,55 @@
+{
+  "id": "ema_cross",
+  "school": "اتباع الاتجاه",
+  "strategy": "ema_cross",
+  "version": "1.0.0",
+  "indicators": [
+    "EMA 12",
+    "EMA 26",
+    "ATR 14"
+  ],
+  "evidence_group": "trend",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "ema_cross",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "trend",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.ema_cross",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تقاطع جديد بين المتوسطين الأسيين 12 و26.",
+  "execution_enabled": true,
+  "rules_python": "@_register(\"ema_cross\", \"اتباع الاتجاه\", [\"EMA 12\", \"EMA 26\", \"ATR 14\"], \"trend\", 60)\ndef ema_cross(b, c):\n    closes = [x[\"close\"] for x in b]\n    fast, slow = ema(closes, 12), ema(closes, 26)\n    bull = fast[-2] <= slow[-2] and fast[-1] > slow[-1]\n    bear = fast[-2] >= slow[-2] and fast[-1] < slow[-1]\n    return _result(\"BUY\" if fast[-1] > slow[-1] else \"SELL\" if fast[-1] < slow[-1] else \"NEUTRAL\", bull or bear, closes[-1],\n                   min(x[\"low\"] for x in b[-5:]) if fast[-1] > slow[-1] else max(x[\"high\"] for x in b[-5:]),\n                   [_evidence(\"line\", fast[-1], b, \"EMA12\"), _evidence(\"line\", slow[-1], b, \"EMA26\")],\n                   ([\"EMA directional ordering\"] if fast[-1] != slow[-1] else []) + ([\"fresh EMA crossover\"] if bull or bear else []), [] if bull or bear else [\"fresh EMA crossover\"])\n",
+  "rules_sha256": "900e125ad26fa560f90174a77886f23ad5c4f54e37b32e7e9abb48d169619d8b",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

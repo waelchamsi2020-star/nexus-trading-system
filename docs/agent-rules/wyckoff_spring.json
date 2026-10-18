@@ -1,0 +1,65 @@
+{
+  "id": "wyckoff_spring",
+  "school": "وايكوف: نموذج كسر واختبار محلي",
+  "strategy": "wyckoff_spring",
+  "version": "3.0.0",
+  "indicators": [
+    "range",
+    "spring proxy"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc",
+    "positive_tick_volume"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "wyckoff_spring",
+    "rule_version": "3.0.0",
+    "data_requirements": [
+      "completed_ohlc",
+      "positive_tick_volume"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Wyckoff: local spring-test model",
+      "implementation": "nexus.local_models.spring_test",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "40-bar sideways range; boundary sweep, departure, then lighter tick-count retest within eight bars; target range midpoint."
+      ],
+      "rules_ar": [
+        "نطاق جانبي لأربعين شمعة؛ سحب حد ثم ابتعاد وإعادة اختبار بعدد تكات أقل خلال ثماني شموع، والهدف منتصف النطاق."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: وايكوف: نموذج كسر واختبار محلي",
+  "execution_enabled": true,
+  "rules_python": "def spring_test(b,c):\n    for index in range(len(b)-3,len(b)-9,-1):\n        prior=b[index-40:index];spring=b[index];post=b[index+1:-1];x=b[-1]\n        if len(prior)!=40 or not post:continue\n        lo=min(z[\"low\"] for z in prior);hi=max(z[\"high\"] for z in prior);scale=st.atr(prior)\n        if scale<=0 or hi-lo<3*scale or abs(prior[-1][\"close\"]-prior[0][\"close\"])>.25*(hi-lo):continue\n        if min(x.get(\"tick_volume\",0),spring.get(\"tick_volume\",0))<=0:continue\n        light=x[\"tick_volume\"]<=spring[\"tick_volume\"]\n        bull=(spring[\"low\"]<lo<spring[\"close\"]<hi and max(z[\"close\"] for z in post)>lo+scale\n              and all(z[\"low\"]>lo+.25*scale for z in post) and lo<=x[\"low\"]<=lo+.25*scale\n              and x[\"close\"]>b[-2][\"close\"] and x[\"close\"]<(lo+hi)/2 and light)\n        bear=(spring[\"high\"]>hi>spring[\"close\"]>lo and min(z[\"close\"] for z in post)<hi-scale\n              and all(z[\"high\"]<hi-.25*scale for z in post) and hi-.25*scale<=x[\"high\"]<=hi\n              and x[\"close\"]<b[-2][\"close\"] and x[\"close\"]>(lo+hi)/2 and light)\n        if bull or bear:\n            result=signal(b,bull,bear,spring[\"low\"],spring[\"high\"],{\"low\": lo,\"high\": hi,\"spring_time\": spring[\"time\"]}, (lo+hi)/2)\n            result[\"assumptions\"].append(\"Range spring/test with tick-count proxy; no full Wyckoff phase or institutional intent inference\")\n            return result\n    return wait(b)\n",
+  "rules_sha256": "a6c99e9ebad1b0f6373a10f0f6591f8ae88258c78b41a7749482ca7732f43f97",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

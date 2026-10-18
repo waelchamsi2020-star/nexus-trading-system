@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "id": "macd_signal_cross",
+  "name_ar": "تقاطع الماكد: تأكيد اتجاه",
+  "version": "1.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. تقاطع الماكد: تأكيد اتجاه",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "momentum",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "macd_signal_cross",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "momentum",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "MACD EMA-signal cross",
+      "rules": [
+        "MACD=EMA12-EMA26; signal=EMA9(MACD), arithmetic seeds; explicit EMA-signal variant.",
+        "Fresh upward signal cross with MACD>0 and close above prior EMA20; inverse for sell."
+      ],
+      "rules_en": [
+        "MACD=EMA12-EMA26; signal=EMA9(MACD), arithmetic seeds; explicit EMA-signal variant.",
+        "Fresh upward signal cross with MACD>0 and close above prior EMA20; inverse for sell."
+      ],
+      "rules_ar": [
+        "فرق متوسطين أسيين اثنتي عشرة وست وعشرين شمعة؛ إشارة أسية لتسع قيم وبذور حسابية.",
+        "تقاطع صاعد جديد للماكد مع الإشارة فوق الصفر وفي اتجاه متوسط عشرين السابق؛ العكس للبيع."
+      ],
+      "parameters": {
+        "indicators": [
+          "macd_ema_signal",
+          "ema_sma_seed"
+        ],
+        "fast": 12,
+        "slow": 26,
+        "signal": 9
+      },
+      "allowed_regimes": [
+        "TREND",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.macd_signal_cross",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+      "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators/macd"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "a[-2] <= s[-2]",
+    "a[-1] > s[-1]",
+    "a[-1] > 0",
+    "closes[-1] > mean",
+    "a[-2] >= s[-2]",
+    "a[-1] < s[-1]",
+    "a[-1] < 0",
+    "closes[-1] < mean"
+  ],
+  "algorithm_python": "@model('macd_signal_cross', 'تقاطع الماكد: تأكيد اتجاه', 'MACD EMA-signal cross', 'momentum',\n       ['فرق متوسطين أسيين اثنتي عشرة وست وعشرين شمعة؛ إشارة أسية لتسع قيم وبذور حسابية.',\n        'تقاطع صاعد جديد للماكد مع الإشارة فوق الصفر وفي اتجاه متوسط عشرين السابق؛ العكس للبيع.'],\n       ['MACD=EMA12-EMA26; signal=EMA9(MACD), arithmetic seeds; explicit EMA-signal variant.',\n        'Fresh upward signal cross with MACD>0 and close above prior EMA20; inverse for sell.'],\n       {'indicators': ['macd_ema_signal', 'ema_sma_seed'], 'fast': 12, 'slow': 26, 'signal': 9},\n       source=MT5_OSC+'/macd', regimes=('TREND', 'MIXED'))\ndef macd_signal_cross(b, c):\n    closes = [x['close'] for x in b]; values = ind.macd(closes); a = values['line']; s = values['signal']\n    mean = ind.ema(closes[:-1], 20)[-1]; lo, hi = _stops(b)\n    return signal(b, a[-2] <= s[-2] and a[-1] > s[-1] and a[-1] > 0 and closes[-1] > mean,\n                  a[-2] >= s[-2] and a[-1] < s[-1] and a[-1] < 0 and closes[-1] < mean, lo, hi,\n                  {'macd': a[-1], 'signal': s[-1], 'previous_macd': a[-2], 'previous_signal': s[-2], 'prior_ema': mean})\n",
+  "source_hashes": {
+    "strategies.py": "46d65a27827a7851139109182d589b9ffeb9f297e9f459630a64dd76ecdaa293",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "config/models.yaml": "ae0b53519cd32666c7ece681fcec8c095711a26f67bb75963b6ca5d1c74c075b",
+    "config/models.schema.json": "56ad04230dd939cd1dca8caaf3a0a4f0801392851b4bf9d912ab06b2a64cdd83"
+  },
+  "source_reference": {
+    "url": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators/macd"
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "825b62231df9ed91e940270aa4d700088c50663c791fc82d0d1cbe5ba30fb4af"
+}

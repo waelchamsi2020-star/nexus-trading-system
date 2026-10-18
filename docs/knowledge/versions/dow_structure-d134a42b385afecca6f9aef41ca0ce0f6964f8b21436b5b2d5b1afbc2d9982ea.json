@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "id": "dow_structure",
+  "name_ar": "داو والتحليل الكلاسيكي",
+  "version": "1.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "تعريف محلي لاتجاه القمم والقيعان المؤكدة ثم اختراق جديد؛ لا يمثل نظرية داو كاملة.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 40,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "dow_structure",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 40,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.dow_structure",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "len(highs) < 2",
+    "len(lows) < 2",
+    "highs[-1]['price'] > highs[-2]['price']",
+    "lows[-1]['price'] > lows[-2]['price']",
+    "highs[-1]['price'] < highs[-2]['price']",
+    "lows[-1]['price'] < lows[-2]['price']",
+    "x['kind'] == 'HIGH'",
+    "x['kind'] == 'LOW'",
+    "b[-2]['close'] <= level < b[-1]['close']",
+    "b[-2]['close'] >= level > b[-1]['close']",
+    "side != 'NEUTRAL'"
+  ],
+  "algorithm_python": "@_register(\"dow_structure\", \"داو والتحليل الكلاسيكي\", [\"confirmed pivots\"], \"structure\", 40)\ndef dow_structure(b, c):\n    p = c[\"pivots\"]\n    highs = [x for x in p if x[\"kind\"] == \"HIGH\"]\n    lows = [x for x in p if x[\"kind\"] == \"LOW\"]\n    if len(highs) < 2 or len(lows) < 2:\n        return _result(missing=[\"two confirmed highs and lows\"])\n    up = highs[-1][\"price\"] > highs[-2][\"price\"] and lows[-1][\"price\"] > lows[-2][\"price\"]\n    down = highs[-1][\"price\"] < highs[-2][\"price\"] and lows[-1][\"price\"] < lows[-2][\"price\"]\n    side = \"BUY\" if up else \"SELL\" if down else \"NEUTRAL\"\n    level = highs[-1][\"price\"] if up else lows[-1][\"price\"] if down else None\n    triggered = (up and b[-2][\"close\"] <= level < b[-1][\"close\"]) or (down and b[-2][\"close\"] >= level > b[-1][\"close\"])\n    return _result(side, triggered, level, lows[-1][\"price\"] if up else highs[-1][\"price\"] if down else None,\n                   evidence=highs[-2:]+lows[-2:], met=[\"confirmed structure\"] if side != \"NEUTRAL\" else [],\n                   missing=[] if triggered else [\"fresh close through confirmed swing\"])\n",
+  "source_hashes": {
+    "strategies.py": "90ac1a27ddfb2b6dccff293986add17e9f6c454bc4a70c94e45c92af2289b7e6",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "config/models.yaml": "ae0b53519cd32666c7ece681fcec8c095711a26f67bb75963b6ca5d1c74c075b",
+    "config/models.schema.json": "56ad04230dd939cd1dca8caaf3a0a4f0801392851b4bf9d912ab06b2a64cdd83"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "d134a42b385afecca6f9aef41ca0ce0f6964f8b21436b5b2d5b1afbc2d9982ea"
+}

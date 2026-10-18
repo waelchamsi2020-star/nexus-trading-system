@@ -1,0 +1,67 @@
+{
+  "id": "interasset_confirmation",
+  "school": "تأكيد أصل مقابل محدد",
+  "strategy": "interasset_confirmation",
+  "version": "3.0.1",
+  "indicators": [
+    "return correlation 40",
+    "20 bar breakout"
+  ],
+  "evidence_group": "interasset",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc",
+    "explicit_partner_symbol",
+    "aligned_partner_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "interasset_confirmation",
+    "rule_version": "3.0.1",
+    "data_requirements": [
+      "completed_ohlc",
+      "explicit_partner_symbol",
+      "aligned_partner_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "interasset",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Declared paired-asset confirmation",
+      "implementation": "nexus.local_models.interasset",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "Prior 40-return correlation at least 0.7; new 20-bar breakout confirmed by the declared paired asset."
+      ],
+      "rules_ar": [
+        "ارتباط أربعين عائدًا سابقًا لا يقل عن 0.7، مع كسر جديد لنطاق عشرين شمعة يؤكده الأصل المقابل المحدد."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: تأكيد أصل مقابل محدد",
+  "execution_enabled": true,
+  "rules_python": "def interasset(b,c):\n    pairs=aligned(b,c)\n    if pairs is None:return wait(b,\"aligned declared MT5 partner required\",missing=True)\n    # The old complete arithmetic is retained; its previous missing wiring is\n    # now supplied by Engine's declared metadata mapping.\n    return st.interasset_confirmation(b,{**c,\"partner_bars\":[p[1] for p in pairs]})\n",
+  "rules_sha256": "56b23fd2d281f8e6c49723bceeacc6fd42884596a31fb913c5355ce0125114f8",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

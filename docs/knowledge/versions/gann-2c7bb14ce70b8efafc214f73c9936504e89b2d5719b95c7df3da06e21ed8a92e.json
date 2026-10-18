@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "id": "gann",
+  "name_ar": "جان: شبكة جذر سعر معيارية",
+  "version": "3.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: جان: شبكة جذر سعر معيارية",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "gann",
+    "rule_version": "3.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Gann: normalized price-root grid",
+      "implementation": "nexus.local_models.root_grid",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "House rule: ATR-normalized square-root level shifted by 0.25 from a confirmed pivot; fresh cross within 32 bars with anchor intact."
+      ],
+      "rules_ar": [
+        "قاعدة خاصة: مستوى جذر سعر معياري بنطاق التقلب وإزاحة ربع وحدة من محور مؤكد؛ عبور جديد خلال اثنتين وثلاثين شمعة مع سلامة المحور."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "anchor['kind'] == 'LOW'",
+    "unit <= 0",
+    "shift <= 0",
+    "b[-2]['close'] <= level < b[-1]['close']",
+    "b[-2]['close'] >= level > b[-1]['close']",
+    "1 <= age <= 32",
+    "x['low'] >= anchor['price']",
+    "x['high'] <= anchor['price']"
+  ],
+  "algorithm_python": "def root_grid(b,c):\n    p=st._alternating_pivots(c[\"pivots\"])\n    if not p:return wait(b)\n    anchor=p[-1];bull=anchor[\"kind\"]==\"LOW\";unit=st.atr(b[:anchor[\"index\"]+1])\n    if unit<=0:return wait(b)\n    root=math.sqrt(anchor[\"price\"]/unit);shift=root+(.25 if bull else -.25)\n    if shift<=0:return wait(b)\n    level=unit*shift*shift\n    age=len(b)-1-(anchor[\"index\"]+2)\n    intact=all(x[\"low\"]>=anchor[\"price\"] if bull else x[\"high\"]<=anchor[\"price\"] for x in b[anchor[\"index\"]+1:])\n    cross=b[-2][\"close\"]<=level<b[-1][\"close\"] if bull else b[-2][\"close\"]>=level>b[-1][\"close\"]\n    active=1<=age<=32 and intact and cross\n    result=signal(b,active and bull,active and not bull,anchor[\"price\"],anchor[\"price\"],{\"level\": level,\"unit\": unit,\"anchor\": anchor,\"age\": age})\n    result[\"assumptions\"].append(\"Volatility-normalized square-root grid is a house model; not complete Gann theory or a natural time cycle\")\n    return result\n",
+  "source_hashes": {
+    "strategies.py": "90ac1a27ddfb2b6dccff293986add17e9f6c454bc4a70c94e45c92af2289b7e6",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "config/models.yaml": "ae0b53519cd32666c7ece681fcec8c095711a26f67bb75963b6ca5d1c74c075b",
+    "config/models.schema.json": "56ad04230dd939cd1dca8caaf3a0a4f0801392851b4bf9d912ab06b2a64cdd83"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "2c7bb14ce70b8efafc214f73c9936504e89b2d5719b95c7df3da06e21ed8a92e"
+}

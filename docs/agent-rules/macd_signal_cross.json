@@ -1,0 +1,84 @@
+{
+  "id": "macd_signal_cross",
+  "school": "تقاطع الماكد: تأكيد اتجاه",
+  "strategy": "macd_signal_cross",
+  "version": "1.0.0",
+  "indicators": [
+    "macd_ema_signal",
+    "ema_sma_seed"
+  ],
+  "evidence_group": "momentum",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "macd_signal_cross",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "momentum",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "MACD EMA-signal cross",
+      "rules": [
+        "MACD=EMA12-EMA26; signal=EMA9(MACD), arithmetic seeds; explicit EMA-signal variant.",
+        "Fresh upward signal cross with MACD>0 and close above prior EMA20; inverse for sell."
+      ],
+      "rules_en": [
+        "MACD=EMA12-EMA26; signal=EMA9(MACD), arithmetic seeds; explicit EMA-signal variant.",
+        "Fresh upward signal cross with MACD>0 and close above prior EMA20; inverse for sell."
+      ],
+      "rules_ar": [
+        "فرق متوسطين أسيين اثنتي عشرة وست وعشرين شمعة؛ إشارة أسية لتسع قيم وبذور حسابية.",
+        "تقاطع صاعد جديد للماكد مع الإشارة فوق الصفر وفي اتجاه متوسط عشرين السابق؛ العكس للبيع."
+      ],
+      "parameters": {
+        "indicators": [
+          "macd_ema_signal",
+          "ema_sma_seed"
+        ],
+        "fast": 12,
+        "slow": 26,
+        "signal": 9
+      },
+      "allowed_regimes": [
+        "TREND",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.macd_signal_cross",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+      "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators/macd"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. تقاطع الماكد: تأكيد اتجاه",
+  "execution_enabled": true,
+  "rules_python": "@model('macd_signal_cross', 'تقاطع الماكد: تأكيد اتجاه', 'MACD EMA-signal cross', 'momentum',\n       ['فرق متوسطين أسيين اثنتي عشرة وست وعشرين شمعة؛ إشارة أسية لتسع قيم وبذور حسابية.',\n        'تقاطع صاعد جديد للماكد مع الإشارة فوق الصفر وفي اتجاه متوسط عشرين السابق؛ العكس للبيع.'],\n       ['MACD=EMA12-EMA26; signal=EMA9(MACD), arithmetic seeds; explicit EMA-signal variant.',\n        'Fresh upward signal cross with MACD>0 and close above prior EMA20; inverse for sell.'],\n       {'indicators': ['macd_ema_signal', 'ema_sma_seed'], 'fast': 12, 'slow': 26, 'signal': 9},\n       source=MT5_OSC+'/macd', regimes=('TREND', 'MIXED'))\ndef macd_signal_cross(b, c):\n    closes = [x['close'] for x in b]; values = ind.macd(closes); a = values['line']; s = values['signal']\n    mean = ind.ema(closes[:-1], 20)[-1]; lo, hi = _stops(b)\n    return signal(b, a[-2] <= s[-2] and a[-1] > s[-1] and a[-1] > 0 and closes[-1] > mean,\n                  a[-2] >= s[-2] and a[-1] < s[-1] and a[-1] < 0 and closes[-1] < mean, lo, hi,\n                  {'macd': a[-1], 'signal': s[-1], 'previous_macd': a[-2], 'previous_signal': s[-2], 'prior_ema': mean})\n",
+  "rules_sha256": "27f132659b9b2d659f0b5f8d1d9adbf9b623de27408ea99c1a20184d156b4fd4",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

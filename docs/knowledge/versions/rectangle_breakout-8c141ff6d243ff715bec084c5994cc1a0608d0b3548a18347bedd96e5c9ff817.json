@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "id": "rectangle_breakout",
+  "name_ar": "الكلاسيكي: اختراق مستطيل سعري",
+  "version": "1.0.0",
+  "dependency_schema": 3,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الكلاسيكي: اختراق مستطيل سعري",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "rectangle_breakout",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Confirmed rectangle breakout",
+      "rules": [
+        "20 prior bars; width 2..8 times ATR calculated before the range.",
+        "Two touches per edge separated by >=3 bars within .15 ATR; fresh close outside with opposite edge intact."
+      ],
+      "rules_en": [
+        "20 prior bars; width 2..8 times ATR calculated before the range.",
+        "Two touches per edge separated by >=3 bars within .15 ATR; fresh close outside with opposite edge intact."
+      ],
+      "rules_ar": [
+        "عشرون شمعة سابقة، ونطاق بين ضعفي وثمانية أضعاف تقلب سابق مستقل.",
+        "اختباران لكل حد يفصل بينهما ثلاث شموع على الأقل ضمن سماح 0.15 من التقلب؛ إغلاق جديد خارج الحد مع سلامة المقابل."
+      ],
+      "parameters": {
+        "indicators": [
+          "prior_20_bar_range",
+          "prior_atr_simple"
+        ],
+        "window": 20,
+        "touch_tolerance_atr": 0.15,
+        "min_touch_separation": 3
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.rectangle_breakout",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "a > 0",
+    "2 * a <= hi - lo <= 8 * a",
+    "b[-2]['close'] <= hi < b[-1]['close']",
+    "b[-1]['low'] > lo",
+    "b[-2]['close'] >= lo > b[-1]['close']",
+    "b[-1]['high'] < hi",
+    "len(selected) >= 2",
+    "selected[-1] - selected[0] >= 3",
+    "abs(x[key] - level) <= 0.15 * a"
+  ],
+  "algorithm_python": "@model('rectangle_breakout', 'الكلاسيكي: اختراق مستطيل سعري', 'Confirmed rectangle breakout', 'structure',\n       ['عشرون شمعة سابقة، ونطاق بين ضعفي وثمانية أضعاف تقلب سابق مستقل.',\n        'اختباران لكل حد يفصل بينهما ثلاث شموع على الأقل ضمن سماح 0.15 من التقلب؛ إغلاق جديد خارج الحد مع سلامة المقابل.'],\n       ['20 prior bars; width 2..8 times ATR calculated before the range.',\n        'Two touches per edge separated by >=3 bars within .15 ATR; fresh close outside with opposite edge intact.'],\n       {'indicators': ['prior_20_bar_range', 'prior_atr_simple'], 'window': 20, 'touch_tolerance_atr': .15, 'min_touch_separation': 3})\ndef rectangle_breakout(b, c):\n    window = b[-21:-1]; a = st.atr(b[:-21]); lo = min(x['low'] for x in window); hi = max(x['high'] for x in window)\n    def touches(key, level):\n        selected = [i for i, x in enumerate(window) if abs(x[key]-level) <= .15*a]\n        return len(selected) >= 2 and selected[-1]-selected[0] >= 3\n    shape = a > 0 and 2*a <= hi-lo <= 8*a and touches('high', hi) and touches('low', lo)\n    bull = shape and b[-2]['close'] <= hi < b[-1]['close'] and b[-1]['low'] > lo\n    bear = shape and b[-2]['close'] >= lo > b[-1]['close'] and b[-1]['high'] < hi\n    return signal(b, bull, bear, lo, hi, dict(low=lo, high=hi, valid_rectangle=shape, reference_atr=a))\n",
+  "source_hashes": {
+    "strategies.py": "2c87c9f0a05cc57da77ba92c9adb84b9e13482be7c287daf20866ea08f81fdce",
+    "specialists.py": "c25a7df6dc31511146b07bec16f0ca62ecf5b417409ee5f7686a916815840f45",
+    "local_models.py": "60618291b43a8fced1b73e740c58f5a829a882f44bfa77763bb80518c850f607",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f",
+    "confluence.py": "bb8bb3c3cb832b7f48d8c0cd0e8f7c6a02a23030ec35b06eefaccfce74bbe2a2",
+    "confluence_registry.py": "a8b0a67bd7287e94a7c7aa5403b69b2713c4bfbb16b4b0aa03c18c1771049c11",
+    "indicators.py": "17e67e354ee7a35551876c32d4bd38b2e8267e71e2bad1db42f18081c231290c",
+    "extended_models.py": "3b4022319003d32954359e41581394d5cc538c60b9921c1d8eb11cd3458e0421"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "8c141ff6d243ff715bec084c5994cc1a0608d0b3548a18347bedd96e5c9ff817"
+}

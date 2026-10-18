@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "id": "wyckoff_spring",
+  "name_ar": "وايكوف: نموذج كسر واختبار محلي",
+  "version": "3.0.0",
+  "dependency_schema": 2,
+  "scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: وايكوف: نموذج كسر واختبار محلي",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc",
+    "positive_tick_volume"
+  ],
+  "minimum_bars": 65,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "wyckoff_spring",
+    "rule_version": "3.0.0",
+    "data_requirements": [
+      "completed_ohlc",
+      "positive_tick_volume"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Wyckoff: local spring-test model",
+      "implementation": "nexus.local_models.spring_test",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "40-bar sideways range; boundary sweep, departure, then lighter tick-count retest within eight bars; target range midpoint."
+      ],
+      "rules_ar": [
+        "نطاق جانبي لأربعين شمعة؛ سحب حد ثم ابتعاد وإعادة اختبار بعدد تكات أقل خلال ثماني شموع، والهدف منتصف النطاق."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "min(x.get('tick_volume', 0), spring.get('tick_volume', 0)) <= 0",
+    "x['tick_volume'] <= spring['tick_volume']",
+    "len(prior) != 40",
+    "scale <= 0",
+    "hi - lo < 3 * scale",
+    "abs(prior[-1]['close'] - prior[0]['close']) > 0.25 * (hi - lo)",
+    "spring['low'] < lo < spring['close'] < hi",
+    "max((z['close'] for z in post)) > lo + scale",
+    "lo <= x['low'] <= lo + 0.25 * scale",
+    "x['close'] > b[-2]['close']",
+    "x['close'] < (lo + hi) / 2",
+    "spring['high'] > hi > spring['close'] > lo",
+    "min((z['close'] for z in post)) < hi - scale",
+    "hi - 0.25 * scale <= x['high'] <= hi",
+    "x['close'] < b[-2]['close']",
+    "x['close'] > (lo + hi) / 2",
+    "z['low'] > lo + 0.25 * scale",
+    "z['high'] < hi - 0.25 * scale"
+  ],
+  "algorithm_python": "def spring_test(b,c):\n    for index in range(len(b)-3,len(b)-9,-1):\n        prior=b[index-40:index];spring=b[index];post=b[index+1:-1];x=b[-1]\n        if len(prior)!=40 or not post:continue\n        lo=min(z[\"low\"] for z in prior);hi=max(z[\"high\"] for z in prior);scale=st.atr(prior)\n        if scale<=0 or hi-lo<3*scale or abs(prior[-1][\"close\"]-prior[0][\"close\"])>.25*(hi-lo):continue\n        if min(x.get(\"tick_volume\",0),spring.get(\"tick_volume\",0))<=0:continue\n        light=x[\"tick_volume\"]<=spring[\"tick_volume\"]\n        bull=(spring[\"low\"]<lo<spring[\"close\"]<hi and max(z[\"close\"] for z in post)>lo+scale\n              and all(z[\"low\"]>lo+.25*scale for z in post) and lo<=x[\"low\"]<=lo+.25*scale\n              and x[\"close\"]>b[-2][\"close\"] and x[\"close\"]<(lo+hi)/2 and light)\n        bear=(spring[\"high\"]>hi>spring[\"close\"]>lo and min(z[\"close\"] for z in post)<hi-scale\n              and all(z[\"high\"]<hi-.25*scale for z in post) and hi-.25*scale<=x[\"high\"]<=hi\n              and x[\"close\"]<b[-2][\"close\"] and x[\"close\"]>(lo+hi)/2 and light)\n        if bull or bear:\n            result=signal(b,bull,bear,spring[\"low\"],spring[\"high\"],dict(low=lo,high=hi,spring_time=spring[\"time\"]), (lo+hi)/2)\n            result[\"assumptions\"].append(\"Range spring/test with tick-count proxy; no full Wyckoff phase or institutional intent inference\")\n            return result\n    return wait(b)\n",
+  "source_hashes": {
+    "strategies.py": "6f4a5becbb893d61c22b10b2e28e07951cf29490c967c8a16d7a7b9ce7ed173c",
+    "specialists.py": "a030bc1a3abe16e31b1fe3eba4da9e683968561acb87c83c2d394a41a40e428c",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f",
+    "confluence.py": "bb8bb3c3cb832b7f48d8c0cd0e8f7c6a02a23030ec35b06eefaccfce74bbe2a2",
+    "confluence_registry.py": "a8b0a67bd7287e94a7c7aa5403b69b2713c4bfbb16b4b0aa03c18c1771049c11"
+  },
+  "source_reference": {
+    "url": "https://www.wyckoffanalytics.com/wyckoff-method/",
+    "principles_ar": [
+      "قراءة العرض والطلب والجهد والنتيجة وسياق النطاق جزء من المدرسة.",
+      "كسر نطاق واختباره في البرنامج نموذج محلي؛ لا يستنتج تلقائيًا جميع المراحل أو نية المؤسسات."
+    ]
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "720044c2cb8ebc06f6892e9bb06778b73f85514268857bdab8f8a4923334168a"
+}

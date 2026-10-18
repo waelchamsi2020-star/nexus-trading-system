@@ -1,0 +1,69 @@
+{
+  "id": "band_reentry",
+  "school": "العودة داخل النطاق الإحصائي",
+  "strategy": "band_reentry",
+  "version": "1.0.0",
+  "indicators": [
+    "Two-deviation band reentry"
+  ],
+  "evidence_group": "statistical",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "band_reentry",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "statistical",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Two-deviation band reentry",
+      "rules": [
+        "Fixed mean and population deviation from 20 bars preceding both trigger bars",
+        "Previous close outside 2 deviations; current close reenters but has not reached mean"
+      ],
+      "parameters": {
+        "lookback": 20,
+        "deviations": 2
+      },
+      "allowed_regimes": [
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "متوسط وانحراف معياري من عشرين شمعة قبل شمعتي الدخول.",
+        "الإغلاق السابق خارج انحرافين معياريين والحالي يعود داخلهما قبل الوصول للمتوسط."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. العودة داخل النطاق الإحصائي",
+  "execution_enabled": true,
+  "rules_python": "@specialist(\"band_reentry\", \"العودة داخل النطاق الإحصائي\", \"Two-deviation band reentry\", \"statistical\",\n            [\"Fixed mean and population deviation from 20 bars preceding both trigger bars\", \"Previous close outside 2 deviations; current close reenters but has not reached mean\"],\n            {\"lookback\": 20, \"deviations\": 2}, (\"RANGE\", \"MIXED\"))\ndef band_reentry(b, c):\n    values = [x[\"close\"] for x in b[-22:-2]]\n    mean, sd = statistics.fmean(values), statistics.pstdev(values)\n    hi, lo = mean+2*sd, mean-2*sd\n    previous, now = b[-2][\"close\"], b[-1][\"close\"]\n    return signal(b, sd > 0 and previous < lo <= now < mean, sd > 0 and previous > hi >= now > mean,\n                  min(x[\"low\"] for x in b[-2:]), max(x[\"high\"] for x in b[-2:]), {\"mean\": mean, \"high\": hi, \"low\": lo}, mean)\n",
+  "rules_sha256": "9bc9ac69f79827fdd1bbef21c372beb2e45e72e61ff6db1ef853d98bdbe09509",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

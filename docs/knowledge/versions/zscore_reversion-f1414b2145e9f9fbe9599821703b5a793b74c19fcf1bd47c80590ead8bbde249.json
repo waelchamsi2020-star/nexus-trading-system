@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "id": "zscore_reversion",
+  "name_ar": "العودة إلى المتوسط والتحليل الإحصائي",
+  "version": "1.0.0",
+  "scope_ar": "عودة درجة معيارية عبر عتبة مع هدف متوسط صالح؛ لا يفترض ثبات التوزيع.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "statistical",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "zscore_reversion",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "statistical",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.zscore_reversion",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "sd <= 0",
+    "abs(statistics.fmean(training[-10:]) - statistics.fmean(training[:10])) < sd",
+    "before <= -2 < now",
+    "before >= 2 > now",
+    "mean > closes[-1]",
+    "mean < closes[-1]"
+  ],
+  "algorithm_python": "@_register(\"zscore_reversion\", \"العودة إلى المتوسط والتحليل الإحصائي\", [\"rolling zscore 40\", \"mean slope filter\"], \"statistical\", 65)\ndef zscore_reversion(b, c):\n    closes = [x[\"close\"] for x in b]\n    training = closes[-42:-2]\n    mean, sd = statistics.fmean(training), statistics.pstdev(training)\n    if sd <= 0:\n        return _result(missing=[\"nonzero dispersion\"])\n    before, now = (closes[-2]-mean)/sd, (closes[-1]-mean)/sd\n    stable = abs(statistics.fmean(training[-10:])-statistics.fmean(training[:10])) < sd\n    bull, bear = stable and before <= -2 < now, stable and before >= 2 > now\n    side = \"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\"\n    target = mean if (bull and mean > closes[-1]) or (bear and mean < closes[-1]) else None\n    return _result(side, bool((bull or bear) and target), closes[-1],\n                   min(x[\"low\"] for x in b[-5:]) if bull else max(x[\"high\"] for x in b[-5:]),\n                   [_evidence(\"zscore\", {\"mean\": mean, \"sd\": sd, \"before\": before, \"current\": now, \"stable\": stable}, b, \"mean estimated before both trigger bars\")],\n                   [\"stable mean\"] if stable else [], [] if target else [\"fresh zscore recross with valid mean target\"],\n                   [\"No stationarity or Gaussian distribution claim\"], targets=[{\"price\": target, \"method\": \"pre-trigger sample mean\", \"fraction\": 1.0}] if target else None)\n",
+  "source_hashes": {
+    "strategies.py": "96413b45cdd5c54cc59078918d7eb72139291bf88caea83359bd54bf521c2b5e",
+    "specialists.py": "bfb845771766b997aa571c2fd4bb9259a73cc34d69959b5d15d2c5f19be16880",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "f1414b2145e9f9fbe9599821703b5a793b74c19fcf1bd47c80590ead8bbde249"
+}

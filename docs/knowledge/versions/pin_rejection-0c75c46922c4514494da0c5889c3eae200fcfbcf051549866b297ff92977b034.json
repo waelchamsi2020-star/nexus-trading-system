@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "id": "pin_rejection",
+  "name_ar": "رفض الذيل عند حد سعري",
+  "version": "1.0.0",
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. رفض الذيل عند حد سعري",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "candle",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "pin_rejection",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "candle",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Boundary pin rejection",
+      "rules": [
+        "Touch or sweep prior 20-bar extreme and close back inside",
+        "Dominant wick >= 2 bodies and >= 60% of range; opposite wick <= 20%; range >= 0.5 prior ATR"
+      ],
+      "parameters": {
+        "lookback": 20,
+        "wick_body": 2,
+        "wick_range": 0.6,
+        "opposite_wick": 0.2
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "ملامسة أو تجاوز الحد السعري للعشرين شمعة السابقة والإغلاق داخله.",
+        "الذيل الرئيسي ضعف الجسم على الأقل وستون بالمئة من الشمعة، والذيل المقابل لا يتجاوز عشرين بالمئة."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "span >= 0.5 * atr(b[:-1])",
+    "span > 0",
+    "lower >= max(2 * body, 0.6 * span)",
+    "upper <= 0.2 * span",
+    "x['low'] <= lo < x['close']",
+    "upper >= max(2 * body, 0.6 * span)",
+    "lower <= 0.2 * span",
+    "x['high'] >= hi > x['close']"
+  ],
+  "algorithm_python": "@specialist(\"pin_rejection\", \"رفض الذيل عند حد سعري\", \"Boundary pin rejection\", \"candle\",\n            [\"Touch or sweep prior 20-bar extreme and close back inside\", \"Dominant wick >= 2 bodies and >= 60% of range; opposite wick <= 20%; range >= 0.5 prior ATR\"],\n            {\"lookback\": 20, \"wick_body\": 2, \"wick_range\": .6, \"opposite_wick\": .2})\ndef pin_rejection(b, c):\n    x, p = b[-1], b[-21:-1]\n    span, body = x[\"high\"]-x[\"low\"], abs(x[\"close\"]-x[\"open\"])\n    lower, upper = min(x[\"open\"], x[\"close\"])-x[\"low\"], x[\"high\"]-max(x[\"open\"], x[\"close\"])\n    hi, lo = max(z[\"high\"] for z in p), min(z[\"low\"] for z in p)\n    valid = span >= .5*atr(b[:-1]) and span > 0\n    bull = valid and lower >= max(2*body, .6*span) and upper <= .2*span and x[\"low\"] <= lo < x[\"close\"]\n    bear = valid and upper >= max(2*body, .6*span) and lower <= .2*span and x[\"high\"] >= hi > x[\"close\"]\n    return signal(b, bull, bear, x[\"low\"], x[\"high\"], dict(low=lo, high=hi, lower_wick=lower, upper_wick=upper))\n",
+  "source_hashes": {
+    "strategies.py": "82214308617a53c4b8198ef22031a5f37be30c9917e47f6410e5108cb03cb5e6",
+    "specialists.py": "143634dc372f0bf2116ff8c1c97fdfe3f324cac036f71fa24d9a5d30a5fa34fe",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "0c75c46922c4514494da0c5889c3eae200fcfbcf051549866b297ff92977b034"
+}

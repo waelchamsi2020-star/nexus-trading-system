@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "id": "elliott_candidate",
+  "name_ar": "إليوت: فرضية موجتين محلية",
+  "version": "3.0.0",
+  "dependency_schema": 3,
+  "scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: إليوت: فرضية موجتين محلية",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "elliott_candidate",
+    "rule_version": "3.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Elliott: local wave 1-2 hypothesis",
+      "implementation": "nexus.local_models.wave12",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "Three confirmed alternating pivots; first leg at least 2 ATR, retracement 0.382–0.786, fresh first-leg break within 16 bars with retracement intact."
+      ],
+      "rules_ar": [
+        "ثلاثة محاور مؤكدة متناوبة؛ الضلع الأول ضعفا نطاق التقلب على الأقل والتصحيح بين 38.2 و78.6 بالمئة، ثم كسر جديد خلال ست عشرة شمعة مع سلامة قاع أو قمة التصحيح."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "len(p) < 3",
+    "a['kind'] == 'LOW'",
+    "wave > 0",
+    "b[-2]['close'] <= peak['price'] < b[-1]['close']",
+    "b[-2]['close'] >= peak['price'] > b[-1]['close']",
+    "1 <= age <= 16",
+    "wave >= 2 * c['atr']",
+    "0.382 <= pullback / wave <= 0.786",
+    "x['low'] >= retrace['price']",
+    "x['high'] <= retrace['price']"
+  ],
+  "algorithm_python": "def wave12(b,c):\n    p=st._alternating_pivots(c[\"pivots\"])[-3:]\n    if len(p)<3:return wait(b)\n    a,peak,retrace=p;bull=a[\"kind\"]==\"LOW\";sign=1 if bull else -1\n    wave=sign*(peak[\"price\"]-a[\"price\"])\n    pullback=sign*(peak[\"price\"]-retrace[\"price\"])\n    geometry=wave>=2*c[\"atr\"] and .382<=pullback/wave<=.786 if wave>0 else False\n    age=len(b)-1-(retrace[\"index\"]+2)\n    intact=all(x[\"low\"]>=retrace[\"price\"] if bull else x[\"high\"]<=retrace[\"price\"] for x in b[retrace[\"index\"]+1:])\n    trigger=(b[-2][\"close\"]<=peak[\"price\"]<b[-1][\"close\"] if bull else b[-2][\"close\"]>=peak[\"price\"]>b[-1][\"close\"])\n    active=geometry and 1<=age<=16 and intact and trigger\n    result=signal(b,active and bull,active and not bull,retrace[\"price\"],retrace[\"price\"],\n                  dict(pivots=p,retracement=pullback/wave if wave>0 else None,age=age))\n    result[\"assumptions\"].append(\"Local wave 1-2 hypothesis; nested Elliott counts and future wave completion are not asserted\")\n    return result\n",
+  "source_hashes": {
+    "strategies.py": "1f6f553617bade455372616b5cf528927e167465f6c664293e4def6702f9580d",
+    "specialists.py": "a030bc1a3abe16e31b1fe3eba4da9e683968561acb87c83c2d394a41a40e428c",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f",
+    "confluence.py": "bb8bb3c3cb832b7f48d8c0cd0e8f7c6a02a23030ec35b06eefaccfce74bbe2a2",
+    "confluence_registry.py": "a8b0a67bd7287e94a7c7aa5403b69b2713c4bfbb16b4b0aa03c18c1771049c11",
+    "indicators.py": "a66461eb81decbb57660ed16b63f4393ac30077015222f11ea9f1e618183980b",
+    "extended_models.py": "7354046e1c4fb70b2f6fb0289fefa5496e0f9fc74f727ab538cc2b2019e95610"
+  },
+  "source_reference": {
+    "url": "https://www.elliottwave.com/waveopedia/impulse/",
+    "principles_ar": [
+      "في الدافعة القياسية لا تتجاوز الثانية بداية الأولى، والثالثة ليست الأقصر بين الموجات الدافعة، والرابعة لا تتداخل مع نطاق الأولى.",
+      "هذه القيود لا تجعل فرضية الموجتين في البرنامج ترقيمًا كاملًا لكل درجات إليوت."
+    ]
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "aa3b1efbefb318c49a4e845b8564b2c9de250891c6b4f42e21359e5331313307"
+}

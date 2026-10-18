@@ -1,0 +1,83 @@
+{
+  "id": "liquidity_bos_retest",
+  "school": "السيولة: سحب ثم كسر وإعادة اختبار",
+  "strategy": "liquidity_bos_retest",
+  "version": "1.0.0",
+  "indicators": [
+    "prior_10_bar_range",
+    "prior_atr_simple"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "liquidity_bos_retest",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Liquidity sweep BOS first retest",
+      "rules": [
+        "Sweep/reclaim of a prior 10-bar boundary, then later close beyond opposite boundary with body>=pre-sweep ATR.",
+        "First retest within eight bars of sweep, tolerance .15 ATR, directional rejection, sweep extreme unbroken."
+      ],
+      "rules_en": [
+        "Sweep/reclaim of a prior 10-bar boundary, then later close beyond opposite boundary with body>=pre-sweep ATR.",
+        "First retest within eight bars of sweep, tolerance .15 ATR, directional rejection, sweep extreme unbroken."
+      ],
+      "rules_ar": [
+        "سحب أحد حدي عشر شموع وإغلاق داخله، ثم إغلاق لاحق خارج الحد المقابل بجسم لا يقل عن التقلب السابق.",
+        "أول إعادة اختبار للحد المكسور خلال ثماني شموع من السحب بسماح 0.15 من التقلب وإغلاق موافق؛ يبقى حد السحب سليماً."
+      ],
+      "parameters": {
+        "indicators": [
+          "prior_10_bar_range",
+          "prior_atr_simple"
+        ],
+        "max_sweep_age": 8,
+        "retest_tolerance_atr": 0.15
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.liquidity_bos_retest",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. السيولة: سحب ثم كسر وإعادة اختبار",
+  "execution_enabled": true,
+  "rules_python": "@model('liquidity_bos_retest', 'السيولة: سحب ثم كسر وإعادة اختبار', 'Liquidity sweep BOS first retest', 'structure',\n       ['سحب أحد حدي عشر شموع وإغلاق داخله، ثم إغلاق لاحق خارج الحد المقابل بجسم لا يقل عن التقلب السابق.',\n        'أول إعادة اختبار للحد المكسور خلال ثماني شموع من السحب بسماح 0.15 من التقلب وإغلاق موافق؛ يبقى حد السحب سليماً.'],\n       ['Sweep/reclaim of a prior 10-bar boundary, then later close beyond opposite boundary with body>=pre-sweep ATR.',\n        'First retest within eight bars of sweep, tolerance .15 ATR, directional rejection, sweep extreme unbroken.'],\n       {'indicators': ['prior_10_bar_range', 'prior_atr_simple'], 'max_sweep_age': 8, 'retest_tolerance_atr': .15})\ndef liquidity_bos_retest(b, c):\n    x = b[-1]\n    for i in range(len(b)-4, len(b)-10, -1):\n        sweep = b[i]; prior = b[i-10:i]; a = st.atr(b[:i]); lo = min(z['low'] for z in prior); hi = max(z['high'] for z in prior)\n        if a <= 0:\n            continue\n        for bull in (True, False):\n            valid = sweep['low'] < lo < sweep['close'] <= hi if bull else sweep['high'] > hi > sweep['close'] >= lo\n            if not valid:\n                continue\n            level = hi if bull else lo\n            breaks = [j for j in range(i+1, len(b)-1) if (b[j-1]['close'] <= level < b[j]['close'] and b[j]['close']-b[j]['open'] >= a if bull else\n                      b[j-1]['close'] >= level > b[j]['close'] and b[j]['open']-b[j]['close'] >= a)]\n            if not breaks:\n                continue\n            j = breaks[0]; between = b[j+1:-1]\n            consumed = any(z['low'] <= level+.15*a if bull else z['high'] >= level-.15*a for z in between)\n            intact = all(z['low'] > sweep['low'] if bull else z['high'] < sweep['high'] for z in b[i+1:])\n            rejected = (level-.15*a <= x['low'] <= level+.15*a and x['close'] > level and x['close'] > x['open'] if bull else\n                        level-.15*a <= x['high'] <= level+.15*a and x['close'] < level and x['close'] < x['open'])\n            if not consumed and intact and rejected:\n                return signal(b, bull, not bull, sweep['low'], sweep['high'],\n                              {'sweep_time': sweep['time'], 'bos_time': b[j]['time'], 'level': level, 'first_touch': True, 'reference_atr': a})\n    return signal(b, False, False, None, None, {'first_touch': False})\n",
+  "rules_sha256": "f19ddabcf928f85bed92dc0342597f730ad4b4aa0251965fb1af6ec810587ff2",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

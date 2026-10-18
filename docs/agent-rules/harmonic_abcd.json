@@ -1,0 +1,62 @@
+{
+  "id": "harmonic_abcd",
+  "school": "الهارمونيك: نموذج الأضلاع المتساوية",
+  "strategy": "harmonic_abcd",
+  "version": "2.0.0",
+  "indicators": [
+    "confirmed alternating pivots",
+    "AB/CD ratio"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "harmonic_abcd",
+    "rule_version": "2.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "rules": [
+        "Four confirmed alternating pivots; BC/AB 0.382..0.886; CD/AB 0.95..1.05; CD/BC 1.13..2.618",
+        "Fresh break of two-bar D confirmation level within eight bars; D intact; target C not passed"
+      ],
+      "rules_ar": [
+        "أربعة محاور مؤكدة؛ تصحيح الضلع الثاني بين 38.2 و88.6 بالمئة، وتشابه الضلعين ضمن خمسة بالمئة.",
+        "اختراق مستوى تأكيد النقطة الرابعة خلال ثماني شموع مع بقائها سليمة وهدف عند النقطة الثالثة."
+      ],
+      "source": "https://harmonictrader.com/harmonic-patterns/abcd-pattern/",
+      "scope": "Equal-leg pattern; custom tolerance, entry, expiry and exit, not the complete harmonic school"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "نموذج الأضلاع المتساوية بنسب محددة ومحاور مؤكدة وتفعيل لاحق وإبطال وهدف؛ بقية أنماط الهارمونيك خارج النطاق.",
+  "execution_enabled": true,
+  "rules_python": "@_register(\"harmonic_abcd\", \"الهارمونيك: نموذج الأضلاع المتساوية\", [\"confirmed alternating pivots\", \"AB/CD ratio\"], \"structure\", 60)\ndef harmonic_abcd(b, c):\n    p = _alternating_pivots(c[\"pivots\"])[-4:]\n    assumptions = [\"Equal-leg model only; not all harmonic patterns; entry confirmation and tolerances are house rules\"]\n    if len(p) < 4:\n        return _result(missing=[\"four confirmed alternating harmonic pivots\"], assumptions=assumptions)\n    a, base, turn, end = p\n    bull = [x[\"kind\"] for x in p] == [\"HIGH\", \"LOW\", \"HIGH\", \"LOW\"]\n    sign = 1 if bull else -1\n    ab = sign*(a[\"price\"]-base[\"price\"])\n    bc = sign*(turn[\"price\"]-base[\"price\"])\n    cd = sign*(turn[\"price\"]-end[\"price\"])\n    ratios = {\"retracement\": bc/ab if ab > 0 else None, \"equality\": cd/ab if ab > 0 else None,\n              \"projection\": cd/bc if bc > 0 else None}\n    geometry = (ab > 0 and bc > 0 and cd > 0 and .382 <= bc/ab <= .886\n                and .95 <= cd/ab <= 1.05 and 1.13 <= cd/bc <= 2.618)\n    evidence = [_evidence(\"pattern_candidate\", ratios, b, \"AB=CD candidate ratio\"), *p]\n    if not geometry:\n        return _result(evidence=evidence, missing=[\"equal-leg ratios outside declared bounds\"], assumptions=assumptions)\n    # The D pivot is not known until two subsequent bars have closed. The\n    # confirmation level is frozen from those bars, not the trigger candle.\n    confirmed_index = end[\"index\"]+2\n    if not confirmed_index < len(b)-1 <= confirmed_index+8:\n        return _result(evidence=evidence, missing=[\"fresh break after D confirmation within eight bars\"], assumptions=assumptions)\n    confirmation = b[end[\"index\"]+1:confirmed_index+1]\n    level = max(x[\"high\"] for x in confirmation) if bull else min(x[\"low\"] for x in confirmation)\n    breached = any(x[\"low\"] < end[\"price\"] if bull else x[\"high\"] > end[\"price\"] for x in b[end[\"index\"]+1:])\n    crossed = b[-2][\"close\"] <= level < b[-1][\"close\"] if bull else b[-2][\"close\"] >= level > b[-1][\"close\"]\n    target_valid = b[-1][\"close\"] < turn[\"price\"] if bull else b[-1][\"close\"] > turn[\"price\"]\n    active = not breached and crossed and target_valid\n    return _result(\"BUY\" if bull else \"SELL\", active, level, end[\"price\"], evidence,\n                   [\"confirmed equal-leg geometry\"]+([\"fresh post-confirmation break\"] if active else []),\n                   [] if active else [\"unbroken D and fresh confirmation break before C target\"], assumptions,\n                   targets=[{\"price\": turn[\"price\"], \"method\": \"harmonic C pivot target\", \"fraction\": 1.0}] if active else None)\n",
+  "rules_sha256": "688aaa187e5250c387628201f50d76be27569ef4d80aa913375b58e022706abe",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

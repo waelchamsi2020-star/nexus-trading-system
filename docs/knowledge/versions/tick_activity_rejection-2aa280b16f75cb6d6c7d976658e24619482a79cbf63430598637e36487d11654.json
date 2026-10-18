@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "id": "tick_activity_rejection",
+  "name_ar": "رفض سعري مع نشاط التكات التقريبي",
+  "version": "1.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. رفض سعري مع نشاط التكات التقريبي",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc",
+    "positive_tick_volume"
+  ],
+  "minimum_bars": 60,
+  "family": "volume",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "tick_activity_rejection",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc",
+      "positive_tick_volume"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "volume",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Bar tick-activity rejection proxy",
+      "rules": [
+        "Bar tick count >= 1.5 times median of prior 20 bars; every sample must have positive tick count",
+        "Reject prior 10-bar boundary; directional body; close in outer 20%; range >= 0.5 prior ATR",
+        "OHLC close-location pressure is a proxy, never signed trades, real delta, footprint or depth"
+      ],
+      "parameters": {
+        "volume_lookback": 20,
+        "activity_multiplier": 1.5,
+        "boundary_lookback": 10,
+        "close_fraction": 0.8
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "عدد تكات الشمعة لا يقل عن مرة ونصف وسيط العشرين شمعة السابقة، مع أعداد موجبة لكل العينة.",
+        "رفض حد العشر شموع السابقة بجسم اتجاهي وإغلاق في طرف عشرين بالمئة من الشمعة.",
+        "ضغط الإغلاق مؤشر حسابي تقريبي وليس دلتا فعلية أو بصمة أوامر أو عمق سوق."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "span > 0",
+    "volumes[-1] >= 1.5 * baseline",
+    "span >= 0.5 * atr(b[:-1])",
+    "x['low'] <= lo < x['close']",
+    "x['high'] <= hi",
+    "location >= 0.8",
+    "x['close'] > x['open']",
+    "x['high'] >= hi > x['close']",
+    "x['low'] >= lo",
+    "location <= 0.2",
+    "x['close'] < x['open']",
+    "v <= 0"
+  ],
+  "algorithm_python": "@specialist(\"tick_activity_rejection\", \"رفض سعري مع نشاط التكات التقريبي\", \"Bar tick-activity rejection proxy\", \"volume\",\n            [\"Bar tick count >= 1.5 times median of prior 20 bars; every sample must have positive tick count\",\n             \"Reject prior 10-bar boundary; directional body; close in outer 20%; range >= 0.5 prior ATR\",\n             \"OHLC close-location pressure is a proxy, never signed trades, real delta, footprint or depth\"],\n            {\"volume_lookback\": 20, \"activity_multiplier\": 1.5, \"boundary_lookback\": 10, \"close_fraction\": .8})\ndef tick_activity_rejection(b, c):\n    x=b[-1]\n    volumes=[z.get(\"tick_volume\",0) for z in b[-21:]]\n    if any(v<=0 for v in volumes):\n        return _result(status=\"DATA_MISSING\",missing=[\"positive bar tick counts required for local activity proxy\"])\n    baseline=statistics.median(volumes[:-1])\n    span=x[\"high\"]-x[\"low\"]\n    location=(x[\"close\"]-x[\"low\"])/span if span>0 else .5\n    lo=min(z[\"low\"] for z in b[-11:-1]); hi=max(z[\"high\"] for z in b[-11:-1])\n    active=volumes[-1]>=1.5*baseline and span>=.5*atr(b[:-1]) and span>0\n    bull=active and x[\"low\"]<=lo<x[\"close\"] and x[\"high\"]<=hi and location>=.8 and x[\"close\"]>x[\"open\"]\n    bear=active and x[\"high\"]>=hi>x[\"close\"] and x[\"low\"]>=lo and location<=.2 and x[\"close\"]<x[\"open\"]\n    result=signal(b,bull,bear,x[\"low\"],x[\"high\"],{\"tick_count\": volumes[-1],\"baseline\": baseline,\n                  \"activity_ratio\": volumes[-1]/baseline,\"close_location\": location,\"pressure_proxy\": (2*location-1)*volumes[-1]})\n    result[\"assumptions\"].append(\"Bar tick activity and close-location proxy; not real order flow or signed volume\")\n    return result\n",
+  "source_hashes": {
+    "strategies.py": "e49b6d93dbab334bf40ba14f5ded899b387cf577af751619d31d69f430bcc989",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "model-config.json": "ae0b53519cd32666c7ece681fcec8c095711a26f67bb75963b6ca5d1c74c075b",
+    "model-config.schema.json": "56ad04230dd939cd1dca8caaf3a0a4f0801392851b4bf9d912ab06b2a64cdd83"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "2aa280b16f75cb6d6c7d976658e24619482a79cbf63430598637e36487d11654"
+}

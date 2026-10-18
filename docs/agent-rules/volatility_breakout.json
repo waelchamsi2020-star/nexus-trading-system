@@ -1,0 +1,54 @@
+{
+  "id": "volatility_breakout",
+  "school": "مؤشرات التقلب",
+  "strategy": "volatility_breakout",
+  "version": "1.0.0",
+  "indicators": [
+    "Bollinger 20/2",
+    "bandwidth contraction"
+  ],
+  "evidence_group": "volatility",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "volatility_breakout",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "volatility",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.volatility_breakout",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "انكماش ثم إغلاق جديد خارج نطاق محسوب من الشموع السابقة.",
+  "execution_enabled": true,
+  "rules_python": "@_register(\"volatility_breakout\", \"مؤشرات التقلب\", [\"Bollinger 20/2\", \"bandwidth contraction\"], \"volatility\", 65)\ndef volatility_breakout(b, c):\n    closes = [x[\"close\"] for x in b]\n    prev = closes[-21:-1]\n    mean, sd = statistics.fmean(prev), statistics.pstdev(prev)\n    old = statistics.pstdev(closes[-61:-41])\n    squeeze = sd < .7*old and sd > 0\n    bull = squeeze and closes[-2] <= mean+2*sd < closes[-1]\n    bear = squeeze and closes[-2] >= mean-2*sd > closes[-1]\n    return _result(\"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\", bull or bear, mean+2*sd if bull else mean-2*sd, mean,\n                   [_evidence(\"bands\", {\"mean\": mean, \"upper\": mean+2*sd, \"lower\": mean-2*sd, \"sd\": sd, \"historical_sd\": old}, b, \"prior-only bands\")],\n                   [\"contraction\"] if squeeze else [], [] if bull or bear else [\"contraction then fresh outside-band close\"])\n",
+  "rules_sha256": "ed63c8a29aaa1f6288e809843f237e0b2b9719218fd403c873ca3986a4654192",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

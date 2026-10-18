@@ -1,0 +1,14 @@
+# Ruff default rules are retained: no select, ignore or file-wide suppression.
+# Inline compatibility exceptions, individually indexed and justified:
+# src/nexus/execution.py:25 PLC0414 -- Explicit public re-export or deterministic side-effect model registration; removing it breaks compatibility.
+# src/nexus/learning_journal.py:86 TRY004 -- Keep ValueError validation contract consumed by API handlers and existing risk tests.
+# src/nexus/learning_journal.py:112 TRY004 -- Keep ValueError validation contract consumed by API handlers and existing risk tests.
+# src/nexus/market.py:5 PLC0414 -- Explicit public re-export or deterministic side-effect model registration; removing it breaks compatibility.
+# src/nexus/risk.py:31 TRY004 -- Keep ValueError validation contract consumed by API handlers and existing risk tests.
+# src/nexus/risk.py:50 TRY004 -- Keep ValueError validation contract consumed by API handlers and existing risk tests.
+# src/nexus/scalping.py:52 TRY004 -- Keep ValueError validation contract consumed by API handlers and existing risk tests.
+# src/nexus/scalping.py:108 TRY004 -- Keep ValueError validation contract consumed by API handlers and existing risk tests.
+# src/nexus/scalping.py:211 TRY004 -- Keep ValueError validation contract consumed by API handlers and existing risk tests.
+# src/nexus/strategies.py:17 PLC0414 -- Explicit public re-export or deterministic side-effect model registration; removing it breaks compatibility.
+# src/nexus/strategies.py:19 PLC0414 -- Explicit public re-export or deterministic side-effect model registration; removing it breaks compatibility.
+# src/nexus/valuation.py:16 TRY004 -- Keep ValueError validation contract consumed by API handlers and existing risk tests.

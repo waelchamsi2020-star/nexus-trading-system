@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "id": "stochastic_rebound",
+  "name_ar": "الاستوكاستيك: عودة زخم مؤكدة",
+  "version": "1.0.1",
+  "dependency_schema": 3,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الاستوكاستيك: عودة زخم مؤكدة",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "momentum",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "stochastic_rebound",
+    "rule_version": "1.0.1",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "momentum",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Stochastic SMA rebound",
+      "rules": [
+        "Raw K(14), slow K=SMA(raw,3), D=SMA(K,3); flat raw=50.",
+        "K crosses above 20 with K>D and rising close; inverse below 80 with K<D.",
+        "Five-bar structural stop reference; no entry on an overbought/oversold label alone."
+      ],
+      "rules_en": [
+        "Raw K(14), slow K=SMA(raw,3), D=SMA(K,3); flat raw=50.",
+        "K crosses above 20 with K>D and rising close; inverse below 80 with K<D.",
+        "Five-bar structural stop reference; no entry on an overbought/oversold label alone."
+      ],
+      "rules_ar": [
+        "خام أربعة عشر شمعة؛ خط رئيسي بمتوسط ثلاث قيم وخط إشارة بمتوسط ثلاث قيم أخرى.",
+        "عبور الخط الرئيسي صعوداً فوق عشرين وهو أعلى من الإشارة مع إغلاق صاعد؛ عكسه عند ثمانين للبيع.",
+        "مرجع الوقف أدنى أو أعلى خمس شموع؛ لا يكفي وجود المؤشر في منطقة تشبع."
+      ],
+      "parameters": {
+        "indicators": [
+          "stochastic_sma"
+        ],
+        "period": 14,
+        "slowing": 3,
+        "signal": 3,
+        "levels": [
+          20,
+          80
+        ]
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.stochastic_rebound",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+      "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "k[-2] <= 20 < k[-1]",
+    "k[-1] > d[-1]",
+    "b[-1]['close'] > b[-2]['close']",
+    "k[-2] >= 80 > k[-1]",
+    "k[-1] < d[-1]",
+    "b[-1]['close'] < b[-2]['close']"
+  ],
+  "algorithm_python": "@model('stochastic_rebound', 'الاستوكاستيك: عودة زخم مؤكدة', 'Stochastic SMA rebound', 'momentum',\n       ['خام أربعة عشر شمعة؛ خط رئيسي بمتوسط ثلاث قيم وخط إشارة بمتوسط ثلاث قيم أخرى.',\n        'عبور الخط الرئيسي صعوداً فوق عشرين وهو أعلى من الإشارة مع إغلاق صاعد؛ عكسه عند ثمانين للبيع.',\n        'مرجع الوقف أدنى أو أعلى خمس شموع؛ لا يكفي وجود المؤشر في منطقة تشبع.'],\n       ['Raw K(14), slow K=SMA(raw,3), D=SMA(K,3); flat raw=50.',\n        'K crosses above 20 with K>D and rising close; inverse below 80 with K<D.',\n        'Five-bar structural stop reference; no entry on an overbought/oversold label alone.'],\n       {'indicators': ['stochastic_sma'], 'period': 14, 'slowing': 3, 'signal': 3, 'levels': [20, 80]}, source=MT5_OSC)\ndef stochastic_rebound(b, c):\n    values = ind.stochastic(b); k = values['k']; d = values['d']; lo, hi = _stops(b)\n    return signal(b, k[-2] <= 20 < k[-1] and k[-1] > d[-1] and b[-1]['close'] > b[-2]['close'],\n                  k[-2] >= 80 > k[-1] and k[-1] < d[-1] and b[-1]['close'] < b[-2]['close'], lo, hi,\n                  dict(k_previous=k[-2], k=k[-1], d=d[-1], variant='SMA_of_raw_ratios'))\n",
+  "source_hashes": {
+    "strategies.py": "5d98ec4402f2e46ea6870a949dbd2d5d909ff1d7f55e0a0744a96d012e2be2e4",
+    "specialists.py": "a030bc1a3abe16e31b1fe3eba4da9e683968561acb87c83c2d394a41a40e428c",
+    "local_models.py": "60618291b43a8fced1b73e740c58f5a829a882f44bfa77763bb80518c850f607",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f",
+    "confluence.py": "bb8bb3c3cb832b7f48d8c0cd0e8f7c6a02a23030ec35b06eefaccfce74bbe2a2",
+    "confluence_registry.py": "a8b0a67bd7287e94a7c7aa5403b69b2713c4bfbb16b4b0aa03c18c1771049c11",
+    "indicators.py": "3288110b9b542d83cf3804fbc46b006f5b5d8eae83041f4ebc762f1c47945e60",
+    "extended_models.py": "641b0b535290b641fc1e9d744797f15b60023c75d40bf85940628c83cd56e2a9"
+  },
+  "source_reference": {
+    "url": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators"
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "c2348bfa011161ede33bc33cfcb258bc042666c354c3f0db2e7f31d83f0d726c"
+}

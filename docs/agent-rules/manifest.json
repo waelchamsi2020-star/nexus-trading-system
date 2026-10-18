@@ -1,0 +1,4213 @@
+{
+  "schema_version": 2,
+  "timeframes_sha256": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "specialists_sha256": "b80ac3ec42b2f169becbb6295007440ce654ea01fa5e2e39bfb4581bdeff3cd8",
+  "local_models_sha256": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+  "confluence_sha256": "41a35b875aa9ad7ef0e1c3218329f0b39be491db2eb735d2ac90b46a69ea34d8",
+  "confluence_registry_sha256": "1d3a0d34c3cfabccdfa64bea784a58ffcd037d9e177d6cad5b2a6f87543da065",
+  "indicators_sha256": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+  "extended_models_sha256": "f360b0f9f69fd8a1cc5724b2dc5207210dd22b6091b5ba9096b202040e10e7b1",
+  "config_hashes": {
+    "config/models.yaml": "5a2a25132504b314dbd85d6e013913fda7f9a220db88c6c2ee1e2e36b30bd619",
+    "config/models.schema.json": "151116766f8f956dd0f69c5f53a4132010ef193add42abe6dff04ebac6e8941f"
+  },
+  "agents": [
+    {
+      "id": "dow_structure",
+      "school": "داو والتحليل الكلاسيكي",
+      "strategy": "dow_structure",
+      "version": "1.0.0",
+      "indicators": [
+        "confirmed pivots"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 40,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "dow_structure",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 40,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.dow_structure",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف محلي لاتجاه القمم والقيعان المؤكدة ثم اختراق جديد؛ لا يمثل نظرية داو كاملة.",
+      "execution_enabled": true,
+      "rules_sha256": "6392af45735bc4471f1436ad89acd862e6a822cac56723bfb3e914b09e8ac8ec",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "engulfing",
+      "school": "حركة السعر والشموع",
+      "strategy": "engulfing",
+      "version": "1.0.0",
+      "indicators": [
+        "body engulfing"
+      ],
+      "evidence_group": "candle",
+      "min_bars": 20,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "engulfing",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 20,
+        "completed_bars_only": true,
+        "evidence_group": "candle",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.engulfing",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "ابتلاع جسم الشمعة السابقة مع حد أدنى لحجم الجسم نسبة إلى التقلب.",
+      "execution_enabled": true,
+      "rules_sha256": "ac81f13259c35e6b5759134f2525d3d0abd4bbaf43331bdf92bdeaecb84aa3cb",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "support_bounce",
+      "school": "الدعم والمقاومة",
+      "strategy": "support_bounce",
+      "version": "1.1.0",
+      "indicators": [
+        "confirmed pivots",
+        "rejection wick"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 40,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "support_bounce",
+        "rule_version": "1.1.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 40,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.support_bounce",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "ملامسة دعم أو مقاومة من محور مؤكد ثم رفض سعري بإغلاق مكتمل.",
+      "execution_enabled": true,
+      "rules_sha256": "90dbff3fff0c5f960c5c5de53c1301d8323cd0b559c2ec554dbeebfa38e2a2f0",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "classic_reversal_patterns",
+      "school": "الأنماط الانعكاسية الكلاسيكية",
+      "strategy": "classic_reversal_patterns",
+      "version": "1.0.0",
+      "indicators": [
+        "confirmed pivots",
+        "double top/bottom",
+        "head and shoulders",
+        "neckline close"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "classic_reversal_patterns",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.classic_reversal_patterns",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "قمة وقاع مزدوجان والرأس والكتفان وعكسه؛ هندسة مؤكدة واختراق خط العنق.",
+      "execution_enabled": true,
+      "rules_sha256": "4f2e4e73fa7ee8dbbfd7e86a893164a574445b216f71dcd1c996fee278d83328",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "geometric_triangle_breakout",
+      "school": "الأنماط الهندسية",
+      "strategy": "geometric_triangle_breakout",
+      "version": "1.0.0",
+      "indicators": [
+        "confirmed pivots",
+        "least-squares trendlines",
+        "converging triangle",
+        "fresh close breakout"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "geometric_triangle_breakout",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.geometric_triangle_breakout",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "مثلث صاعد أو هابط أو متماثل من محاور مؤكدة وخطوط متقاربة؛ دخول عند اختراق جديد.",
+      "execution_enabled": true,
+      "rules_sha256": "5db2b972a0c163f9d6defb6bd8775d7d0eedd9d38f2ba011ccc3ebf512709ed7",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "breakout_retest",
+      "school": "الاختراق وإعادة الاختبار",
+      "strategy": "breakout_retest",
+      "version": "1.0.0",
+      "indicators": [
+        "20 bar range"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 30,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "breakout_retest",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 30,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.breakout_retest",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "اختراق نطاق سابق ثم إعادة اختبار ناجحة وفق ترتيب زمني محدد.",
+      "execution_enabled": true,
+      "rules_sha256": "7d08f3b7ccb714f876f29fd03f8a4356d0ac1810f7bbbe011d0b29b24ebd3246",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "darvas_box",
+      "school": "Darvas Box",
+      "strategy": "darvas_box",
+      "version": "1.0.0",
+      "indicators": [
+        "confirmed 20 bar box"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 35,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "darvas_box",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 35,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.darvas_box",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نسخة محددة لصندوق سعري سابق وتأكيد السقف ثم الاختراق، وليست كل قراءات دارفاس.",
+      "execution_enabled": true,
+      "rules_sha256": "e4485d6b33155cfe8706996fda37c557d4feedc1c756b257897d16e65a1a725e",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "ichimoku_cross",
+      "school": "إيشيموكو",
+      "strategy": "ichimoku_cross",
+      "version": "1.0.0",
+      "indicators": [
+        "Tenkan 9",
+        "Kijun 26",
+        "Senkou 52 lagged 26"
+      ],
+      "evidence_group": "trend",
+      "min_bars": 80,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "ichimoku_cross",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 80,
+        "completed_bars_only": true,
+        "evidence_group": "trend",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.ichimoku_cross",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تقاطع واتجاه خطي تنكان وكيجون خارج سحابة سببية محسوبة من الماضي.",
+      "execution_enabled": true,
+      "rules_sha256": "7ba0da89c4b326ef7c587a70779cd44cc5fcba1f7f9055341603ac5978705297",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "fib_retracement",
+      "school": "فيبوناتشي",
+      "strategy": "fib_retracement",
+      "version": "1.1.0",
+      "indicators": [
+        "confirmed swing",
+        "0.618 retracement"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "fib_retracement",
+        "rule_version": "1.1.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.fib_retracement",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تصحيح لموجة مؤكدة ولمس 61.8% ثم استعادة 50%؛ تعريف محدد وليس جميع تطبيقات فيبوناتشي.",
+      "execution_enabled": true,
+      "rules_sha256": "a61e658606d89336913a6e6adfd38b534a850d84bbbeeac54c6271f287c673dc",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "ema_cross",
+      "school": "اتباع الاتجاه",
+      "strategy": "ema_cross",
+      "version": "1.0.0",
+      "indicators": [
+        "EMA 12",
+        "EMA 26",
+        "ATR 14"
+      ],
+      "evidence_group": "trend",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "ema_cross",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "trend",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.ema_cross",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تقاطع جديد بين المتوسطين الأسيين 12 و26.",
+      "execution_enabled": true,
+      "rules_sha256": "900e125ad26fa560f90174a77886f23ad5c4f54e37b32e7e9abb48d169619d8b",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "rsi_rebound",
+      "school": "مؤشرات الزخم",
+      "strategy": "rsi_rebound",
+      "version": "1.0.1",
+      "indicators": [
+        "simple RSI 14"
+      ],
+      "evidence_group": "momentum",
+      "min_bars": 30,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "rsi_rebound",
+        "rule_version": "1.0.1",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 30,
+        "completed_bars_only": true,
+        "evidence_group": "momentum",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.rsi_rebound",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "عودة مؤشر القوة النسبية عبر 30 أو70؛ النسخة الحالية بمتوسط بسيط لا بتنعيم وايلدر.",
+      "execution_enabled": true,
+      "rules_sha256": "98f2d201f760d50a4a7a9629d91830f9a906de759c6b687f845b7d35218c79cf",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "volatility_breakout",
+      "school": "مؤشرات التقلب",
+      "strategy": "volatility_breakout",
+      "version": "1.0.0",
+      "indicators": [
+        "Bollinger 20/2",
+        "bandwidth contraction"
+      ],
+      "evidence_group": "volatility",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "volatility_breakout",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "volatility",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.volatility_breakout",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "انكماش ثم إغلاق جديد خارج نطاق محسوب من الشموع السابقة.",
+      "execution_enabled": true,
+      "rules_sha256": "ed63c8a29aaa1f6288e809843f237e0b2b9719218fd403c873ca3986a4654192",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "zscore_reversion",
+      "school": "العودة إلى المتوسط والتحليل الإحصائي",
+      "strategy": "zscore_reversion",
+      "version": "1.0.0",
+      "indicators": [
+        "rolling zscore 40",
+        "mean slope filter"
+      ],
+      "evidence_group": "statistical",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "zscore_reversion",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "statistical",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.zscore_reversion",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "عودة درجة معيارية عبر عتبة مع هدف متوسط صالح؛ لا يفترض ثبات التوزيع.",
+      "execution_enabled": true,
+      "rules_sha256": "218329459865a4420ec2d7f5cfc0bee9fad3d99f757ab36be2f043e2b8c16603",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "vwap_reclaim",
+      "school": "VWAP وAnchored VWAP",
+      "strategy": "vwap_reclaim",
+      "version": "1.0.0",
+      "indicators": [
+        "typical-price weighted mean",
+        "explicit anchor"
+      ],
+      "evidence_group": "volume",
+      "min_bars": 30,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "bar_real_volume_or_labeled_tick_proxy",
+        "explicit_anchor"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "vwap_reclaim",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc",
+          "bar_real_volume_or_labeled_tick_proxy",
+          "explicit_anchor"
+        ],
+        "minimum_bars": 30,
+        "completed_bars_only": true,
+        "evidence_group": "volume",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "implementation": "nexus.strategies.vwap_reclaim",
+          "scope": "existing versioned algorithm; see exported exact rule source"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "عبور المتوسط المرجح لشموع اليوم؛ وزن التكات بديل تقريبي ولا يساوي حجم صفقات مركزيًا.",
+      "execution_enabled": true,
+      "rules_sha256": "7dacc32ecd389bb09eb7ecb254215ee0f5937ec18a63cbbfa7bd5e55f43d0d0e",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "interasset_confirmation",
+      "school": "تأكيد أصل مقابل محدد",
+      "strategy": "interasset_confirmation",
+      "version": "3.0.1",
+      "indicators": [
+        "return correlation 40",
+        "20 bar breakout"
+      ],
+      "evidence_group": "interasset",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "explicit_partner_symbol",
+        "aligned_partner_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "interasset_confirmation",
+        "rule_version": "3.0.1",
+        "data_requirements": [
+          "completed_ohlc",
+          "explicit_partner_symbol",
+          "aligned_partner_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "interasset",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Declared paired-asset confirmation",
+          "implementation": "nexus.local_models.interasset",
+          "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+          "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+          "rules": [
+            "Prior 40-return correlation at least 0.7; new 20-bar breakout confirmed by the declared paired asset."
+          ],
+          "rules_ar": [
+            "ارتباط أربعين عائدًا سابقًا لا يقل عن 0.7، مع كسر جديد لنطاق عشرين شمعة يؤكده الأصل المقابل المحدد."
+          ],
+          "rules_source": "local_models.py"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: تأكيد أصل مقابل محدد",
+      "execution_enabled": true,
+      "rules_sha256": "56b23fd2d281f8e6c49723bceeacc6fd42884596a31fb913c5355ce0125114f8",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "harmonic_abcd",
+      "school": "الهارمونيك: نموذج الأضلاع المتساوية",
+      "strategy": "harmonic_abcd",
+      "version": "2.0.0",
+      "indicators": [
+        "confirmed alternating pivots",
+        "AB/CD ratio"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "harmonic_abcd",
+        "rule_version": "2.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "rules": [
+            "Four confirmed alternating pivots; BC/AB 0.382..0.886; CD/AB 0.95..1.05; CD/BC 1.13..2.618",
+            "Fresh break of two-bar D confirmation level within eight bars; D intact; target C not passed"
+          ],
+          "rules_ar": [
+            "أربعة محاور مؤكدة؛ تصحيح الضلع الثاني بين 38.2 و88.6 بالمئة، وتشابه الضلعين ضمن خمسة بالمئة.",
+            "اختراق مستوى تأكيد النقطة الرابعة خلال ثماني شموع مع بقائها سليمة وهدف عند النقطة الثالثة."
+          ],
+          "source": "https://harmonictrader.com/harmonic-patterns/abcd-pattern/",
+          "scope": "Equal-leg pattern; custom tolerance, entry, expiry and exit, not the complete harmonic school"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نموذج الأضلاع المتساوية بنسب محددة ومحاور مؤكدة وتفعيل لاحق وإبطال وهدف؛ بقية أنماط الهارمونيك خارج النطاق.",
+      "execution_enabled": true,
+      "rules_sha256": "688aaa187e5250c387628201f50d76be27569ef4d80aa913375b58e022706abe",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "elliott_candidate",
+      "school": "إليوت: فرضية موجتين محلية",
+      "strategy": "elliott_candidate",
+      "version": "3.0.0",
+      "indicators": [
+        "confirmed pivots",
+        "alternative wave counts"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "elliott_candidate",
+        "rule_version": "3.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Elliott: local wave 1-2 hypothesis",
+          "implementation": "nexus.local_models.wave12",
+          "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+          "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+          "rules": [
+            "Three confirmed alternating pivots; first leg at least 2 ATR, retracement 0.382–0.786, fresh first-leg break within 16 bars with retracement intact."
+          ],
+          "rules_ar": [
+            "ثلاثة محاور مؤكدة متناوبة؛ الضلع الأول ضعفا نطاق التقلب على الأقل والتصحيح بين 38.2 و78.6 بالمئة، ثم كسر جديد خلال ست عشرة شمعة مع سلامة قاع أو قمة التصحيح."
+          ],
+          "rules_source": "local_models.py"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: إليوت: فرضية موجتين محلية",
+      "execution_enabled": true,
+      "rules_sha256": "83d04531ce3686a5d1e886d8b133b6212c8feba7163ccc9c95ac9b45038b3bc3",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "wyckoff_spring",
+      "school": "وايكوف: نموذج كسر واختبار محلي",
+      "strategy": "wyckoff_spring",
+      "version": "3.0.0",
+      "indicators": [
+        "range",
+        "spring proxy"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "positive_tick_volume"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "wyckoff_spring",
+        "rule_version": "3.0.0",
+        "data_requirements": [
+          "completed_ohlc",
+          "positive_tick_volume"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Wyckoff: local spring-test model",
+          "implementation": "nexus.local_models.spring_test",
+          "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+          "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+          "rules": [
+            "40-bar sideways range; boundary sweep, departure, then lighter tick-count retest within eight bars; target range midpoint."
+          ],
+          "rules_ar": [
+            "نطاق جانبي لأربعين شمعة؛ سحب حد ثم ابتعاد وإعادة اختبار بعدد تكات أقل خلال ثماني شموع، والهدف منتصف النطاق."
+          ],
+          "rules_source": "local_models.py"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: وايكوف: نموذج كسر واختبار محلي",
+      "execution_enabled": true,
+      "rules_sha256": "a6c99e9ebad1b0f6373a10f0f6591f8ae88258c78b41a7749482ca7732f43f97",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "smc_ict_proxy",
+      "school": "السيولة: سحب مستوى وعودة فجوة",
+      "strategy": "smc_ict_proxy",
+      "version": "3.0.0",
+      "indicators": [
+        "three-bar gap",
+        "sweep",
+        "structure"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "smc_ict_proxy",
+        "rule_version": "3.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Liquidity: sweep and gap return",
+          "implementation": "nexus.local_models.liquidity_gap",
+          "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+          "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+          "rules": [
+            "Sweep of a prior 10-bar boundary before a displacement gap; first valid gap return within 20 bars."
+          ],
+          "rules_ar": [
+            "سحب حد عشر شموع قبل فجوة اندفاع؛ أول عودة صالحة للفجوة خلال عشرين شمعة."
+          ],
+          "rules_source": "local_models.py"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: السيولة: سحب مستوى وعودة فجوة",
+      "execution_enabled": true,
+      "rules_sha256": "4178c12910f5dc79f6f18ae33f4422cd16b49097acfc6d800285affeed7c356d",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "supply_demand_proxy",
+      "school": "العرض والطلب: عودة منطقة محلية",
+      "strategy": "supply_demand_proxy",
+      "version": "3.0.0",
+      "indicators": [
+        "displacement base proxy"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "supply_demand_proxy",
+        "rule_version": "3.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Supply/demand: local zone return",
+          "implementation": "nexus.local_models.supply_zone",
+          "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+          "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+          "rules": [
+            "First return to an unbroken displacement base within 20 bars, aligned with the prior 20-bar EMA."
+          ],
+          "rules_ar": [
+            "أول عودة إلى أساس اندفاع غير مكسور خلال عشرين شمعة، في اتجاه المتوسط الأسي السابق لعشرين شمعة."
+          ],
+          "rules_source": "local_models.py"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: العرض والطلب: عودة منطقة محلية",
+      "execution_enabled": true,
+      "rules_sha256": "20667c659742ee2f16cd62e945fc78963c3d04ecf233eca5126f6364a2de4658",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "smt_proxy",
+      "school": "اختلاف نطاق أصلين: نموذج محلي",
+      "strategy": "smt_proxy",
+      "version": "3.0.1",
+      "indicators": [
+        "paired swing divergence"
+      ],
+      "evidence_group": "interasset",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "explicit_partner_symbol",
+        "aligned_partner_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "smt_proxy",
+        "rule_version": "3.0.1",
+        "data_requirements": [
+          "completed_ohlc",
+          "explicit_partner_symbol",
+          "aligned_partner_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "interasset",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Paired range divergence: local model",
+          "implementation": "nexus.local_models.smt",
+          "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+          "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+          "rules": [
+            "Correlation at least 0.7; one asset sweeps its prior 20-bar boundary and returns while its declared partner does not sweep."
+          ],
+          "rules_ar": [
+            "ارتباط لا يقل عن 0.7؛ يسحب أصل حد عشرين شمعة ويعود داخله دون أن يسحب الأصل المقابل حده."
+          ],
+          "rules_source": "local_models.py"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: اختلاف نطاق أصلين: نموذج محلي",
+      "execution_enabled": true,
+      "rules_sha256": "cf006b7e665b6ab6dac6e3686775c1cd6e77875200a7af3156053c4e28dae6c9",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "seasonality",
+      "school": "موسمية العملات: نموذج شهري محلي",
+      "strategy": "seasonality",
+      "version": "3.0.0",
+      "indicators": [
+        "calendar-conditioned returns"
+      ],
+      "evidence_group": "statistical",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "broker_daily_history"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "seasonality",
+        "rule_version": "3.0.0",
+        "data_requirements": [
+          "completed_ohlc",
+          "broker_daily_history"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "statistical",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "FX seasonality: local monthly model",
+          "implementation": "nexus.local_models.monthly_bias",
+          "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+          "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+          "rules": [
+            "Declared FX only; at least three completed prior same-month samples from MT5 D1, absolute t-score at least 2, direction agreement at least two thirds, fresh 20-bar break."
+          ],
+          "rules_ar": [
+            "أزواج العملات المعلنة فقط؛ ثلاث عينات شهرية سابقة مكتملة على الأقل من يوميات المنصة، ودرجة إحصائية مطلقة لا تقل عن اثنتين واتفاق ثلثي العينات مع كسر جديد لنطاق عشرين شمعة."
+          ],
+          "rules_source": "local_models.py"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: موسمية العملات: نموذج شهري محلي",
+      "execution_enabled": true,
+      "rules_sha256": "4db2dbe3414dfe26d8b40c98ad699d761aef0cb096b6b1d4da1579f657cdc26a",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "gann",
+      "school": "جان: شبكة جذر سعر معيارية",
+      "strategy": "gann",
+      "version": "3.0.0",
+      "indicators": [],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "gann",
+        "rule_version": "3.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Gann: normalized price-root grid",
+          "implementation": "nexus.local_models.root_grid",
+          "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+          "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+          "rules": [
+            "House rule: ATR-normalized square-root level shifted by 0.25 from a confirmed pivot; fresh cross within 32 bars with anchor intact."
+          ],
+          "rules_ar": [
+            "قاعدة خاصة: مستوى جذر سعر معياري بنطاق التقلب وإزاحة ربع وحدة من محور مؤكد؛ عبور جديد خلال اثنتين وثلاثين شمعة مع سلامة المحور."
+          ],
+          "rules_source": "local_models.py"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: جان: شبكة جذر سعر معيارية",
+      "execution_enabled": true,
+      "rules_sha256": "0033660b137afaa1b3b3c5d3634a5f63d7b2a6f0854222c475969e8e1f1257c7",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "order_flow",
+      "school": "تدفق النشاط: تقريب من شموع التكات",
+      "strategy": "order_flow",
+      "version": "3.0.0",
+      "indicators": [],
+      "evidence_group": "volume",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "positive_tick_volume"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "order_flow",
+        "rule_version": "3.0.0",
+        "data_requirements": [
+          "completed_ohlc",
+          "positive_tick_volume"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "volume",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Activity flow: bar-tick approximation",
+          "implementation": "nexus.local_models.activity_flow",
+          "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+          "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+          "rules": [
+            "Bar tick count at least 1.2 times the prior median; close-location pressure crosses ±0.35 and breaks a five-bar boundary. No signed trade volume or depth."
+          ],
+          "rules_ar": [
+            "عدد تكات لا يقل عن 1.2 من الوسيط السابق؛ ضغط موقع الإغلاق يعبر موجب أو سالب 0.35 مع كسر حد خمس شموع. لا يستخدم حجم صفقات محدد الاتجاه أو عمق سوق."
+          ],
+          "rules_source": "local_models.py"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: تدفق النشاط: تقريب من شموع التكات",
+      "execution_enabled": true,
+      "rules_sha256": "614692b8c6a0993b9fa431e8d72a29534d6dce16c2f07b1141ed0df5bd85e2b6",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "classic_pivot_reclaim",
+      "school": "استعادة النقطة المحورية اليومية",
+      "strategy": "classic_pivot_reclaim",
+      "version": "1.0.0",
+      "indicators": [
+        "Previous-session classic pivot reclaim"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "broker_daily_history"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "classic_pivot_reclaim",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc",
+          "broker_daily_history"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Previous-session classic pivot reclaim",
+          "rules": [
+            "P=(H+L+C)/3, R1=2P-L, S1=2P-H, R2=P+(H-L), S2=P-(H-L), from a completed MT5 D1 bar only",
+            "Intraday trigger pair shares the declared daily clock; reference closes before both trigger bars and is at most four days old",
+            "Fresh directional close through P, inside first resistance/support; structural stop and first level target"
+          ],
+          "parameters": {
+            "reference_timeframe": "D1",
+            "max_reference_age_seconds": 345600,
+            "entry_definition": "fresh pivot reclaim; no entry merely because price touches a level"
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": [
+            "M1",
+            "M2",
+            "M3",
+            "M4",
+            "M5",
+            "M6",
+            "M10",
+            "M12",
+            "M15",
+            "M20",
+            "M30",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H6",
+            "H8",
+            "H12"
+          ],
+          "rules_ar": [
+            "النقطة المحورية متوسط أعلى وأدنى وإغلاق يوم مكتمل من منصة التداول، مع حساب الدعم والمقاومة الكلاسيكيين.",
+            "مرجع اليوم متاح قبل شمعتي التفعيل، ولا يزيد عمره على أربعة أيام، والشمعتان في اليوم نفسه وفق ساعة مرجع المنصة.",
+            "عبور جديد بالإغلاق للنقطة المحورية داخل أول دعم أو مقاومة؛ وقف بنيوي وهدف عند المستوى الأول."
+          ],
+          "source": "https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/pivot-points-resistance-support",
+          "scope": "Classic pivot formula with explicit intraday house trigger; not every pivot variant or a profitability claim"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. استعادة النقطة المحورية اليومية",
+      "execution_enabled": true,
+      "rules_sha256": "369a17c4721a46fe90b5e29f98c518645843f4bc81443b6981684fd65112c257",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "fvg_first_return",
+      "school": "العودة الأولى للفجوة السعرية",
+      "strategy": "fvg_first_return",
+      "version": "1.0.0",
+      "indicators": [
+        "Three-bar gap first return"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "fvg_first_return",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Three-bar gap first return",
+          "rules": [
+            "Directional middle body >= prior ATR; gap >= 0.1 ATR",
+            "First subsequent touch within 20 bars; reject through near edge; no far-edge breach"
+          ],
+          "parameters": {
+            "max_age": 20,
+            "body_atr": 1,
+            "min_gap_atr": 0.1
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "جسم الشمعة الوسطى لا يقل عن نطاق التقلب السابق والفجوة لا تقل عن عُشره.",
+            "أول ملامسة خلال عشرين شمعة، ثم إغلاق خارج الحافة القريبة دون تجاوز الحافة البعيدة."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. العودة الأولى للفجوة السعرية",
+      "execution_enabled": true,
+      "rules_sha256": "bc403e8bd8fd063fdaa3c4f189f624d441114969e19e220e4c0edcbfa647dd87",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "base_first_return",
+      "school": "العودة الأولى لمنطقة الأساس",
+      "strategy": "base_first_return",
+      "version": "1.0.0",
+      "indicators": [
+        "Displacement base first return"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "base_first_return",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Displacement base first return",
+          "rules": [
+            "Base range <= prior ATR; departure body >= 1.5 ATR and closes beyond base",
+            "First return within 20 bars rejects zone without far-edge breach"
+          ],
+          "parameters": {
+            "max_age": 20,
+            "base_atr_max": 1,
+            "body_atr": 1.5
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "عرض الأساس لا يزيد على نطاق التقلب، وجسم الاندفاع لا يقل عن ضعفه مرة ونصف مع إغلاق خارج الأساس.",
+            "أول عودة خلال عشرين شمعة ترفض المنطقة دون اختراق طرفها البعيد."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. العودة الأولى لمنطقة الأساس",
+      "execution_enabled": true,
+      "rules_sha256": "8bd43f0f0ffb508135dc98a739a97a534e37adb5590cf6a5ed01ecbf7b14b341",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "donchian_20",
+      "school": "اختراق قناة عشرين شمعة",
+      "strategy": "donchian_20",
+      "version": "1.0.0",
+      "indicators": [
+        "20-bar channel breakout"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "donchian_20",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "20-bar channel breakout",
+          "rules": [
+            "Latest close crosses highest high / lowest low of 20 previous bars",
+            "Stop reference is opposite channel boundary"
+          ],
+          "parameters": {
+            "lookback": 20
+          },
+          "allowed_regimes": [
+            "TREND",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "إغلاق جديد خلف أعلى قمة أو أدنى قاع للعشرين شمعة السابقة.",
+            "مرجع الوقف هو الطرف المقابل للقناة."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختراق قناة عشرين شمعة",
+      "execution_enabled": true,
+      "rules_sha256": "90737dfcf499c19a16caa6c11ac29af73c982311c62fa800893c1c932c0f9940",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "failed_range_break",
+      "school": "فشل اختراق النطاق",
+      "strategy": "failed_range_break",
+      "version": "1.0.0",
+      "indicators": [
+        "Failed range breakout"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "failed_range_break",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Failed range breakout",
+          "rules": [
+            "Sweep prior 20-bar boundary and close back inside",
+            "Close in inner 60% of bar toward reversal; reject simultaneous two-edge sweeps"
+          ],
+          "parameters": {
+            "lookback": 20,
+            "close_fraction": 0.6
+          },
+          "allowed_regimes": [
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "تجاوز طرف نطاق العشرين شمعة السابقة ثم إغلاق داخل النطاق.",
+            "الإغلاق ضمن ستين بالمئة من الشمعة باتجاه العودة؛ تجاوز الطرفين معًا مرفوض."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. فشل اختراق النطاق",
+      "execution_enabled": true,
+      "rules_sha256": "f9059a070f3942f2d8432e63486673be795245ad0d6f42e10f607c9c9cd040d6",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "pin_rejection",
+      "school": "رفض الذيل عند حد سعري",
+      "strategy": "pin_rejection",
+      "version": "1.0.0",
+      "indicators": [
+        "Boundary pin rejection"
+      ],
+      "evidence_group": "candle",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "pin_rejection",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "candle",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Boundary pin rejection",
+          "rules": [
+            "Touch or sweep prior 20-bar extreme and close back inside",
+            "Dominant wick >= 2 bodies and >= 60% of range; opposite wick <= 20%; range >= 0.5 prior ATR"
+          ],
+          "parameters": {
+            "lookback": 20,
+            "wick_body": 2,
+            "wick_range": 0.6,
+            "opposite_wick": 0.2
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "ملامسة أو تجاوز الحد السعري للعشرين شمعة السابقة والإغلاق داخله.",
+            "الذيل الرئيسي ضعف الجسم على الأقل وستون بالمئة من الشمعة، والذيل المقابل لا يتجاوز عشرين بالمئة."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. رفض الذيل عند حد سعري",
+      "execution_enabled": true,
+      "rules_sha256": "fec1795c938b7da4c2c0ea380b455e3b4178b636c006926dbcddb59a5266dd44",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "inside_bar_break",
+      "school": "اختراق الشمعة الداخلية",
+      "strategy": "inside_bar_break",
+      "version": "1.0.0",
+      "indicators": [
+        "Inside bar breakout"
+      ],
+      "evidence_group": "candle",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "inside_bar_break",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "candle",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Inside bar breakout",
+          "rules": [
+            "Previous bar strictly inside mother bar",
+            "Latest close crosses mother boundary in prior EMA20 direction"
+          ],
+          "parameters": {
+            "ema": 20
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "الشمعة السابقة تقع بالكامل داخل الشمعة الأم.",
+            "إغلاق جديد خارج حد الشمعة الأم في اتجاه المتوسط الأسي السابق لعشرين شمعة."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختراق الشمعة الداخلية",
+      "execution_enabled": true,
+      "rules_sha256": "c74ffcab9b79f1d1f127a4ecb45f94a8025985f8e95a26fe2d8d25f1ce99676a",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "band_reentry",
+      "school": "العودة داخل النطاق الإحصائي",
+      "strategy": "band_reentry",
+      "version": "1.0.0",
+      "indicators": [
+        "Two-deviation band reentry"
+      ],
+      "evidence_group": "statistical",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "band_reentry",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "statistical",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Two-deviation band reentry",
+          "rules": [
+            "Fixed mean and population deviation from 20 bars preceding both trigger bars",
+            "Previous close outside 2 deviations; current close reenters but has not reached mean"
+          ],
+          "parameters": {
+            "lookback": 20,
+            "deviations": 2
+          },
+          "allowed_regimes": [
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "متوسط وانحراف معياري من عشرين شمعة قبل شمعتي الدخول.",
+            "الإغلاق السابق خارج انحرافين معياريين والحالي يعود داخلهما قبل الوصول للمتوسط."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. العودة داخل النطاق الإحصائي",
+      "execution_enabled": true,
+      "rules_sha256": "9bc9ac69f79827fdd1bbef21c372beb2e45e72e61ff6db1ef853d98bdbe09509",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "atr_channel_break",
+      "school": "اختراق قناة التقلب",
+      "strategy": "atr_channel_break",
+      "version": "1.0.0",
+      "indicators": [
+        "ATR channel breakout"
+      ],
+      "evidence_group": "volatility",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "atr_channel_break",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "volatility",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "ATR channel breakout",
+          "rules": [
+            "Fixed prior EMA20 +/- 2 prior ATR14",
+            "Fresh close through channel in matching EMA direction"
+          ],
+          "parameters": {
+            "ema": 20,
+            "atr": 14,
+            "multiplier": 2
+          },
+          "allowed_regimes": [
+            "TREND",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "قناة ثابتة حول المتوسط الأسي السابق بعرض ضعفي نطاق التقلب.",
+            "اختراق جديد بالإغلاق في اتجاه ميل المتوسط."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختراق قناة التقلب",
+      "execution_enabled": true,
+      "rules_sha256": "5c88e500a82a237c761955da9f40e99f9ce9babd46da54b256c35e2ba89cec68",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "momentum_acceleration",
+      "school": "تسارع الزخم السعري",
+      "strategy": "momentum_acceleration",
+      "version": "1.0.0",
+      "indicators": [
+        "Normalized momentum acceleration"
+      ],
+      "evidence_group": "momentum",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "momentum_acceleration",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "momentum",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Normalized momentum acceleration",
+          "rules": [
+            "20-bar price change freshly crosses +/- 2 prior ATR",
+            "Sign agrees with prior EMA20 slope"
+          ],
+          "parameters": {
+            "lookback": 20,
+            "threshold_atr": 2,
+            "ema": 20
+          },
+          "allowed_regimes": [
+            "TREND",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "تغير السعر خلال عشرين شمعة يعبر حديثًا عتبة ضعفي نطاق التقلب السابق.",
+            "اتجاه العبور يوافق ميل المتوسط الأسي السابق."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. تسارع الزخم السعري",
+      "execution_enabled": true,
+      "rules_sha256": "18ea99e82b8ab14c81d6a37ceabff5dcd18bf28a676fc83d40e70c3dadf001f0",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "utc_opening_range",
+      "school": "اختراق نطاق بداية اليوم العالمي",
+      "strategy": "utc_opening_range",
+      "version": "1.0.0",
+      "indicators": [
+        "UTC first-hour range breakout"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "utc_opening_range",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "UTC first-hour range breakout",
+          "rules": [
+            "Exact continuous first UTC hour available on M1/M2/M3/M4/M5/M6/M10/M12/M15/M20/M30",
+            "Fresh close beyond first-hour range on same UTC day; explicitly not exchange opening hours"
+          ],
+          "parameters": {
+            "start_utc_hour": 0,
+            "range_minutes": 60
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": [
+            "M1",
+            "M2",
+            "M3",
+            "M4",
+            "M5",
+            "M6",
+            "M10",
+            "M12",
+            "M15",
+            "M20",
+            "M30"
+          ],
+          "rules_ar": [
+            "توفر كل شموع الساعة الأولى من اليوم بالتوقيت العالمي دون فجوات.",
+            "إغلاق جديد خارج هذا النطاق في اليوم نفسه؛ هذا ليس توقيت افتتاح بورصة بعينها."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختراق نطاق بداية اليوم العالمي",
+      "execution_enabled": true,
+      "rules_sha256": "b7be5f7af53d9e5f05b48c43609b9956c5fc346107236c2ba2615253c6750d9f",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "regression_reentry",
+      "school": "عودة إلى قناة الانحدار",
+      "strategy": "regression_reentry",
+      "version": "1.0.0",
+      "indicators": [
+        "Regression residual reentry"
+      ],
+      "evidence_group": "statistical",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "regression_reentry",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "statistical",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Regression residual reentry",
+          "rules": [
+            "OLS on 30 closes preceding both trigger bars; population residual deviation",
+            "Previous residual outside 2 deviations; latest residual recross inside toward projected center"
+          ],
+          "parameters": {
+            "lookback": 30,
+            "deviations": 2
+          },
+          "allowed_regimes": [
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "انحدار خطي على ثلاثين إغلاقًا قبل شمعتي الدخول مع انحراف البواقي.",
+            "عودة الباقي السعري من خارج انحرافين إلى داخلهما باتجاه المركز المتوقع."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. عودة إلى قناة الانحدار",
+      "execution_enabled": true,
+      "rules_sha256": "c0f7c7f9afd1fc441aaafd44ab1aa510db3da96f2043ce0f2885fb749d43e5b2",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "tick_activity_rejection",
+      "school": "رفض سعري مع نشاط التكات التقريبي",
+      "strategy": "tick_activity_rejection",
+      "version": "1.0.0",
+      "indicators": [
+        "Bar tick-activity rejection proxy"
+      ],
+      "evidence_group": "volume",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "positive_tick_volume"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "tick_activity_rejection",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc",
+          "positive_tick_volume"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "volume",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Bar tick-activity rejection proxy",
+          "rules": [
+            "Bar tick count >= 1.5 times median of prior 20 bars; every sample must have positive tick count",
+            "Reject prior 10-bar boundary; directional body; close in outer 20%; range >= 0.5 prior ATR",
+            "OHLC close-location pressure is a proxy, never signed trades, real delta, footprint or depth"
+          ],
+          "parameters": {
+            "volume_lookback": 20,
+            "activity_multiplier": 1.5,
+            "boundary_lookback": 10,
+            "close_fraction": 0.8
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_ar": [
+            "عدد تكات الشمعة لا يقل عن مرة ونصف وسيط العشرين شمعة السابقة، مع أعداد موجبة لكل العينة.",
+            "رفض حد العشر شموع السابقة بجسم اتجاهي وإغلاق في طرف عشرين بالمئة من الشمعة.",
+            "ضغط الإغلاق مؤشر حسابي تقريبي وليس دلتا فعلية أو بصمة أوامر أو عمق سوق."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. رفض سعري مع نشاط التكات التقريبي",
+      "execution_enabled": true,
+      "rules_sha256": "984c643c68520da056b649b543e22050057199204b9f780ec98cf8db279b8358",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "elliott_impulse_reversal",
+      "school": "إليوت: عودة بعد هندسة خمس موجات",
+      "strategy": "elliott_impulse_reversal",
+      "version": "1.0.0",
+      "indicators": [
+        "Elliott five-swing geometry reversal"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "elliott_impulse_reversal",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Elliott five-swing geometry reversal",
+          "rules": [
+            "Six strict confirmed alternating pivots, with terminal confirmation complete before trigger; no assumed ordering of outside-bar extremes",
+            "Wave 2 stays beyond origin; wave 3 extends wave 1 and is not the shortest arithmetic motive leg; wave 4 does not overlap wave 1; nontruncated wave 5 extends wave 3",
+            "House range at least 3 prior ATR; fresh reversal break of two-bar terminal confirmation range within eight bars, terminal pivot intact and wave-4 target not reached",
+            "Geometry hypothesis only: 5-3-5-3-5 subdivisions, diagonals, truncations, nested degrees and unique counts are not inferred"
+          ],
+          "parameters": {
+            "left_right": 2,
+            "minimum_range_atr": 3,
+            "max_confirmation_age": 8,
+            "wave3_measure": "arithmetic_price_distance"
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "source": "https://www.elliottwave.com/waveopedia/impulse/",
+          "additional_source": "https://www.elliottwave.com/waveopedia/motive-waves/",
+          "scope": "House causal reversal of standard six-pivot impulse geometry; nested 5-3-5-3-5 structure and alternate degrees remain unverified",
+          "rules_ar": [
+            "ستة محاور مؤكدة متعاقبة مع اكتمال تأكيد المحور الأخير قبل شمعة التفعيل؛ لا يفترض ترتيب القمة والقاع في شمعة خارجية واحدة.",
+            "الثانية لا تتجاوز البداية، والثالثة تتجاوز الأولى ولا تكون الأقصر بقياس فرق السعر، والرابعة لا تتداخل مع الأولى، والخامسة غير المنقطعة تتجاوز الثالثة.",
+            "نطاق لا يقل عن ثلاثة أمثال التقلب السابق؛ كسر عكسي جديد لنطاق شموع التأكيد خلال ثماني شموع مع سلامة المحور الأخير وهدف عند الرابعة.",
+            "فرضية هندسة موجية فقط؛ تقسيم الموجات الفرعية والقطريات والانقطاعات والدرجات المتداخلة والترقيم الفريد غير محسومة."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. إليوت: عودة بعد هندسة خمس موجات",
+      "execution_enabled": true,
+      "rules_sha256": "27010b30f821a98821d102ccd262f21db00d8cd5df905f29586390350a31baa7",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "elliott_zigzag_reversal",
+      "school": "إليوت: عودة بعد هندسة زجزاج",
+      "strategy": "elliott_zigzag_reversal",
+      "version": "1.0.0",
+      "indicators": [
+        "Elliott zigzag geometry reversal"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 60,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "elliott_zigzag_reversal",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 60,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Elliott zigzag geometry reversal",
+          "rules": [
+            "Four strict confirmed alternating pivots form A-B-C geometry; B does not return to origin and C extends beyond A",
+            "House B/A retracement 0.382..0.786 and C/A length 0.618..1.618; total range at least 3 prior ATR",
+            "Fresh break of the two-bar C-confirmation range within eight bars, C pivot intact, B structural target not reached",
+            "Geometry hypothesis only: required 5-3-5 subdivisions are unverified; no claim of complete zigzag or Elliott classification"
+          ],
+          "parameters": {
+            "B_retracement": [
+              0.382,
+              0.786
+            ],
+            "C_A_ratio": [
+              0.618,
+              1.618
+            ],
+            "max_confirmation_age": 8
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "source": "https://www.elliottwave.com/waveopedia/zigzags/",
+          "scope": "House causal reversal of ABC geometry with explicit ratios; internal 5-3-5 structure is unverified",
+          "rules_ar": [
+            "أربعة محاور مؤكدة متعاقبة لهندسة تصحيح ثلاثي؛ الوسطى لا تستعيد البداية والأخيرة تتجاوز نهاية الأولى.",
+            "تصحيح الوسطى بين 38.2 و78.6 بالمئة، ونسبة طول الأخيرة للأولى بين 61.8 و161.8 بالمئة، ونطاق ثلاثة أمثال التقلب السابق على الأقل؛ نسب محلية.",
+            "كسر جديد لنطاق شموع تأكيد النهاية خلال ثماني شموع مع سلامة المحور الأخير وهدف عند المحور الأوسط.",
+            "فرضية هندسية؛ التقسيم الداخلي خمس ثم ثلاث ثم خمس غير مفحوص، ولا يصنف جميع أشكال إليوت أو الزجزاج."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. إليوت: عودة بعد هندسة زجزاج",
+      "execution_enabled": true,
+      "rules_sha256": "fe37a81fd9e5c110f56ee1bf70885a6923694056190fee8b4a9d257af6d6c785",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "fractal_5_breakout",
+      "school": "اختراق فراكتال خماسي مؤكد",
+      "strategy": "fractal_5_breakout",
+      "version": "1.0.0",
+      "indicators": [
+        "Confirmed five-bar fractal breakout"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 61,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "fractal_5_breakout",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 61,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Confirmed five-bar fractal breakout",
+          "rules": [
+            "Fixed 60 bars preceding the trigger; every strict pivot has two lower highs / higher lows on each side, with both right bars already closed before the trigger; ties and dual high/low pivot bars excluded",
+            "Use the newest confirmed high and newest confirmed low; require high > low and a fresh completed close above the high / below the low from the previous close",
+            "Trigger must remain strictly inside the opposite structural boundary; bars crossing both boundaries are rejected; structural stop reference is the newest opposite pivot",
+            "House definition of five-bar breakout only; no Alligator filter or complete Bill Williams trading system"
+          ],
+          "parameters": {
+            "lookback": 60,
+            "left_bars": 2,
+            "right_closed_bars": 2,
+            "strict_pivots": true
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_en": [
+            "Fixed 60 bars preceding the trigger; every strict pivot has two lower highs / higher lows on each side, with both right bars already closed before the trigger; ties and dual high/low pivot bars excluded",
+            "Use the newest confirmed high and newest confirmed low; require high > low and a fresh completed close above the high / below the low from the previous close",
+            "Trigger must remain strictly inside the opposite structural boundary; bars crossing both boundaries are rejected; structural stop reference is the newest opposite pivot",
+            "House definition of five-bar breakout only; no Alligator filter or complete Bill Williams trading system"
+          ],
+          "source": "https://www.metatrader5.com/en/terminal/help/indicators/bw_indicators/fractals",
+          "scope": "House strict five-bar breakout, fixed window and stop; not the complete Bill Williams system",
+          "rules_ar": [
+            "نافذة ثابتة من ستين شمعة قبل شمعة التفعيل؛ محور خماسي صارم بقمتين أدنى أو قاعين أعلى على كل جانب، مع اكتمال الشمعتين اللاحقتين قبل التفعيل؛ التعادل والمحور المزدوج مستبعدان.",
+            "أحدث قمة وأحدث قاع مؤكدين، مع القمة أعلى من القاع؛ يعبر الإغلاق المكتمل حديثًا القمة للشراء أو القاع للبيع مقارنة بالإغلاق السابق.",
+            "تبقى شمعة التفعيل داخل الحد البنيوي المقابل بصورة صارمة؛ تجاوز الحدين مرفوض، ومرجع الوقف أحدث محور مقابل.",
+            "تعريف محلي محدد للاختراق الخماسي؛ لا يتضمن فلتر التمساح ولا نظام بيل ويليامز الكامل."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختراق فراكتال خماسي مؤكد",
+      "execution_enabled": true,
+      "rules_sha256": "cd3c942caef5c5c69e6d553d148a259e130ca14ecb7602175170e830b4f931be",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "obv_divergence_reclaim",
+      "school": "اختلاف OBV التقريبي واستعادة المستوى",
+      "strategy": "obv_divergence_reclaim",
+      "version": "1.0.0",
+      "indicators": [
+        "Tick-count OBV divergence and price reclaim proxy"
+      ],
+      "evidence_group": "volume",
+      "min_bars": 61,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "positive_tick_volume"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "obv_divergence_reclaim",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc",
+          "positive_tick_volume"
+        ],
+        "minimum_bars": 61,
+        "completed_bars_only": true,
+        "evidence_group": "volume",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Tick-count OBV divergence and price reclaim proxy",
+          "rules": [
+            "Fixed 60 completed bars preceding the trigger plus the trigger; positive finite MT5 tick_volume on every bar; never substitute real_volume or silently fill missing activity",
+            "Start OBV at zero at the window's first bar; add / subtract the current bar tick count when close rises / falls versus the preceding close; unchanged closes add zero",
+            "Newest two strict confirmed five-bar lows: lower price low with strictly higher OBV; bearish mirror is higher price high with strictly lower OBV; dual high/low pivots and ties excluded",
+            "Pivot separation <= 30 bars; trigger occurs 1..8 bars after the second right confirmation bar, which must precede the trigger",
+            "Fresh completed close reclaims the maximum intervening high for BUY / minimum intervening low for SELL; latest divergence pivot remains unbroken through trigger and supplies the structural stop; opposing simultaneous triggers abstain",
+            "House divergence, confirmation, expiry and reclaim definition; tick-count candle-volume proxy, not actual order flow or the complete OBV theory"
+          ],
+          "parameters": {
+            "lookback": 60,
+            "left_bars": 2,
+            "right_closed_bars": 2,
+            "max_pivot_separation": 30,
+            "max_confirmation_age": 8,
+            "volume_source": "tick_volume"
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "rules_en": [
+            "Fixed 60 completed bars preceding the trigger plus the trigger; positive finite MT5 tick_volume on every bar; never substitute real_volume or silently fill missing activity",
+            "Start OBV at zero at the window's first bar; add / subtract the current bar tick count when close rises / falls versus the preceding close; unchanged closes add zero",
+            "Newest two strict confirmed five-bar lows: lower price low with strictly higher OBV; bearish mirror is higher price high with strictly lower OBV; dual high/low pivots and ties excluded",
+            "Pivot separation <= 30 bars; trigger occurs 1..8 bars after the second right confirmation bar, which must precede the trigger",
+            "Fresh completed close reclaims the maximum intervening high for BUY / minimum intervening low for SELL; latest divergence pivot remains unbroken through trigger and supplies the structural stop; opposing simultaneous triggers abstain",
+            "House divergence, confirmation, expiry and reclaim definition; tick-count candle-volume proxy, not actual order flow or the complete OBV theory"
+          ],
+          "source": "https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/OBV",
+          "volume_source_reference": "https://www.mql5.com/en/docs/constants/structures/mqlrates",
+          "scope": "House tick-count candle-volume divergence/reclaim proxy; not actual order flow or complete OBV theory",
+          "rules_ar": [
+            "ستون شمعة مكتملة قبل التفعيل مع شمعة التفعيل؛ عدد تكات MT5 موجب ومحدود لكل شمعة، دون استبداله بحجم فعلي أو تعويض القيم المفقودة.",
+            "يبدأ OBV بصفر عند أول شمعة؛ يضاف أو يطرح عدد تكات الشمعة وفق ارتفاع الإغلاق أو انخفاضه عن السابق، والتعادل لا يغير القيمة.",
+            "أحدث قاعين خماسيين مؤكدين: قاع سعري أدنى مع OBV أعلى بصورة صارمة؛ للبيع قمة سعرية أعلى مع OBV أدنى؛ يستبعد التعادل والمحاور المزدوجة.",
+            "المسافة بين المحورين لا تتجاوز ثلاثين شمعة؛ التفعيل بعد شمعة تأكيد المحور الثاني بواحدة إلى ثماني شموع، والتأكيد يسبق شمعة التفعيل.",
+            "إغلاق جديد فوق أعلى قمة بين القاعين للشراء أو أسفل أدنى قاع بين القمتين للبيع؛ يبقى المحور الأخير دون كسر حتى التفعيل وهو مرجع الوقف؛ التفعيل المتعارض يمتنع.",
+            "الاختلاف والتأكيد والعمر والاستعادة قواعد محلية؛ الحجم بديل تقريبي لشموع التكات وليس تدفق أوامر فعليًا أو نظرية OBV كاملة."
+          ]
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختلاف OBV التقريبي واستعادة المستوى",
+      "execution_enabled": true,
+      "rules_sha256": "22b8709b0d3f40383e601756cf8c1036a4a648b6918670096d7abd5dd5fed466",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "four_school_confluence",
+      "school": "تقاطع المدارس الأربع",
+      "strategy": "confluence_reference",
+      "version": "1.0.0",
+      "indicators": [
+        "Liquidity sweep",
+        "BOS",
+        "FVG",
+        "POC",
+        "Local timing",
+        "RSI divergence",
+        "ABC geometry"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 40,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "fresh_executable_quote",
+        "actual_volume_profile_or_declared_local_timing"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "four_school_confluence",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc",
+          "fresh_executable_quote",
+          "actual_volume_profile_or_declared_local_timing"
+        ],
+        "minimum_bars": 40,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Four-school structural confluence",
+          "scope": "Bounded computational house definitions; no win-probability or daily-profit guarantee.",
+          "scope_ar": "تعريفات حسابية محلية محددة؛ لا تثبت احتمالية نجاح ولا تضمن الربح اليومي.",
+          "implementation": "nexus.confluence.evaluate",
+          "rules_source": "confluence.py",
+          "rules": [
+            "Confirmed strict five-bar liquidity pivot, sweep/reclaim, later fresh structure break by displacement, three-bar gap, first untouched return; protected sweep pivot stays intact.",
+            "ICT plus an actual transaction-volume POC inside the gap overrides only time, momentum and bounded Elliott opposition.",
+            "Without a qualifying POC, require an 8/16/32/64 +/-1-bar timing window from the latest same-direction confirmed pivot, with available non-opposing momentum and Elliott context.",
+            "Stop is one price tick beyond the protected sweep pivot; target is nearest previously confirmed, still-unswept opposite liquidity; exact quote reward must be at least twice quote risk. Never move target to manufacture eligibility.",
+            "Simple rolling RSI14 at two confirmed same-kind pivots; price divergence needs at least two RSI points. Neutral is an evaluated context, not an invented divergence.",
+            "Four confirmed alternating pivots test a bounded ABC price geometry only, not nesting, alternation, complete Elliott interpretation or wave forecasting."
+          ],
+          "rules_ar": [
+            "محور سيولة مؤكد بخمس شموع، ثم سحب واستعادة، ثم كسر هيكل لاحق بإزاحة وفجوة ثلاث شموع، ثم أول عودة دون لمس سابق مع سلامة محور السحب المحمي.",
+            "توافق السيولة مع نقطة التحكم لحجم صفقات فعلي داخل الفجوة له الأولوية فقط على تعارض الزمن والزخم ونموذج إليوت المحدد.",
+            "عند غياب نقطة تحكم مؤهلة يلزم توقيت ٨ أو ١٦ أو ٣٢ أو ٦٤ شمعة بسماح شمعة من آخر محور مؤكد مناسب، مع توفر سياق الزخم وإليوت وعدم معارضتهما.",
+            "الوقف خلف محور السحب المحمي بمقدار خطوة سعر، والهدف أقرب سيولة مقابلة مؤكدة سابقا لم تسحب؛ العائد من سعر التنفيذ لا يقل حسابيا عن ضعفي المخاطرة دون تحريك الهدف لتأهيل الصفقة.",
+            "مؤشر القوة النسبية ١٤ بمتوسط بسيط عند محورين مؤكدين من النوع نفسه؛ الانحراف يلزم فارق نقطتين على الأقل. الحياد سياق مفحوص وليس انحرافا مختلقا.",
+            "أربعة محاور مؤكدة متعاقبة تفحص هندسة تصحيح سعري محددة فقط؛ دون ادعاء اكتمال درجات إليوت والتعاقب أو توقع الموجات."
+          ],
+          "parameters": {
+            "cycle_tolerance": 1,
+            "cycles": [
+              8,
+              16,
+              32,
+              64
+            ],
+            "displacement_atr": 1.25,
+            "max_gap_age": 16,
+            "max_quote_age_seconds": 60,
+            "max_sweep_age": 32,
+            "min_reward_risk": 2,
+            "pivot_left": 2,
+            "pivot_right": 2,
+            "profile_min_coverage": 0.99,
+            "rsi_divergence_points": 2,
+            "rsi_period": 14,
+            "value_area_fraction": 0.7
+          },
+          "profile_schema": {
+            "bins": [
+              {
+                "price": "positive price aligned to tick",
+                "volume": "positive executed volume"
+              }
+            ],
+            "complete": true,
+            "coverage": "0.99..1.0",
+            "kind": "TRADE_VOLUME_AT_PRICE",
+            "provenance_verified": true,
+            "source": "trusted adapter identifier",
+            "source_type": "EXECUTED_TRANSACTIONS",
+            "symbol": "same instrument",
+            "units": [
+              "contracts",
+              "shares",
+              "base_asset"
+            ],
+            "venue": "actual venue or broker",
+            "window_end": "UTC seconds <= analysis time",
+            "window_start": "UTC seconds"
+          },
+          "protocol_revision": "b0bdac2b6353a7e99470558df8f339ce4ef126923cc5cb65756faf94626acf5a",
+          "timing_definition": "HOUSE_DEFINITION_NOT_ORIGINAL_GANN",
+          "volume_scope": "ACTUAL_TRANSACTION_VOLUME_ONLY_NO_INSTITUTIONAL_ATTRIBUTION",
+          "source": "https://www.metatrader5.com/en/terminal/help/indicators/bw_indicators/fractals"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "Actual quote, original untouched gap, protected sweep stop and nearest unswept liquidity; net reward/risk checked independently",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "بروتوكول مستقل لتقاطع سيولة وهيكل وفجوة مع حجم صفقات فعلي أو توقيت محلي؛ الوقف هيكلي والعائد مفحوص بعد التكاليف. لا يثبت ربحية أو اكتمال المدارس.",
+      "execution_enabled": true,
+      "rules_sha256": "673ba26f99f67d2b1397cdeb06ec0b005e0a15126ca65fcc5578a6d426539163",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "stochastic_rebound",
+      "school": "الاستوكاستيك: عودة زخم مؤكدة",
+      "strategy": "stochastic_rebound",
+      "version": "1.0.1",
+      "indicators": [
+        "stochastic_sma"
+      ],
+      "evidence_group": "momentum",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "stochastic_rebound",
+        "rule_version": "1.0.1",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "momentum",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Stochastic SMA rebound",
+          "rules": [
+            "Raw K(14), slow K=SMA(raw,3), D=SMA(K,3); flat raw=50.",
+            "K crosses above 20 with K>D and rising close; inverse below 80 with K<D.",
+            "Five-bar structural stop reference; no entry on an overbought/oversold label alone."
+          ],
+          "rules_en": [
+            "Raw K(14), slow K=SMA(raw,3), D=SMA(K,3); flat raw=50.",
+            "K crosses above 20 with K>D and rising close; inverse below 80 with K<D.",
+            "Five-bar structural stop reference; no entry on an overbought/oversold label alone."
+          ],
+          "rules_ar": [
+            "خام أربعة عشر شمعة؛ خط رئيسي بمتوسط ثلاث قيم وخط إشارة بمتوسط ثلاث قيم أخرى.",
+            "عبور الخط الرئيسي صعوداً فوق عشرين وهو أعلى من الإشارة مع إغلاق صاعد؛ عكسه عند ثمانين للبيع.",
+            "مرجع الوقف أدنى أو أعلى خمس شموع؛ لا يكفي وجود المؤشر في منطقة تشبع."
+          ],
+          "parameters": {
+            "indicators": [
+              "stochastic_sma"
+            ],
+            "period": 14,
+            "slowing": 3,
+            "signal": 3,
+            "levels": [
+              20,
+              80
+            ]
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.stochastic_rebound",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+          "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الاستوكاستيك: عودة زخم مؤكدة",
+      "execution_enabled": true,
+      "rules_sha256": "2056c53a7f73854b8e38b22de5297b4c7b8296f988fafea3ea184a64192dac97",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "rsi_wilder_rebound",
+      "school": "القوة النسبية: عودة بتنعيم وايلدر",
+      "strategy": "rsi_wilder_rebound",
+      "version": "1.0.1",
+      "indicators": [
+        "rsi_wilder"
+      ],
+      "evidence_group": "momentum",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "rsi_wilder_rebound",
+        "rule_version": "1.0.1",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "momentum",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Wilder RSI rebound",
+          "rules": [
+            "Wilder means of 14 gains/losses, arithmetic seeds; flat RSI=50.",
+            "Fresh cross above 30 with rising close or below 70 with falling close; five-bar structural stop."
+          ],
+          "rules_en": [
+            "Wilder means of 14 gains/losses, arithmetic seeds; flat RSI=50.",
+            "Fresh cross above 30 with rising close or below 70 with falling close; five-bar structural stop."
+          ],
+          "rules_ar": [
+            "متوسط وايلدر لأرباح وخسائر أربع عشرة حركة مع بذرة حسابية أولية؛ التعادل المحايد خمسون.",
+            "عبور صاعد جديد لثلاثين مع ارتفاع الإغلاق، أو عبور هابط لسبعين مع انخفاضه؛ وقف بنيوي من خمس شموع."
+          ],
+          "parameters": {
+            "indicators": [
+              "rsi_wilder"
+            ],
+            "period": 14,
+            "levels": [
+              30,
+              70
+            ]
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.rsi_wilder_rebound",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+          "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators/rsi"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. القوة النسبية: عودة بتنعيم وايلدر",
+      "execution_enabled": true,
+      "rules_sha256": "1e4e59f4e6ee4eeb4ed006e04f26f4e177321e6a77ac2ea2fb5721ed0b2619a7",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "macd_signal_cross",
+      "school": "تقاطع الماكد: تأكيد اتجاه",
+      "strategy": "macd_signal_cross",
+      "version": "1.0.0",
+      "indicators": [
+        "macd_ema_signal",
+        "ema_sma_seed"
+      ],
+      "evidence_group": "momentum",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "macd_signal_cross",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "momentum",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "MACD EMA-signal cross",
+          "rules": [
+            "MACD=EMA12-EMA26; signal=EMA9(MACD), arithmetic seeds; explicit EMA-signal variant.",
+            "Fresh upward signal cross with MACD>0 and close above prior EMA20; inverse for sell."
+          ],
+          "rules_en": [
+            "MACD=EMA12-EMA26; signal=EMA9(MACD), arithmetic seeds; explicit EMA-signal variant.",
+            "Fresh upward signal cross with MACD>0 and close above prior EMA20; inverse for sell."
+          ],
+          "rules_ar": [
+            "فرق متوسطين أسيين اثنتي عشرة وست وعشرين شمعة؛ إشارة أسية لتسع قيم وبذور حسابية.",
+            "تقاطع صاعد جديد للماكد مع الإشارة فوق الصفر وفي اتجاه متوسط عشرين السابق؛ العكس للبيع."
+          ],
+          "parameters": {
+            "indicators": [
+              "macd_ema_signal",
+              "ema_sma_seed"
+            ],
+            "fast": 12,
+            "slow": 26,
+            "signal": 9
+          },
+          "allowed_regimes": [
+            "TREND",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.macd_signal_cross",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+          "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators/macd"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. تقاطع الماكد: تأكيد اتجاه",
+      "execution_enabled": true,
+      "rules_sha256": "27f132659b9b2d659f0b5f8d1d9adbf9b623de27408ea99c1a20184d156b4fd4",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "adx_di_cross",
+      "school": "الحركة الاتجاهية: تقاطع مؤكد",
+      "strategy": "adx_di_cross",
+      "version": "1.0.1",
+      "indicators": [
+        "adx_wilder",
+        "ema_sma_seed"
+      ],
+      "evidence_group": "trend",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "adx_di_cross",
+        "rule_version": "1.0.1",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "trend",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Wilder ADX directional cross",
+          "rules": [
+            "Exclusive directional movement, ties zero; Wilder(14) smoothing with arithmetic seeds.",
+            "Fresh DI cross; ADX>=25 and nondecreasing; close on the corresponding side of prior EMA20."
+          ],
+          "rules_en": [
+            "Exclusive directional movement, ties zero; Wilder(14) smoothing with arithmetic seeds.",
+            "Fresh DI cross; ADX>=25 and nondecreasing; close on the corresponding side of prior EMA20."
+          ],
+          "rules_ar": [
+            "حركة موجبة وسالبة متنافيتان؛ التعادل صفر، وتنعيم وايلدر لأربع عشرة قيمة.",
+            "تقاطع اتجاهي جديد مع مؤشر قوة لا يقل عن خمس وعشرين ولا ينخفض، وإغلاق في اتجاه متوسط عشرين السابق."
+          ],
+          "parameters": {
+            "indicators": [
+              "adx_wilder",
+              "ema_sma_seed"
+            ],
+            "period": 14,
+            "strength_floor": 25
+          },
+          "allowed_regimes": [
+            "TREND",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.adx_di_cross",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+          "source": "https://www.metatrader5.com/en/terminal/help/indicators/trend_indicators/admiw"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الحركة الاتجاهية: تقاطع مؤكد",
+      "execution_enabled": true,
+      "rules_sha256": "f549d0b7bf11101d1462fccd42632d9febc03945fdc8d4a18cd08f2a18e8e52e",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "cci_reentry",
+      "school": "مؤشر قناة السلع: عودة من التطرف",
+      "strategy": "cci_reentry",
+      "version": "1.0.0",
+      "indicators": [
+        "cci"
+      ],
+      "evidence_group": "momentum",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "cci_reentry",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "momentum",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "CCI reentry",
+          "rules": [
+            "CCI20 of typical price using mean absolute deviation and scale .015; flat=0.",
+            "Fresh reentry above -100 with rising close or below +100 with falling close; five-bar stop."
+          ],
+          "rules_en": [
+            "CCI20 of typical price using mean absolute deviation and scale .015; flat=0.",
+            "Fresh reentry above -100 with rising close or below +100 with falling close; five-bar stop."
+          ],
+          "rules_ar": [
+            "سعر نموذجي ومتوسط وانحراف مطلق لعشرين شمعة، ومعامل مقياس قدره 0.015.",
+            "عودة جديدة فوق سالب مئة مع إغلاق صاعد أو تحت موجب مئة مع إغلاق هابط؛ وقف من خمس شموع."
+          ],
+          "parameters": {
+            "indicators": [
+              "cci"
+            ],
+            "period": 20,
+            "scale": 0.015,
+            "levels": [
+              -100,
+              100
+            ]
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.cci_reentry",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+          "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators/cci"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. مؤشر قناة السلع: عودة من التطرف",
+      "execution_enabled": true,
+      "rules_sha256": "b8ff4087a6b22267d338e119c7819b108a5366ef1452d75bd6310744c0664f30",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "williams_reentry",
+      "school": "ويليامز: استعادة نطاق الزخم",
+      "strategy": "williams_reentry",
+      "version": "1.0.1",
+      "indicators": [
+        "williams_r"
+      ],
+      "evidence_group": "momentum",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "williams_reentry",
+        "rule_version": "1.0.1",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "momentum",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Williams percent-range reentry",
+          "rules": [
+            "Williams R14=-100*(HH-C)/(HH-LL); flat=-50.",
+            "Fresh reentry above -80 with rising close or below -20 with falling close; five-bar stop."
+          ],
+          "rules_en": [
+            "Williams R14=-100*(HH-C)/(HH-LL); flat=-50.",
+            "Fresh reentry above -80 with rising close or below -20 with falling close; five-bar stop."
+          ],
+          "rules_ar": [
+            "موقع الإغلاق ضمن أعلى وأدنى أربع عشرة شمعة على مقياس سالب مئة إلى صفر.",
+            "عودة فوق سالب ثمانين مع ارتفاع الإغلاق أو تحت سالب عشرين مع انخفاضه؛ وقف من خمس شموع."
+          ],
+          "parameters": {
+            "indicators": [
+              "williams_r"
+            ],
+            "period": 14,
+            "levels": [
+              -80,
+              -20
+            ]
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.williams_reentry",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+          "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators/wpr"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. ويليامز: استعادة نطاق الزخم",
+      "execution_enabled": true,
+      "rules_sha256": "d2755ffa39214a2ccdc16822ce8e3d2aa865913a77fc229ebfdeef473f340b31",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "mfi_tick_rebound",
+      "school": "تدفق سعري مرجح بالتكات: عودة زخم",
+      "strategy": "mfi_tick_rebound",
+      "version": "1.0.1",
+      "indicators": [
+        "mfi_tick"
+      ],
+      "evidence_group": "volume",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "positive_tick_volume"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "mfi_tick_rebound",
+        "rule_version": "1.0.1",
+        "data_requirements": [
+          "completed_ohlc",
+          "positive_tick_volume"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "volume",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Tick-weighted MFI proxy rebound",
+          "rules": [
+            "Typical price times positive bar tick count; direction by typical-price change, ties excluded.",
+            "14 changes; fresh cross above 20 or below 80 with confirming close; not actual traded money flow."
+          ],
+          "rules_en": [
+            "Typical price times positive bar tick count; direction by typical-price change, ties excluded.",
+            "14 changes; fresh cross above 20 or below 80 with confirming close; not actual traded money flow."
+          ],
+          "rules_ar": [
+            "السعر النموذجي مضروب بعدد التكات الموجب؛ التصنيف حسب تغير السعر النموذجي، والتعادل مستبعد.",
+            "أربع عشرة حركة؛ عودة فوق عشرين أو تحت ثمانين مع إغلاق موافق؛ ليس حجم صفقات أو تدفق أموال فعلياً."
+          ],
+          "parameters": {
+            "indicators": [
+              "mfi_tick"
+            ],
+            "period": 14,
+            "levels": [
+              20,
+              80
+            ],
+            "volume_source": "tick_volume"
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.mfi_tick_rebound",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. تدفق سعري مرجح بالتكات: عودة زخم",
+      "execution_enabled": true,
+      "rules_sha256": "519a957ae2eeca85da954f9e950671ca34c7c840d6c14564076bb969783e0e82",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "three_bar_reversal",
+      "school": "الشموع: انعكاس ثلاثي مؤكد",
+      "strategy": "three_bar_reversal",
+      "version": "1.0.0",
+      "indicators": [
+        "prior_ema20",
+        "prior_atr_simple"
+      ],
+      "evidence_group": "candle",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "three_bar_reversal",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "candle",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Three-bar reversal without gap assumption",
+          "rules": [
+            "Prior EMA20 slope/context; first body >=.8 prior ATR, middle body <=one third of first.",
+            "Opposite third body >=.5 prior ATR and closes beyond first body midpoint; no gap assumption."
+          ],
+          "rules_en": [
+            "Prior EMA20 slope/context; first body >=.8 prior ATR, middle body <=one third of first.",
+            "Opposite third body >=.5 prior ATR and closes beyond first body midpoint; no gap assumption."
+          ],
+          "rules_ar": [
+            "اتجاه سابق من متوسط عشرين وميله؛ جسم أول لا يقل عن 0.8 من التقلب السابق، وجسم وسط لا يتجاوز ثلثه.",
+            "جسم ثالث معاكس لا يقل عن نصف التقلب وإغلاق يتجاوز منتصف الجسم الأول؛ لا يشترط فجوات لأسواق التداول المتصل."
+          ],
+          "parameters": {
+            "indicators": [
+              "prior_ema20",
+              "prior_atr_simple"
+            ],
+            "first_body_atr": 0.8,
+            "middle_fraction": 0.3333333333333333,
+            "third_body_atr": 0.5
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.three_bar_reversal",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الشموع: انعكاس ثلاثي مؤكد",
+      "execution_enabled": true,
+      "rules_sha256": "37b0373efbe2de5e1495f6e7d9c73aeca156c5391dfdcb54beb6d85daee9e639",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "rectangle_breakout",
+      "school": "الكلاسيكي: اختراق مستطيل سعري",
+      "strategy": "rectangle_breakout",
+      "version": "1.0.0",
+      "indicators": [
+        "prior_20_bar_range",
+        "prior_atr_simple"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "rectangle_breakout",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Confirmed rectangle breakout",
+          "rules": [
+            "20 prior bars; width 2..8 times ATR calculated before the range.",
+            "Two touches per edge separated by >=3 bars within .15 ATR; fresh close outside with opposite edge intact."
+          ],
+          "rules_en": [
+            "20 prior bars; width 2..8 times ATR calculated before the range.",
+            "Two touches per edge separated by >=3 bars within .15 ATR; fresh close outside with opposite edge intact."
+          ],
+          "rules_ar": [
+            "عشرون شمعة سابقة، ونطاق بين ضعفي وثمانية أضعاف تقلب سابق مستقل.",
+            "اختباران لكل حد يفصل بينهما ثلاث شموع على الأقل ضمن سماح 0.15 من التقلب؛ إغلاق جديد خارج الحد مع سلامة المقابل."
+          ],
+          "parameters": {
+            "indicators": [
+              "prior_20_bar_range",
+              "prior_atr_simple"
+            ],
+            "window": 20,
+            "touch_tolerance_atr": 0.15,
+            "min_touch_separation": 3
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.rectangle_breakout",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الكلاسيكي: اختراق مستطيل سعري",
+      "execution_enabled": true,
+      "rules_sha256": "cd90b05c65ceb04220e320792bdf4fb9b2ccecfc704b2ff23385dba2fa397582",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "flag_breakout",
+      "school": "الكلاسيكي: استمرار راية محددة",
+      "strategy": "flag_breakout",
+      "version": "1.0.0",
+      "indicators": [
+        "prior_atr_simple",
+        "pole_and_flag_ohlc"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "flag_breakout",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Bounded flag continuation",
+          "rules": [
+            "Five-bar pole >=3 pre-pole ATR followed by eight-bar consolidation.",
+            "Retracement .25..50, flag width <=3 ATR; fresh directional break of flag with opposite edge intact."
+          ],
+          "rules_en": [
+            "Five-bar pole >=3 pre-pole ATR followed by eight-bar consolidation.",
+            "Retracement .25..50, flag width <=3 ATR; fresh directional break of flag with opposite edge intact."
+          ],
+          "rules_ar": [
+            "اندفاع خمس شموع لا يقل عن ثلاثة أضعاف التقلب السابق، يليه تصحيح من ثماني شموع.",
+            "تصحيح بين خمس وعشرين وخمسين بالمئة، وعرض لا يتجاوز ثلاثة أضعاف التقلب؛ اختراق جديد في اتجاه السارية."
+          ],
+          "parameters": {
+            "indicators": [
+              "prior_atr_simple",
+              "pole_and_flag_ohlc"
+            ],
+            "pole_bars": 5,
+            "flag_bars": 8,
+            "retracement": [
+              0.25,
+              0.5
+            ]
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.flag_breakout",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الكلاسيكي: استمرار راية محددة",
+      "execution_enabled": true,
+      "rules_sha256": "7f8a209f9b9417cef87e4d70490a72ad0dd904d084b2c6c9d4472d22e27eeb7e",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "harmonic_gartley",
+      "school": "الهارمونيك: غارتلي مؤكد",
+      "strategy": "harmonic_gartley",
+      "version": "1.1.0",
+      "indicators": [
+        "causal_five_bar_pivots",
+        "fibonacci_ratios"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "harmonic_gartley",
+        "rule_version": "1.1.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Confirmed Gartley house model",
+          "rules": [
+            "Five confirmed alternating XABCD pivots; every ratio interval is explicit in parameters.",
+            "Fresh break of two D-confirmation bars 1..8 bars after confirmation; D intact and target C ahead.",
+            "Retain the newest matching XABCD window within its lifetime despite minor later confirmation pivots; never reuse expired windows."
+          ],
+          "rules_en": [
+            "Five confirmed alternating XABCD pivots; every ratio interval is explicit in parameters.",
+            "Fresh break of two D-confirmation bars 1..8 bars after confirmation; D intact and target C ahead.",
+            "Retain the newest matching XABCD window within its lifetime despite minor later confirmation pivots; never reuse expired windows."
+          ],
+          "rules_ar": [
+            "خمسة محاور متناوبة مؤكدة؛ النسب والسماحات العددية محفوظة كاملة في معاملات النموذج.",
+            "عبور جديد لمستوى الشمعتين المؤكدتين للنقطة الأخيرة بعد تأكيدها بواحدة إلى ثماني شموع؛ بقاء النقطة سليمة والهدف عند النقطة السابقة.",
+            "يبقى أحدث تسلسل مطابق ضمن عمره صالحاً رغم محور تأكيد صغير لاحق؛ لا يُبحث عن تسلسل انتهى عمره."
+          ],
+          "parameters": {
+            "indicators": [
+              "causal_five_bar_pivots",
+              "fibonacci_ratios"
+            ],
+            "ratios": {
+              "ab_xa": [
+                0.588,
+                0.648
+              ],
+              "bc_ab": [
+                0.382,
+                0.886
+              ],
+              "ad_xa": [
+                0.756,
+                0.816
+              ],
+              "cd_bc": [
+                1.27,
+                1.618
+              ],
+              "cd_ab": [
+                0.95,
+                1.05
+              ]
+            },
+            "ratio_policy": "house_intervals_not_universal_tolerances",
+            "max_confirmation_age": 8
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.harmonic_gartley",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+          "source": "https://harmonictrader.com/harmonic-patterns/gartley-pattern/"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الهارمونيك: غارتلي مؤكد",
+      "execution_enabled": true,
+      "rules_sha256": "8ba40ed465acc6d2433e9460b49d447738748f08f2c71166ad8c9ec3b5922f81",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "harmonic_bat",
+      "school": "الهارمونيك: بات مؤكد",
+      "strategy": "harmonic_bat",
+      "version": "1.1.0",
+      "indicators": [
+        "causal_five_bar_pivots",
+        "fibonacci_ratios"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "harmonic_bat",
+        "rule_version": "1.1.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Confirmed Bat house model",
+          "rules": [
+            "Five confirmed alternating XABCD pivots; every ratio interval is explicit in parameters.",
+            "Fresh break of two D-confirmation bars 1..8 bars after confirmation; D intact and target C ahead.",
+            "Retain the newest matching XABCD window within its lifetime despite minor later confirmation pivots; never reuse expired windows."
+          ],
+          "rules_en": [
+            "Five confirmed alternating XABCD pivots; every ratio interval is explicit in parameters.",
+            "Fresh break of two D-confirmation bars 1..8 bars after confirmation; D intact and target C ahead.",
+            "Retain the newest matching XABCD window within its lifetime despite minor later confirmation pivots; never reuse expired windows."
+          ],
+          "rules_ar": [
+            "خمسة محاور متناوبة مؤكدة؛ النسب والسماحات العددية محفوظة كاملة في معاملات النموذج.",
+            "عبور جديد لمستوى الشمعتين المؤكدتين للنقطة الأخيرة بعد تأكيدها بواحدة إلى ثماني شموع؛ بقاء النقطة سليمة والهدف عند النقطة السابقة.",
+            "يبقى أحدث تسلسل مطابق ضمن عمره صالحاً رغم محور تأكيد صغير لاحق؛ لا يُبحث عن تسلسل انتهى عمره."
+          ],
+          "parameters": {
+            "indicators": [
+              "causal_five_bar_pivots",
+              "fibonacci_ratios"
+            ],
+            "ratios": {
+              "ab_xa": [
+                0.382,
+                0.5
+              ],
+              "bc_ab": [
+                0.382,
+                0.886
+              ],
+              "ad_xa": [
+                0.856,
+                0.916
+              ],
+              "cd_bc": [
+                1.618,
+                2.618
+              ],
+              "cd_ab": [
+                1.0,
+                1.618
+              ]
+            },
+            "ratio_policy": "house_intervals_not_universal_tolerances",
+            "max_confirmation_age": 8
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.harmonic_bat",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+          "source": "https://harmonictrader.com/harmonic-patterns/bat-pattern/"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الهارمونيك: بات مؤكد",
+      "execution_enabled": true,
+      "rules_sha256": "bfa6d315ce70ad4077aa50ea6b9cf7a361fa7c216cc2556f20073659541b6a37",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "harmonic_butterfly",
+      "school": "الهارمونيك: باترفلاي مؤكد",
+      "strategy": "harmonic_butterfly",
+      "version": "1.1.0",
+      "indicators": [
+        "causal_five_bar_pivots",
+        "fibonacci_ratios"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "harmonic_butterfly",
+        "rule_version": "1.1.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Confirmed Butterfly house model",
+          "rules": [
+            "Five confirmed alternating XABCD pivots; every ratio interval is explicit in parameters.",
+            "Fresh break of two D-confirmation bars 1..8 bars after confirmation; D intact and target C ahead.",
+            "Retain the newest matching XABCD window within its lifetime despite minor later confirmation pivots; never reuse expired windows."
+          ],
+          "rules_en": [
+            "Five confirmed alternating XABCD pivots; every ratio interval is explicit in parameters.",
+            "Fresh break of two D-confirmation bars 1..8 bars after confirmation; D intact and target C ahead.",
+            "Retain the newest matching XABCD window within its lifetime despite minor later confirmation pivots; never reuse expired windows."
+          ],
+          "rules_ar": [
+            "خمسة محاور متناوبة مؤكدة؛ النسب والسماحات العددية محفوظة كاملة في معاملات النموذج.",
+            "عبور جديد لمستوى الشمعتين المؤكدتين للنقطة الأخيرة بعد تأكيدها بواحدة إلى ثماني شموع؛ بقاء النقطة سليمة والهدف عند النقطة السابقة.",
+            "يبقى أحدث تسلسل مطابق ضمن عمره صالحاً رغم محور تأكيد صغير لاحق؛ لا يُبحث عن تسلسل انتهى عمره."
+          ],
+          "parameters": {
+            "indicators": [
+              "causal_five_bar_pivots",
+              "fibonacci_ratios"
+            ],
+            "ratios": {
+              "ab_xa": [
+                0.756,
+                0.816
+              ],
+              "bc_ab": [
+                0.382,
+                0.886
+              ],
+              "ad_xa": [
+                1.24,
+                1.3
+              ],
+              "cd_bc": [
+                1.618,
+                2.618
+              ],
+              "cd_ab": [
+                1.27,
+                1.618
+              ]
+            },
+            "ratio_policy": "house_intervals_not_universal_tolerances",
+            "max_confirmation_age": 8
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.harmonic_butterfly",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+          "source": "https://harmonictrader.com/harmonic-patterns/butterfly-pattern/"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الهارمونيك: باترفلاي مؤكد",
+      "execution_enabled": true,
+      "rules_sha256": "86b1d0119fdfb761e20446cbe61eb3cf73a62e984fdf1bb146a6ffcabdf54d69",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "wyckoff_range_expansion",
+      "school": "وايكوف: توسع نطاق مع نشاط تكات",
+      "strategy": "wyckoff_range_expansion",
+      "version": "1.0.0",
+      "indicators": [
+        "range40",
+        "efficiency40",
+        "tick_activity"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc",
+        "positive_tick_volume"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "wyckoff_range_expansion",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc",
+          "positive_tick_volume"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Wyckoff-inspired range expansion",
+          "rules": [
+            "Prior 40-bar range width >=3 prior ATR with close efficiency <=.25.",
+            "Fresh boundary break, body>=prior ATR, close in outer 20%, ticks>=1.5 prior median.",
+            "Price/activity event only; no complete Wyckoff phase or institutional intent inference."
+          ],
+          "rules_en": [
+            "Prior 40-bar range width >=3 prior ATR with close efficiency <=.25.",
+            "Fresh boundary break, body>=prior ATR, close in outer 20%, ticks>=1.5 prior median.",
+            "Price/activity event only; no complete Wyckoff phase or institutional intent inference."
+          ],
+          "rules_ar": [
+            "نطاق سابق من أربعين شمعة بعرض لا يقل عن ثلاثة أضعاف التقلب وكفاءة اتجاه لا تزيد عن الربع.",
+            "إغلاق جديد خارج النطاق بجسم لا يقل عن التقلب، وفي طرف عشرين بالمئة من الشمعة، ونشاط تكات لا يقل عن مرة ونصف الوسيط السابق.",
+            "هذا حدث سعري مستوحى من القوة والضعف؛ لا يقرر مرحلة التجميع أو نية المؤسسات."
+          ],
+          "parameters": {
+            "indicators": [
+              "range40",
+              "efficiency40",
+              "tick_activity"
+            ],
+            "activity_multiple": 1.5
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.wyckoff_range_expansion",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+          "source": "https://www.wyckoffanalytics.com/wyckoff-method/"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. وايكوف: توسع نطاق مع نشاط تكات",
+      "execution_enabled": true,
+      "rules_sha256": "4557e776098afd564fae98af8ce560beebbea6b567ccff5bb9ec917b63a309f5",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "liquidity_bos_retest",
+      "school": "السيولة: سحب ثم كسر وإعادة اختبار",
+      "strategy": "liquidity_bos_retest",
+      "version": "1.0.0",
+      "indicators": [
+        "prior_10_bar_range",
+        "prior_atr_simple"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "liquidity_bos_retest",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Liquidity sweep BOS first retest",
+          "rules": [
+            "Sweep/reclaim of a prior 10-bar boundary, then later close beyond opposite boundary with body>=pre-sweep ATR.",
+            "First retest within eight bars of sweep, tolerance .15 ATR, directional rejection, sweep extreme unbroken."
+          ],
+          "rules_en": [
+            "Sweep/reclaim of a prior 10-bar boundary, then later close beyond opposite boundary with body>=pre-sweep ATR.",
+            "First retest within eight bars of sweep, tolerance .15 ATR, directional rejection, sweep extreme unbroken."
+          ],
+          "rules_ar": [
+            "سحب أحد حدي عشر شموع وإغلاق داخله، ثم إغلاق لاحق خارج الحد المقابل بجسم لا يقل عن التقلب السابق.",
+            "أول إعادة اختبار للحد المكسور خلال ثماني شموع من السحب بسماح 0.15 من التقلب وإغلاق موافق؛ يبقى حد السحب سليماً."
+          ],
+          "parameters": {
+            "indicators": [
+              "prior_10_bar_range",
+              "prior_atr_simple"
+            ],
+            "max_sweep_age": 8,
+            "retest_tolerance_atr": 0.15
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.liquidity_bos_retest",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. السيولة: سحب ثم كسر وإعادة اختبار",
+      "execution_enabled": true,
+      "rules_sha256": "f19ddabcf928f85bed92dc0342597f730ad4b4aa0251965fb1af6ec810587ff2",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    },
+    {
+      "id": "darvas_rising_boxes",
+      "school": "دارفاس: تتابع صندوقين مؤكدين",
+      "strategy": "darvas_rising_boxes",
+      "version": "1.0.0",
+      "indicators": [
+        "two_confirmed_20_bar_boxes"
+      ],
+      "evidence_group": "structure",
+      "min_bars": 65,
+      "coverage": "IMPLEMENTED",
+      "data_requirements": [
+        "completed_ohlc"
+      ],
+      "news_requirements": [
+        "calendar"
+      ],
+      "agent_type": "local_deterministic_research_agent",
+      "authority": "research_only_no_broker_access",
+      "input_contract": "completed chronological bars; no unfinished or future bar",
+      "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+      "contract": {
+        "schema_version": 1,
+        "rule_id": "darvas_rising_boxes",
+        "rule_version": "1.0.0",
+        "data_requirements": [
+          "completed_ohlc"
+        ],
+        "minimum_bars": 65,
+        "completed_bars_only": true,
+        "evidence_group": "structure",
+        "coverage": "IMPLEMENTED",
+        "school_complete": false,
+        "definition": {
+          "name_en": "Darvas two-box continuation",
+          "rules": [
+            "Two consecutive 20-bar boxes; each top precedes at least three strictly lower highs.",
+            "Both boundaries rise then fresh upper break for buy, or both fall then lower break for sell; opposite edge stop."
+          ],
+          "rules_en": [
+            "Two consecutive 20-bar boxes; each top precedes at least three strictly lower highs.",
+            "Both boundaries rise then fresh upper break for buy, or both fall then lower break for sell; opposite edge stop."
+          ],
+          "rules_ar": [
+            "صندوقان متتابعان من عشرين شمعة لكل منهما؛ سقف كل صندوق يسبق ثلاث قمم أدنى بصورة صارمة.",
+            "ارتفاع السقف والقاع معاً ثم اختراق جديد للسقف للشراء، أو انخفاضهما واختراق القاع للبيع؛ الوقف عند الحد المقابل."
+          ],
+          "parameters": {
+            "indicators": [
+              "two_confirmed_20_bar_boxes"
+            ],
+            "box_bars": 20,
+            "top_confirmation_bars": 3
+          },
+          "allowed_regimes": [
+            "TREND",
+            "RANGE",
+            "MIXED"
+          ],
+          "timeframe_scope": "all_completed_ohlc",
+          "implementation": "nexus.extended_models.darvas_rising_boxes",
+          "rules_source": "extended_models.py",
+          "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+          "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+        },
+        "missing_data_policy": "abstain",
+        "direct_broker_authority": false,
+        "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+        "data_policy": "MT5_ONLY",
+        "external_model_api_required": false,
+        "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+        "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+        "executable_specialists": []
+      },
+      "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. دارفاس: تتابع صندوقين مؤكدين",
+      "execution_enabled": true,
+      "rules_sha256": "1e6971d1cda68d469efcd1fe4fefb51c19c493b7012ed538b635e9312f79445f",
+      "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+      "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+    }
+  ]
+}

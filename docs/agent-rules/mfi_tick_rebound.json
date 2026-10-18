@@ -1,0 +1,87 @@
+{
+  "id": "mfi_tick_rebound",
+  "school": "تدفق سعري مرجح بالتكات: عودة زخم",
+  "strategy": "mfi_tick_rebound",
+  "version": "1.0.1",
+  "indicators": [
+    "mfi_tick"
+  ],
+  "evidence_group": "volume",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc",
+    "positive_tick_volume"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "mfi_tick_rebound",
+    "rule_version": "1.0.1",
+    "data_requirements": [
+      "completed_ohlc",
+      "positive_tick_volume"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "volume",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Tick-weighted MFI proxy rebound",
+      "rules": [
+        "Typical price times positive bar tick count; direction by typical-price change, ties excluded.",
+        "14 changes; fresh cross above 20 or below 80 with confirming close; not actual traded money flow."
+      ],
+      "rules_en": [
+        "Typical price times positive bar tick count; direction by typical-price change, ties excluded.",
+        "14 changes; fresh cross above 20 or below 80 with confirming close; not actual traded money flow."
+      ],
+      "rules_ar": [
+        "السعر النموذجي مضروب بعدد التكات الموجب؛ التصنيف حسب تغير السعر النموذجي، والتعادل مستبعد.",
+        "أربع عشرة حركة؛ عودة فوق عشرين أو تحت ثمانين مع إغلاق موافق؛ ليس حجم صفقات أو تدفق أموال فعلياً."
+      ],
+      "parameters": {
+        "indicators": [
+          "mfi_tick"
+        ],
+        "period": 14,
+        "levels": [
+          20,
+          80
+        ],
+        "volume_source": "tick_volume"
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.mfi_tick_rebound",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. تدفق سعري مرجح بالتكات: عودة زخم",
+  "execution_enabled": true,
+  "rules_python": "@model('mfi_tick_rebound', 'تدفق سعري مرجح بالتكات: عودة زخم', 'Tick-weighted MFI proxy rebound', 'volume',\n       ['السعر النموذجي مضروب بعدد التكات الموجب؛ التصنيف حسب تغير السعر النموذجي، والتعادل مستبعد.',\n        'أربع عشرة حركة؛ عودة فوق عشرين أو تحت ثمانين مع إغلاق موافق؛ ليس حجم صفقات أو تدفق أموال فعلياً.'],\n       ['Typical price times positive bar tick count; direction by typical-price change, ties excluded.',\n        '14 changes; fresh cross above 20 or below 80 with confirming close; not actual traded money flow.'],\n       {'indicators': ['mfi_tick'], 'period': 14, 'levels': [20, 80], 'volume_source': 'tick_volume'},\n       needs=['completed_ohlc', 'positive_tick_volume'])\ndef mfi_tick_rebound(b, c):\n    try:\n        values = ind.mfi_tick(b[-31:])\n    except (TypeError, ValueError, OverflowError):\n        return st._result(status='DATA_MISSING', missing=['positive finite tick counts required for tick MFI'],\n                          assumptions=['tick MFI is a price-activity proxy, not traded money flow'])\n    result = _rebound(b, values, 20, 80, {'volume_source': 'tick_count'})\n    result['assumptions'].append('tick MFI is a price-activity proxy, not traded money flow')\n    return result\n",
+  "rules_sha256": "519a957ae2eeca85da954f9e950671ca34c7c840d6c14564076bb969783e0e82",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

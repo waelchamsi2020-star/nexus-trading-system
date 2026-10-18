@@ -1,0 +1,76 @@
+{
+  "id": "tick_activity_rejection",
+  "school": "رفض سعري مع نشاط التكات التقريبي",
+  "strategy": "tick_activity_rejection",
+  "version": "1.0.0",
+  "indicators": [
+    "Bar tick-activity rejection proxy"
+  ],
+  "evidence_group": "volume",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc",
+    "positive_tick_volume"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "tick_activity_rejection",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc",
+      "positive_tick_volume"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "volume",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Bar tick-activity rejection proxy",
+      "rules": [
+        "Bar tick count >= 1.5 times median of prior 20 bars; every sample must have positive tick count",
+        "Reject prior 10-bar boundary; directional body; close in outer 20%; range >= 0.5 prior ATR",
+        "OHLC close-location pressure is a proxy, never signed trades, real delta, footprint or depth"
+      ],
+      "parameters": {
+        "volume_lookback": 20,
+        "activity_multiplier": 1.5,
+        "boundary_lookback": 10,
+        "close_fraction": 0.8
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "عدد تكات الشمعة لا يقل عن مرة ونصف وسيط العشرين شمعة السابقة، مع أعداد موجبة لكل العينة.",
+        "رفض حد العشر شموع السابقة بجسم اتجاهي وإغلاق في طرف عشرين بالمئة من الشمعة.",
+        "ضغط الإغلاق مؤشر حسابي تقريبي وليس دلتا فعلية أو بصمة أوامر أو عمق سوق."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. رفض سعري مع نشاط التكات التقريبي",
+  "execution_enabled": true,
+  "rules_python": "@specialist(\"tick_activity_rejection\", \"رفض سعري مع نشاط التكات التقريبي\", \"Bar tick-activity rejection proxy\", \"volume\",\n            [\"Bar tick count >= 1.5 times median of prior 20 bars; every sample must have positive tick count\",\n             \"Reject prior 10-bar boundary; directional body; close in outer 20%; range >= 0.5 prior ATR\",\n             \"OHLC close-location pressure is a proxy, never signed trades, real delta, footprint or depth\"],\n            {\"volume_lookback\": 20, \"activity_multiplier\": 1.5, \"boundary_lookback\": 10, \"close_fraction\": .8})\ndef tick_activity_rejection(b, c):\n    x=b[-1]\n    volumes=[z.get(\"tick_volume\",0) for z in b[-21:]]\n    if any(v<=0 for v in volumes):\n        return _result(status=\"DATA_MISSING\",missing=[\"positive bar tick counts required for local activity proxy\"])\n    baseline=statistics.median(volumes[:-1])\n    span=x[\"high\"]-x[\"low\"]\n    location=(x[\"close\"]-x[\"low\"])/span if span>0 else .5\n    lo=min(z[\"low\"] for z in b[-11:-1]); hi=max(z[\"high\"] for z in b[-11:-1])\n    active=volumes[-1]>=1.5*baseline and span>=.5*atr(b[:-1]) and span>0\n    bull=active and x[\"low\"]<=lo<x[\"close\"] and x[\"high\"]<=hi and location>=.8 and x[\"close\"]>x[\"open\"]\n    bear=active and x[\"high\"]>=hi>x[\"close\"] and x[\"low\"]>=lo and location<=.2 and x[\"close\"]<x[\"open\"]\n    result=signal(b,bull,bear,x[\"low\"],x[\"high\"],{\"tick_count\": volumes[-1],\"baseline\": baseline,\n                  \"activity_ratio\": volumes[-1]/baseline,\"close_location\": location,\"pressure_proxy\": (2*location-1)*volumes[-1]})\n    result[\"assumptions\"].append(\"Bar tick activity and close-location proxy; not real order flow or signed volume\")\n    return result\n",
+  "rules_sha256": "984c643c68520da056b649b543e22050057199204b9f780ec98cf8db279b8358",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

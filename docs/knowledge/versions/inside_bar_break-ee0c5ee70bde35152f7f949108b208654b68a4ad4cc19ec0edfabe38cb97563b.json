@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "id": "inside_bar_break",
+  "name_ar": "اختراق الشمعة الداخلية",
+  "version": "1.0.0",
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختراق الشمعة الداخلية",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "candle",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "inside_bar_break",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "candle",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Inside bar breakout",
+      "rules": [
+        "Previous bar strictly inside mother bar",
+        "Latest close crosses mother boundary in prior EMA20 direction"
+      ],
+      "parameters": {
+        "ema": 20
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "الشمعة السابقة تقع بالكامل داخل الشمعة الأم.",
+        "إغلاق جديد خارج حد الشمعة الأم في اتجاه المتوسط الأسي السابق لعشرين شمعة."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "inside['high'] < mother['high']",
+    "inside['low'] > mother['low']",
+    "x['close'] > mother['high']",
+    "inside['close'] > center",
+    "x['close'] < mother['low']",
+    "inside['close'] < center"
+  ],
+  "algorithm_python": "@specialist(\"inside_bar_break\", \"اختراق الشمعة الداخلية\", \"Inside bar breakout\", \"candle\",\n            [\"Previous bar strictly inside mother bar\", \"Latest close crosses mother boundary in prior EMA20 direction\"], {\"ema\": 20})\ndef inside_bar_break(b, c):\n    mother, inside, x = b[-3:]\n    center = ema([z[\"close\"] for z in b[:-1]], 20)[-1]\n    valid = inside[\"high\"] < mother[\"high\"] and inside[\"low\"] > mother[\"low\"]\n    return signal(b, valid and x[\"close\"] > mother[\"high\"] and inside[\"close\"] > center,\n                  valid and x[\"close\"] < mother[\"low\"] and inside[\"close\"] < center,\n                  mother[\"low\"], mother[\"high\"], dict(low=mother[\"low\"], high=mother[\"high\"], mean=center))\n",
+  "source_hashes": {
+    "strategies.py": "e504984abfe80e7cdc161615a17ff910077d47d82c32c3580379c9fe8882aea9",
+    "specialists.py": "bfb845771766b997aa571c2fd4bb9259a73cc34d69959b5d15d2c5f19be16880",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "ee0c5ee70bde35152f7f949108b208654b68a4ad4cc19ec0edfabe38cb97563b"
+}

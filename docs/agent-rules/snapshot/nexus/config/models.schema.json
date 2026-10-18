@@ -1,0 +1,1594 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Versioned model history configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "version",
+    "rules"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adx_di_cross",
+        "atr_channel_break",
+        "band_reentry",
+        "base_first_return",
+        "breakout_retest",
+        "cci_reentry",
+        "classic_pivot_reclaim",
+        "classic_reversal_patterns",
+        "darvas_box",
+        "darvas_rising_boxes",
+        "donchian_20",
+        "dow_structure",
+        "elliott_candidate",
+        "elliott_impulse_reversal",
+        "elliott_zigzag_reversal",
+        "ema_cross",
+        "engulfing",
+        "failed_range_break",
+        "fib_retracement",
+        "flag_breakout",
+        "four_school_confluence",
+        "fractal_5_breakout",
+        "fvg_first_return",
+        "gann",
+        "geometric_triangle_breakout",
+        "harmonic_abcd",
+        "harmonic_bat",
+        "harmonic_butterfly",
+        "harmonic_gartley",
+        "ichimoku_cross",
+        "inside_bar_break",
+        "interasset_confirmation",
+        "liquidity_bos_retest",
+        "macd_signal_cross",
+        "mfi_tick_rebound",
+        "momentum_acceleration",
+        "obv_divergence_reclaim",
+        "order_flow",
+        "pin_rejection",
+        "rectangle_breakout",
+        "regression_reentry",
+        "rsi_rebound",
+        "rsi_wilder_rebound",
+        "seasonality",
+        "smc_ict_proxy",
+        "smt_proxy",
+        "stochastic_rebound",
+        "supply_demand_proxy",
+        "support_bounce",
+        "three_bar_reversal",
+        "tick_activity_rejection",
+        "utc_opening_range",
+        "volatility_breakout",
+        "vwap_reclaim",
+        "williams_reentry",
+        "wyckoff_range_expansion",
+        "wyckoff_spring",
+        "zscore_reversion"
+      ],
+      "properties": {
+        "adx_di_cross": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.1"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "atr_channel_break": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "band_reentry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "base_first_return": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "breakout_retest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 30,
+              "maximum": 50000,
+              "default": 30
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "cci_reentry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "classic_pivot_reclaim": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "classic_reversal_patterns": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "darvas_box": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 35,
+              "maximum": 50000,
+              "default": 35
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "darvas_rising_boxes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "donchian_20": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "dow_structure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 40,
+              "maximum": 50000,
+              "default": 40
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "elliott_candidate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "3.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "elliott_impulse_reversal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "elliott_zigzag_reversal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "ema_cross": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "engulfing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 20,
+              "maximum": 50000,
+              "default": 20
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "failed_range_break": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "fib_retracement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.1.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "flag_breakout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "four_school_confluence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 40,
+              "maximum": 50000,
+              "default": 40
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "fractal_5_breakout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 61,
+              "maximum": 50000,
+              "default": 61
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "fvg_first_return": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "gann": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "3.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "geometric_triangle_breakout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "harmonic_abcd": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "2.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "harmonic_bat": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.1.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "harmonic_butterfly": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.1.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "harmonic_gartley": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.1.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "ichimoku_cross": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 80,
+              "maximum": 50000,
+              "default": 80
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "inside_bar_break": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "interasset_confirmation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "3.0.1"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "liquidity_bos_retest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "macd_signal_cross": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "mfi_tick_rebound": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.1"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "momentum_acceleration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "obv_divergence_reclaim": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 61,
+              "maximum": 50000,
+              "default": 61
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "order_flow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "3.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "pin_rejection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "rectangle_breakout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "regression_reentry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "rsi_rebound": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.1"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 30,
+              "maximum": 50000,
+              "default": 30
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "rsi_wilder_rebound": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.1"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "seasonality": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "3.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "smc_ict_proxy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "3.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "smt_proxy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "3.0.1"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "stochastic_rebound": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.1"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "supply_demand_proxy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "3.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "support_bounce": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.1.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 40,
+              "maximum": 50000,
+              "default": 40
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "three_bar_reversal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "tick_activity_rejection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "utc_opening_range": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 50000,
+              "default": 60
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "volatility_breakout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "vwap_reclaim": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 30,
+              "maximum": 50000,
+              "default": 30
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "williams_reentry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.1"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "wyckoff_range_expansion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "wyckoff_spring": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "3.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        },
+        "zscore_reversion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule_version",
+            "min_bars",
+            "entry_zone_atr_fraction"
+          ],
+          "properties": {
+            "rule_version": {
+              "const": "1.0.0"
+            },
+            "min_bars": {
+              "type": "integer",
+              "minimum": 65,
+              "maximum": 50000,
+              "default": 65
+            },
+            "entry_zone_atr_fraction": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.15,
+              "default": 0.15
+            }
+          }
+        }
+      }
+    }
+  }
+}

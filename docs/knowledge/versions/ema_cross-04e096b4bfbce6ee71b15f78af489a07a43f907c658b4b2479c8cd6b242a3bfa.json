@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "id": "ema_cross",
+  "name_ar": "اتباع الاتجاه",
+  "version": "1.0.0",
+  "scope_ar": "تقاطع جديد بين المتوسطين الأسيين 12 و26.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "trend",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "ema_cross",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "trend",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.ema_cross",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "fast[-2] <= slow[-2]",
+    "fast[-1] > slow[-1]",
+    "fast[-2] >= slow[-2]",
+    "fast[-1] < slow[-1]",
+    "fast[-1] != slow[-1]"
+  ],
+  "algorithm_python": "@_register(\"ema_cross\", \"اتباع الاتجاه\", [\"EMA 12\", \"EMA 26\", \"ATR 14\"], \"trend\", 60)\ndef ema_cross(b, c):\n    closes = [x[\"close\"] for x in b]\n    fast, slow = ema(closes, 12), ema(closes, 26)\n    bull = fast[-2] <= slow[-2] and fast[-1] > slow[-1]\n    bear = fast[-2] >= slow[-2] and fast[-1] < slow[-1]\n    return _result(\"BUY\" if fast[-1] > slow[-1] else \"SELL\" if fast[-1] < slow[-1] else \"NEUTRAL\", bull or bear, closes[-1],\n                   min(x[\"low\"] for x in b[-5:]) if fast[-1] > slow[-1] else max(x[\"high\"] for x in b[-5:]),\n                   [_evidence(\"line\", fast[-1], b, \"EMA12\"), _evidence(\"line\", slow[-1], b, \"EMA26\")],\n                   ([\"EMA directional ordering\"] if fast[-1] != slow[-1] else []) + ([\"fresh EMA crossover\"] if bull or bear else []), [] if bull or bear else [\"fresh EMA crossover\"])\n",
+  "source_hashes": {
+    "strategies.py": "82214308617a53c4b8198ef22031a5f37be30c9917e47f6410e5108cb03cb5e6",
+    "specialists.py": "143634dc372f0bf2116ff8c1c97fdfe3f324cac036f71fa24d9a5d30a5fa34fe",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "04e096b4bfbce6ee71b15f78af489a07a43f907c658b4b2479c8cd6b242a3bfa"
+}

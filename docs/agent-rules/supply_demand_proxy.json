@@ -1,0 +1,62 @@
+{
+  "id": "supply_demand_proxy",
+  "school": "العرض والطلب: عودة منطقة محلية",
+  "strategy": "supply_demand_proxy",
+  "version": "3.0.0",
+  "indicators": [
+    "displacement base proxy"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "supply_demand_proxy",
+    "rule_version": "3.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Supply/demand: local zone return",
+      "implementation": "nexus.local_models.supply_zone",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "First return to an unbroken displacement base within 20 bars, aligned with the prior 20-bar EMA."
+      ],
+      "rules_ar": [
+        "أول عودة إلى أساس اندفاع غير مكسور خلال عشرين شمعة، في اتجاه المتوسط الأسي السابق لعشرين شمعة."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: العرض والطلب: عودة منطقة محلية",
+  "execution_enabled": true,
+  "rules_python": "def supply_zone(b,c):\n    result=first_return(b,\"base\")\n    if not result[\"triggered\"]:return result\n    mean=st.ema([x[\"close\"] for x in b[:-1]],20)[-1]\n    if (result[\"direction\"]==\"BUY\" and b[-1][\"close\"]<=mean) or (result[\"direction\"]==\"SELL\" and b[-1][\"close\"]>=mean):\n        return wait(b)\n    result[\"assumptions\"].append(\"First-return OHLC zone with prior EMA filter; not observed supply or demand orders\")\n    return result\n",
+  "rules_sha256": "20667c659742ee2f16cd62e945fc78963c3d04ecf233eca5126f6364a2de4658",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

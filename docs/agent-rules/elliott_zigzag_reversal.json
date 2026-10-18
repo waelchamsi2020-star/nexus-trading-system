@@ -1,0 +1,83 @@
+{
+  "id": "elliott_zigzag_reversal",
+  "school": "إليوت: عودة بعد هندسة زجزاج",
+  "strategy": "elliott_zigzag_reversal",
+  "version": "1.0.0",
+  "indicators": [
+    "Elliott zigzag geometry reversal"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "elliott_zigzag_reversal",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Elliott zigzag geometry reversal",
+      "rules": [
+        "Four strict confirmed alternating pivots form A-B-C geometry; B does not return to origin and C extends beyond A",
+        "House B/A retracement 0.382..0.786 and C/A length 0.618..1.618; total range at least 3 prior ATR",
+        "Fresh break of the two-bar C-confirmation range within eight bars, C pivot intact, B structural target not reached",
+        "Geometry hypothesis only: required 5-3-5 subdivisions are unverified; no claim of complete zigzag or Elliott classification"
+      ],
+      "parameters": {
+        "B_retracement": [
+          0.382,
+          0.786
+        ],
+        "C_A_ratio": [
+          0.618,
+          1.618
+        ],
+        "max_confirmation_age": 8
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "source": "https://www.elliottwave.com/waveopedia/zigzags/",
+      "scope": "House causal reversal of ABC geometry with explicit ratios; internal 5-3-5 structure is unverified",
+      "rules_ar": [
+        "أربعة محاور مؤكدة متعاقبة لهندسة تصحيح ثلاثي؛ الوسطى لا تستعيد البداية والأخيرة تتجاوز نهاية الأولى.",
+        "تصحيح الوسطى بين 38.2 و78.6 بالمئة، ونسبة طول الأخيرة للأولى بين 61.8 و161.8 بالمئة، ونطاق ثلاثة أمثال التقلب السابق على الأقل؛ نسب محلية.",
+        "كسر جديد لنطاق شموع تأكيد النهاية خلال ثماني شموع مع سلامة المحور الأخير وهدف عند المحور الأوسط.",
+        "فرضية هندسية؛ التقسيم الداخلي خمس ثم ثلاث ثم خمس غير مفحوص، ولا يصنف جميع أشكال إليوت أو الزجزاج."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. إليوت: عودة بعد هندسة زجزاج",
+  "execution_enabled": true,
+  "rules_python": "@specialist(\"elliott_zigzag_reversal\", \"إليوت: عودة بعد هندسة زجزاج\", \"Elliott zigzag geometry reversal\", \"structure\",\n            [\"Four strict confirmed alternating pivots form A-B-C geometry; B does not return to origin and C extends beyond A\",\n             \"House B/A retracement 0.382..0.786 and C/A length 0.618..1.618; total range at least 3 prior ATR\",\n             \"Fresh break of the two-bar C-confirmation range within eight bars, C pivot intact, B structural target not reached\",\n             \"Geometry hypothesis only: required 5-3-5 subdivisions are unverified; no claim of complete zigzag or Elliott classification\"],\n            {\"B_retracement\": [.382, .786], \"C_A_ratio\": [.618, 1.618], \"max_confirmation_age\": 8})\ndef elliott_zigzag_reversal(b, c):\n    return _wave_reversal(b, c, \"zigzag\")\n",
+  "rules_sha256": "fe37a81fd9e5c110f56ee1bf70885a6923694056190fee8b4a9d257af6d6c785",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "id": "fib_retracement",
+  "name_ar": "فيبوناتشي",
+  "version": "1.1.0",
+  "dependency_schema": 4,
+  "scope_ar": "تصحيح لموجة مؤكدة ولمس 61.8% ثم استعادة 50%؛ تعريف محدد وليس جميع تطبيقات فيبوناتشي.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "fib_retracement",
+    "rule_version": "1.1.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.fib_retracement",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "a['kind'] == 'LOW'",
+    "z['kind'] == 'HIGH'",
+    "b[-1]['low'] <= level + 0.1 * c['atr']",
+    "b[-1]['high'] >= level - 0.1 * c['atr']",
+    "span > 2 * c['atr']",
+    "a['kind'] != z['kind']",
+    "z['confirmed_at'] <= b[-1]['time']",
+    "b[-2]['close'] <= recovery < b[-1]['close']",
+    "b[-2]['close'] >= recovery > b[-1]['close']"
+  ],
+  "algorithm_python": "@_register(\"fib_retracement\", \"فيبوناتشي\", [\"confirmed swing\", \"0.618 retracement\"], \"structure\", 60)\ndef fib_retracement(b, c):\n    p = _alternating_pivots(c[\"pivots\"])\n    pair = None\n    for a, z in itertools.pairwise(p):\n        if a[\"kind\"] != z[\"kind\"] and z[\"confirmed_at\"] <= b[-1][\"time\"]:\n            pair = a, z\n    if not pair:\n        return _result(missing=[\"confirmed alternating swing pair\"])\n    a, z = pair\n    bull_swing = a[\"kind\"] == \"LOW\" and z[\"kind\"] == \"HIGH\"\n    span = abs(z[\"price\"]-a[\"price\"])\n    level = z[\"price\"]-.618*span if bull_swing else z[\"price\"]+.618*span\n    recovery = z[\"price\"]-.5*span if bull_swing else z[\"price\"]+.5*span\n    touched = b[-1][\"low\"] <= level+.1*c[\"atr\"] if bull_swing else b[-1][\"high\"] >= level-.1*c[\"atr\"]\n    valid = span > 2*c[\"atr\"] and touched and (b[-2][\"close\"] <= recovery < b[-1][\"close\"] if bull_swing else b[-2][\"close\"] >= recovery > b[-1][\"close\"])\n    return _result(\"BUY\" if bull_swing else \"SELL\", valid, recovery, a[\"price\"],\n                   [a, z, _evidence(\"horizontal_level\", level, b, \"0.618 pullback\"), _evidence(\"horizontal_level\", recovery, b, \"0.5 recovery trigger\")],\n                   [\"confirmed swing\"] + ([\"pullback recovery\"] if valid else []), [] if valid else [\"0.618 touch and fresh 0.5 recovery\"])\n",
+  "source_hashes": {
+    "strategies.py": "46d65a27827a7851139109182d589b9ffeb9f297e9f459630a64dd76ecdaa293",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "config/models.yaml": "ae0b53519cd32666c7ece681fcec8c095711a26f67bb75963b6ca5d1c74c075b",
+    "config/models.schema.json": "56ad04230dd939cd1dca8caaf3a0a4f0801392851b4bf9d912ab06b2a64cdd83"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "d7cbb209d325e6146f89b55d762ec1ee649ff547f41f04463271d5f664301584"
+}

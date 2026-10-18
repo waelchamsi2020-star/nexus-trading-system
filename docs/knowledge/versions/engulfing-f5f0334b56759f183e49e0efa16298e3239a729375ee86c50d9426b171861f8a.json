@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "id": "engulfing",
+  "name_ar": "حركة السعر والشموع",
+  "version": "1.0.0",
+  "scope_ar": "ابتلاع جسم الشمعة السابقة مع حد أدنى لحجم الجسم نسبة إلى التقلب.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 20,
+  "family": "candle",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "engulfing",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 20,
+    "completed_bars_only": true,
+    "evidence_group": "candle",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.engulfing",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "prev['close'] < prev['open']",
+    "now['close'] > now['open']",
+    "now['open'] <= prev['close']",
+    "now['close'] >= prev['open']",
+    "prev['close'] > prev['open']",
+    "now['close'] < now['open']",
+    "now['open'] >= prev['close']",
+    "now['close'] <= prev['open']",
+    "size >= 0.5 * c['atr']",
+    "side != 'NEUTRAL'"
+  ],
+  "algorithm_python": "@_register(\"engulfing\", \"حركة السعر والشموع\", [\"body engulfing\"], \"candle\", 20)\ndef engulfing(b, c):\n    prev, now = b[-2:]\n    bull = prev[\"close\"] < prev[\"open\"] and now[\"close\"] > now[\"open\"] and now[\"open\"] <= prev[\"close\"] and now[\"close\"] >= prev[\"open\"]\n    bear = prev[\"close\"] > prev[\"open\"] and now[\"close\"] < now[\"open\"] and now[\"open\"] >= prev[\"close\"] and now[\"close\"] <= prev[\"open\"]\n    size = abs(now[\"close\"]-now[\"open\"])\n    valid = size >= .5*c[\"atr\"] and (bull or bear)\n    side = \"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\"\n    return _result(side, valid, now[\"close\"], min(prev[\"low\"], now[\"low\"]) if bull else max(prev[\"high\"], now[\"high\"]),\n                   [_evidence(\"candle\", size, b, \"engulfing body / ATR\", ratio=size/max(c[\"atr\"], 1e-12))],\n                   [\"engulfing body\"] if side != \"NEUTRAL\" else [], [] if valid else [\"body >= 0.5 ATR and engulfing\"])\n",
+  "source_hashes": {
+    "strategies.py": "82214308617a53c4b8198ef22031a5f37be30c9917e47f6410e5108cb03cb5e6",
+    "specialists.py": "143634dc372f0bf2116ff8c1c97fdfe3f324cac036f71fa24d9a5d30a5fa34fe",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "f5f0334b56759f183e49e0efa16298e3239a729375ee86c50d9426b171861f8a"
+}

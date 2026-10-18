@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "id": "classic_reversal_patterns",
+  "name_ar": "الأنماط الانعكاسية الكلاسيكية",
+  "version": "1.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "قمة وقاع مزدوجان والرأس والكتفان وعكسه؛ هندسة مؤكدة واختراق خط العنق.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "classic_reversal_patterns",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.classic_reversal_patterns",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "pattern is None",
+    "side == 'BUY'",
+    "previous_close <= pattern['neckline_previous']",
+    "current_close > pattern['neckline_now']",
+    "previous_close >= pattern['neckline_previous']",
+    "current_close < pattern['neckline_now']",
+    "key not in ('pivots', 'geometry_rule')"
+  ],
+  "algorithm_python": "@_register(\"classic_reversal_patterns\", \"الأنماط الانعكاسية الكلاسيكية\",\n           [\"confirmed pivots\", \"double top/bottom\", \"head and shoulders\", \"neckline close\"],\n           \"structure\", 60)\ndef classic_reversal_patterns(b, c):\n    swings = _alternating_pivots(c[\"pivots\"])\n    pattern = _head_shoulders(swings, c[\"atr\"], len(b)-2, len(b)-1)\n    if pattern is None:\n        pattern = _double_reversal(swings, c[\"atr\"])\n    if pattern is None:\n        return _result(\n            evidence=[_evidence(\"reversal_pattern_scan\", {\"confirmed_swings\": swings[-5:]}, b,\n                                \"classical reversal geometry\")],\n            missing=[\"confirmed classical reversal geometry\"],\n            assumptions=[\"Pattern names describe explicit OHLC geometry, not a forecast guarantee\"],\n        )\n    side = pattern[\"side\"]\n    previous_close, current_close = b[-2][\"close\"], b[-1][\"close\"]\n    triggered = (previous_close <= pattern[\"neckline_previous\"] and current_close > pattern[\"neckline_now\"]\n                 if side == \"BUY\" else\n                 previous_close >= pattern[\"neckline_previous\"] and current_close < pattern[\"neckline_now\"])\n    details = {key: value for key, value in pattern.items() if key not in (\"pivots\", \"geometry_rule\")}\n    details[\"last_pivot_confirmed_at\"] = max(p[\"confirmed_at\"] for p in pattern[\"pivots\"])\n    return _result(\n        side, triggered, pattern[\"neckline_now\"], pattern[\"invalidation\"],\n        [_evidence(\"reversal_pattern\", details, b, \"classical reversal geometry\"), *pattern[\"pivots\"]],\n        [pattern[\"geometry_rule\"]] + ([\"fresh completed close through the neckline\"] if triggered else []),\n        [] if triggered else [\"neckline break on the latest completed bar\"],\n        [\"Pattern names describe explicit OHLC geometry, not a forecast guarantee\"],\n        targets=[{\"price\": pattern[\"target\"], \"method\": \"pattern height projected from neckline\", \"fraction\": 1.0}]\n        if triggered else None,\n    )\n",
+  "source_hashes": {
+    "strategies.py": "e49b6d93dbab334bf40ba14f5ded899b387cf577af751619d31d69f430bcc989",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "model-config.json": "ae0b53519cd32666c7ece681fcec8c095711a26f67bb75963b6ca5d1c74c075b",
+    "model-config.schema.json": "56ad04230dd939cd1dca8caaf3a0a4f0801392851b4bf9d912ab06b2a64cdd83"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "2bad797d16e74347f641af0eb62257c2fc0a2d09e232dd7475f0b787b9e834d1"
+}

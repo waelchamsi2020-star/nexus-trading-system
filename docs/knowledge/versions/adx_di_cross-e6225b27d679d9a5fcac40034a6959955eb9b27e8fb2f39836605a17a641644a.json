@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "id": "adx_di_cross",
+  "name_ar": "الحركة الاتجاهية: تقاطع مؤكد",
+  "version": "1.0.1",
+  "dependency_schema": 4,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الحركة الاتجاهية: تقاطع مؤكد",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "trend",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "adx_di_cross",
+    "rule_version": "1.0.1",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "trend",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Wilder ADX directional cross",
+      "rules": [
+        "Exclusive directional movement, ties zero; Wilder(14) smoothing with arithmetic seeds.",
+        "Fresh DI cross; ADX>=25 and nondecreasing; close on the corresponding side of prior EMA20."
+      ],
+      "rules_en": [
+        "Exclusive directional movement, ties zero; Wilder(14) smoothing with arithmetic seeds.",
+        "Fresh DI cross; ADX>=25 and nondecreasing; close on the corresponding side of prior EMA20."
+      ],
+      "rules_ar": [
+        "حركة موجبة وسالبة متنافيتان؛ التعادل صفر، وتنعيم وايلدر لأربع عشرة قيمة.",
+        "تقاطع اتجاهي جديد مع مؤشر قوة لا يقل عن خمس وعشرين ولا ينخفض، وإغلاق في اتجاه متوسط عشرين السابق."
+      ],
+      "parameters": {
+        "indicators": [
+          "adx_wilder",
+          "ema_sma_seed"
+        ],
+        "period": 14,
+        "strength_floor": 25
+      },
+      "allowed_regimes": [
+        "TREND",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.adx_di_cross",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+      "source": "https://www.metatrader5.com/en/terminal/help/indicators/trend_indicators/admiw"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "a[-1] >= 25",
+    "a[-1] >= a[-2]",
+    "p[-2] <= m[-2]",
+    "p[-1] > m[-1]",
+    "b[-1]['close'] > mean",
+    "p[-2] >= m[-2]",
+    "p[-1] < m[-1]",
+    "b[-1]['close'] < mean"
+  ],
+  "algorithm_python": "@model('adx_di_cross', 'الحركة الاتجاهية: تقاطع مؤكد', 'Wilder ADX directional cross', 'trend',\n       ['حركة موجبة وسالبة متنافيتان؛ التعادل صفر، وتنعيم وايلدر لأربع عشرة قيمة.',\n        'تقاطع اتجاهي جديد مع مؤشر قوة لا يقل عن خمس وعشرين ولا ينخفض، وإغلاق في اتجاه متوسط عشرين السابق.'],\n       ['Exclusive directional movement, ties zero; Wilder(14) smoothing with arithmetic seeds.',\n        'Fresh DI cross; ADX>=25 and nondecreasing; close on the corresponding side of prior EMA20.'],\n       {'indicators': ['adx_wilder', 'ema_sma_seed'], 'period': 14, 'strength_floor': 25},\n       source='https://www.metatrader5.com/en/terminal/help/indicators/trend_indicators/admiw', regimes=('TREND', 'MIXED'))\ndef adx_di_cross(b, c):\n    values = ind.adx_wilder(b); p = values['plus_di']; m = values['minus_di']; a = values['adx']\n    mean = ind.ema([x['close'] for x in b[:-1]], 20)[-1]; lo, hi = _stops(b)\n    strong = a[-1] >= 25 and a[-1] >= a[-2]\n    return signal(b, strong and p[-2] <= m[-2] and p[-1] > m[-1] and b[-1]['close'] > mean,\n                  strong and p[-2] >= m[-2] and p[-1] < m[-1] and b[-1]['close'] < mean, lo, hi,\n                  {'plus_di': p[-1], 'minus_di': m[-1], 'adx': a[-1], 'previous_adx': a[-2], 'prior_ema': mean})\n",
+  "source_hashes": {
+    "strategies.py": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+    "specialists.py": "b80ac3ec42b2f169becbb6295007440ce654ea01fa5e2e39bfb4581bdeff3cd8",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "41a35b875aa9ad7ef0e1c3218329f0b39be491db2eb735d2ac90b46a69ea34d8",
+    "confluence_registry.py": "1d3a0d34c3cfabccdfa64bea784a58ffcd037d9e177d6cad5b2a6f87543da065",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "f360b0f9f69fd8a1cc5724b2dc5207210dd22b6091b5ba9096b202040e10e7b1",
+    "config/models.yaml": "5a2a25132504b314dbd85d6e013913fda7f9a220db88c6c2ee1e2e36b30bd619",
+    "config/models.schema.json": "151116766f8f956dd0f69c5f53a4132010ef193add42abe6dff04ebac6e8941f"
+  },
+  "source_reference": {
+    "url": "https://www.metatrader5.com/en/terminal/help/indicators/trend_indicators/admiw"
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "e6225b27d679d9a5fcac40034a6959955eb9b27e8fb2f39836605a17a641644a"
+}

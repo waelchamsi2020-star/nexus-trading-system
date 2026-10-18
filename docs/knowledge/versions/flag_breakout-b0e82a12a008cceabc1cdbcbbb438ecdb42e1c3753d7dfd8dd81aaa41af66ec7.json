@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "id": "flag_breakout",
+  "name_ar": "الكلاسيكي: استمرار راية محددة",
+  "version": "1.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الكلاسيكي: استمرار راية محددة",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "flag_breakout",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Bounded flag continuation",
+      "rules": [
+        "Five-bar pole >=3 pre-pole ATR followed by eight-bar consolidation.",
+        "Retracement .25..50, flag width <=3 ATR; fresh directional break of flag with opposite edge intact."
+      ],
+      "rules_en": [
+        "Five-bar pole >=3 pre-pole ATR followed by eight-bar consolidation.",
+        "Retracement .25..50, flag width <=3 ATR; fresh directional break of flag with opposite edge intact."
+      ],
+      "rules_ar": [
+        "اندفاع خمس شموع لا يقل عن ثلاثة أضعاف التقلب السابق، يليه تصحيح من ثماني شموع.",
+        "تصحيح بين خمس وعشرين وخمسين بالمئة، وعرض لا يتجاوز ثلاثة أضعاف التقلب؛ اختراق جديد في اتجاه السارية."
+      ],
+      "parameters": {
+        "indicators": [
+          "prior_atr_simple",
+          "pole_and_flag_ohlc"
+        ],
+        "pole_bars": 5,
+        "flag_bars": 8,
+        "retracement": [
+          0.25,
+          0.5
+        ]
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.flag_breakout",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "a > 0",
+    "distance >= 3 * a",
+    "0.25 <= retrace <= 0.5",
+    "hi - lo <= 3 * a",
+    "move > 0",
+    "hi <= max((x['high'] for x in pole))",
+    "b[-2]['close'] <= hi < b[-1]['close']",
+    "b[-1]['low'] > lo",
+    "move < 0",
+    "lo >= min((x['low'] for x in pole))",
+    "b[-2]['close'] >= lo > b[-1]['close']",
+    "b[-1]['high'] < hi"
+  ],
+  "algorithm_python": "@model('flag_breakout', 'الكلاسيكي: استمرار راية محددة', 'Bounded flag continuation', 'structure',\n       ['اندفاع خمس شموع لا يقل عن ثلاثة أضعاف التقلب السابق، يليه تصحيح من ثماني شموع.',\n        'تصحيح بين خمس وعشرين وخمسين بالمئة، وعرض لا يتجاوز ثلاثة أضعاف التقلب؛ اختراق جديد في اتجاه السارية.'],\n       ['Five-bar pole >=3 pre-pole ATR followed by eight-bar consolidation.',\n        'Retracement .25..50, flag width <=3 ATR; fresh directional break of flag with opposite edge intact.'],\n       {'indicators': ['prior_atr_simple', 'pole_and_flag_ohlc'], 'pole_bars': 5, 'flag_bars': 8, 'retracement': [.25, .5]})\ndef flag_breakout(b, c):\n    pole = b[-14:-9]; flag = b[-9:-1]; a = st.atr(b[:-14]); move = pole[-1]['close']-pole[0]['open']\n    lo = min(x['low'] for x in flag); hi = max(x['high'] for x in flag); distance = abs(move)\n    retrace = (pole[-1]['close']-lo if move > 0 else hi-pole[-1]['close'])/distance if distance else 0\n    valid = a > 0 and distance >= 3*a and .25 <= retrace <= .5 and hi-lo <= 3*a\n    bull = valid and move > 0 and hi <= max(x['high'] for x in pole) and b[-2]['close'] <= hi < b[-1]['close'] and b[-1]['low'] > lo\n    bear = valid and move < 0 and lo >= min(x['low'] for x in pole) and b[-2]['close'] >= lo > b[-1]['close'] and b[-1]['high'] < hi\n    return signal(b, bull, bear, lo, hi, {'pole_move': move, 'retracement': retrace, 'flag_low': lo, 'flag_high': hi, 'reference_atr': a})\n",
+  "source_hashes": {
+    "strategies.py": "5bb18f88d8d80740815d66e68463a0bdb275e4c8e535de511873412ba61331ba",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "config/models.yaml": "ae0b53519cd32666c7ece681fcec8c095711a26f67bb75963b6ca5d1c74c075b",
+    "config/models.schema.json": "56ad04230dd939cd1dca8caaf3a0a4f0801392851b4bf9d912ab06b2a64cdd83"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "b0e82a12a008cceabc1cdbcbbb438ecdb42e1c3753d7dfd8dd81aaa41af66ec7"
+}

@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+const ctx={window:{}};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../ui/session-view.js'),'utf8'),ctx);
+const {cutoff,select}=ctx.window.QuantSessionView;
+const boundary=Date.parse('2026-10-16T22:00:00Z')/1000;
+assert.equal(cutoff(boundary),boundary);
+assert.equal(cutoff(boundary-1),boundary-86400);
+assert.equal(cutoff(boundary+86399),boundary);
+const old={id:'old',status:'CLOSED',updated_at:boundary-1}, current={id:'today',status:'CLOSED',updated_at:boundary};
+const unresolved={id:'uncertain',status:'UNKNOWN',updated_at:boundary-100000},open={id:'open',status:'FILLED',updated_at:boundary-100000};
+const rows=[old,current,unresolved,open];const before=JSON.stringify(rows);
+assert.equal(select(rows,boundary).older,1);
+assert.deepEqual(Array.from(select(rows,boundary).rows,x=>x.id),['uncertain','open','today']);
+assert.equal(JSON.stringify(rows),before);
+const many=Array.from({length:150},(_,i)=>({id:i,status:'REJECTED',updated_at:boundary+i}));
+assert.equal(select(many,boundary+200).rows.length,100);assert.equal(select(many,boundary+200).omitted,50);
+assert.equal(select([{status:'FUTURE_STATE',updated_at:0}],boundary).rows.length,1);
+assert.equal(select([{status:'CLOSED'}],boundary).rows.length,1);
+console.log('PASS: Dubai 02:00 boundary, bounded settled rows, open/uncertain/unknown preservation, immutable ledger input.');

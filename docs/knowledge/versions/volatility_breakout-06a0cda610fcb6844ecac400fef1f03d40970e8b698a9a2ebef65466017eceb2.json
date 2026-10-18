@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "id": "volatility_breakout",
+  "name_ar": "مؤشرات التقلب",
+  "version": "1.0.0",
+  "scope_ar": "انكماش ثم إغلاق جديد خارج نطاق محسوب من الشموع السابقة.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "volatility",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "volatility_breakout",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "volatility",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.volatility_breakout",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "sd < 0.7 * old",
+    "sd > 0",
+    "closes[-2] <= mean + 2 * sd < closes[-1]",
+    "closes[-2] >= mean - 2 * sd > closes[-1]"
+  ],
+  "algorithm_python": "@_register(\"volatility_breakout\", \"مؤشرات التقلب\", [\"Bollinger 20/2\", \"bandwidth contraction\"], \"volatility\", 65)\ndef volatility_breakout(b, c):\n    closes = [x[\"close\"] for x in b]\n    prev = closes[-21:-1]\n    mean, sd = statistics.fmean(prev), statistics.pstdev(prev)\n    old = statistics.pstdev(closes[-61:-41])\n    squeeze = sd < .7*old and sd > 0\n    bull = squeeze and closes[-2] <= mean+2*sd < closes[-1]\n    bear = squeeze and closes[-2] >= mean-2*sd > closes[-1]\n    return _result(\"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\", bull or bear, mean+2*sd if bull else mean-2*sd, mean,\n                   [_evidence(\"bands\", {\"mean\": mean, \"upper\": mean+2*sd, \"lower\": mean-2*sd, \"sd\": sd, \"historical_sd\": old}, b, \"prior-only bands\")],\n                   [\"contraction\"] if squeeze else [], [] if bull or bear else [\"contraction then fresh outside-band close\"])\n",
+  "source_hashes": {
+    "strategies.py": "12360f91e67dbf9e0ffe00165d5945c078d1fdda1967ad94b7febc24b98fea5a",
+    "specialists.py": "bfb845771766b997aa571c2fd4bb9259a73cc34d69959b5d15d2c5f19be16880",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "06a0cda610fcb6844ecac400fef1f03d40970e8b698a9a2ebef65466017eceb2"
+}

@@ -1,0 +1,316 @@
+{
+  "type": "SYNTHETIC_BRANCH_FIXTURES",
+  "profitability_evidence": false,
+  "cases": {
+    "cci_reentry": {
+      "SELL": {
+        "seed": 0,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 4,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "engulfing": {
+      "SELL": {
+        "seed": 0,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 1,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "geometric_triangle_breakout": {
+      "SELL": {
+        "seed": 0,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 40,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "rsi_rebound": {
+      "SELL": {
+        "seed": 0,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 27,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "vwap_reclaim": {
+      "SELL": {
+        "seed": 0,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 3,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "darvas_box": {
+      "BUY": {
+        "seed": 1,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 7,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "darvas_rising_boxes": {
+      "BUY": {
+        "seed": 1,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 8,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "dow_structure": {
+      "BUY": {
+        "seed": 1,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 8,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "wyckoff_range_expansion": {
+      "BUY": {
+        "seed": 1,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 43,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "ichimoku_cross": {
+      "BUY": {
+        "seed": 2,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 59,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "volatility_breakout": {
+      "BUY": {
+        "seed": 2,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 12,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "support_bounce": {
+      "BUY": {
+        "seed": 4,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 15,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "ema_cross": {
+      "SELL": {
+        "seed": 7,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 36,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "macd_signal_cross": {
+      "SELL": {
+        "seed": 8,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 40,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "williams_reentry": {
+      "BUY": {
+        "seed": 10,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 18,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "breakout_retest": {
+      "SELL": {
+        "seed": 13,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 71,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "fib_retracement": {
+      "SELL": {
+        "seed": 15,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 33,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "stochastic_rebound": {
+      "SELL": {
+        "seed": 18,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 33,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "three_bar_reversal": {
+      "SELL": {
+        "seed": 18,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 78,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "rectangle_breakout": {
+      "BUY": {
+        "seed": 20,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 334,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "zscore_reversion": {
+      "BUY": {
+        "seed": 39,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 126,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "rsi_wilder_rebound": {
+      "SELL": {
+        "seed": 51,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 73,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "mfi_tick_rebound": {
+      "BUY": {
+        "seed": 97,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 126,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "elliott_zigzag_reversal": {
+      "BUY": {
+        "seed": 153,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 363,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "adx_di_cross": {
+      "BUY": {
+        "seed": 224,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 941,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "classic_reversal_patterns": {
+      "BUY": {
+        "seed": 265,
+        "generator": "synthetic-branch-v1"
+      },
+      "SELL": {
+        "seed": 330,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "elliott_impulse_reversal": {
+      "SELL": {
+        "seed": 363,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 839,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "harmonic_abcd": {
+      "SELL": {
+        "seed": 402,
+        "generator": "synthetic-branch-v1"
+      },
+      "BUY": {
+        "seed": 1217,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "liquidity_bos_retest": {
+      "SELL": {
+        "seed": 493,
+        "generator": "synthetic-branch-v1"
+      }
+    },
+    "flag_breakout": {
+      "BUY": {
+        "seed": 1077,
+        "generator": "synthetic-branch-v1"
+      }
+    }
+  },
+  "not_found": [
+    [
+      "classic_pivot_reclaim",
+      "BUY"
+    ],
+    [
+      "classic_pivot_reclaim",
+      "SELL"
+    ],
+    [
+      "flag_breakout",
+      "SELL"
+    ],
+    [
+      "liquidity_bos_retest",
+      "BUY"
+    ]
+  ]
+}

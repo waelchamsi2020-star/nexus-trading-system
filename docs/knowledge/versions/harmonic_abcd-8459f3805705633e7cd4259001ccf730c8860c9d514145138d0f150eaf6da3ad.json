@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "id": "harmonic_abcd",
+  "name_ar": "الهارمونيك: نموذج الأضلاع المتساوية",
+  "version": "2.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "نموذج الأضلاع المتساوية بنسب محددة ومحاور مؤكدة وتفعيل لاحق وإبطال وهدف؛ بقية أنماط الهارمونيك خارج النطاق.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "harmonic_abcd",
+    "rule_version": "2.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "rules": [
+        "Four confirmed alternating pivots; BC/AB 0.382..0.886; CD/AB 0.95..1.05; CD/BC 1.13..2.618",
+        "Fresh break of two-bar D confirmation level within eight bars; D intact; target C not passed"
+      ],
+      "rules_ar": [
+        "أربعة محاور مؤكدة؛ تصحيح الضلع الثاني بين 38.2 و88.6 بالمئة، وتشابه الضلعين ضمن خمسة بالمئة.",
+        "اختراق مستوى تأكيد النقطة الرابعة خلال ثماني شموع مع بقائها سليمة وهدف عند النقطة الثالثة."
+      ],
+      "source": "https://harmonictrader.com/harmonic-patterns/abcd-pattern/",
+      "scope": "Equal-leg pattern; custom tolerance, entry, expiry and exit, not the complete harmonic school"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "len(p) < 4",
+    "[x['kind'] for x in p] == ['HIGH', 'LOW', 'HIGH', 'LOW']",
+    "ab > 0",
+    "bc > 0",
+    "cd > 0",
+    "0.382 <= bc / ab <= 0.886",
+    "0.95 <= cd / ab <= 1.05",
+    "1.13 <= cd / bc <= 2.618",
+    "confirmed_index < len(b) - 1 <= confirmed_index + 8",
+    "b[-2]['close'] <= level < b[-1]['close']",
+    "b[-2]['close'] >= level > b[-1]['close']",
+    "b[-1]['close'] < turn['price']",
+    "b[-1]['close'] > turn['price']",
+    "x['low'] < end['price']",
+    "x['high'] > end['price']"
+  ],
+  "algorithm_python": "@_register(\"harmonic_abcd\", \"الهارمونيك: نموذج الأضلاع المتساوية\", [\"confirmed alternating pivots\", \"AB/CD ratio\"], \"structure\", 60)\ndef harmonic_abcd(b, c):\n    p = _alternating_pivots(c[\"pivots\"])[-4:]\n    assumptions = [\"Equal-leg model only; not all harmonic patterns; entry confirmation and tolerances are house rules\"]\n    if len(p) < 4:\n        return _result(missing=[\"four confirmed alternating harmonic pivots\"], assumptions=assumptions)\n    a, base, turn, end = p\n    bull = [x[\"kind\"] for x in p] == [\"HIGH\", \"LOW\", \"HIGH\", \"LOW\"]\n    sign = 1 if bull else -1\n    ab = sign*(a[\"price\"]-base[\"price\"])\n    bc = sign*(turn[\"price\"]-base[\"price\"])\n    cd = sign*(turn[\"price\"]-end[\"price\"])\n    ratios = {\"retracement\": bc/ab if ab > 0 else None, \"equality\": cd/ab if ab > 0 else None,\n              \"projection\": cd/bc if bc > 0 else None}\n    geometry = (ab > 0 and bc > 0 and cd > 0 and .382 <= bc/ab <= .886\n                and .95 <= cd/ab <= 1.05 and 1.13 <= cd/bc <= 2.618)\n    evidence = [_evidence(\"pattern_candidate\", ratios, b, \"AB=CD candidate ratio\"), *p]\n    if not geometry:\n        return _result(evidence=evidence, missing=[\"equal-leg ratios outside declared bounds\"], assumptions=assumptions)\n    # The D pivot is not known until two subsequent bars have closed. The\n    # confirmation level is frozen from those bars, not the trigger candle.\n    confirmed_index = end[\"index\"]+2\n    if not confirmed_index < len(b)-1 <= confirmed_index+8:\n        return _result(evidence=evidence, missing=[\"fresh break after D confirmation within eight bars\"], assumptions=assumptions)\n    confirmation = b[end[\"index\"]+1:confirmed_index+1]\n    level = max(x[\"high\"] for x in confirmation) if bull else min(x[\"low\"] for x in confirmation)\n    breached = any(x[\"low\"] < end[\"price\"] if bull else x[\"high\"] > end[\"price\"] for x in b[end[\"index\"]+1:])\n    crossed = b[-2][\"close\"] <= level < b[-1][\"close\"] if bull else b[-2][\"close\"] >= level > b[-1][\"close\"]\n    target_valid = b[-1][\"close\"] < turn[\"price\"] if bull else b[-1][\"close\"] > turn[\"price\"]\n    active = not breached and crossed and target_valid\n    return _result(\"BUY\" if bull else \"SELL\", active, level, end[\"price\"], evidence,\n                   [\"confirmed equal-leg geometry\"]+([\"fresh post-confirmation break\"] if active else []),\n                   [] if active else [\"unbroken D and fresh confirmation break before C target\"], assumptions,\n                   targets=[{\"price\": turn[\"price\"], \"method\": \"harmonic C pivot target\", \"fraction\": 1.0}] if active else None)\n",
+  "source_hashes": {
+    "strategies.py": "90ac1a27ddfb2b6dccff293986add17e9f6c454bc4a70c94e45c92af2289b7e6",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "config/models.yaml": "ae0b53519cd32666c7ece681fcec8c095711a26f67bb75963b6ca5d1c74c075b",
+    "config/models.schema.json": "56ad04230dd939cd1dca8caaf3a0a4f0801392851b4bf9d912ab06b2a64cdd83"
+  },
+  "source_reference": {
+    "url": "https://harmonictrader.com/harmonic-patterns/abcd-pattern/",
+    "principles_ar": [
+      "النموذج يجمع تعاقب الأضلاع وعلاقات التصحيح والامتداد؛ تشابه ضلعين وحده لا يثبت اكتمال كل النماذج الهارمونيكية.",
+      "سماحات الدخول والعمر والوقف في البرنامج اختيارات تنفيذية معلنة وليست قواعد مصدرية شاملة."
+    ]
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "8459f3805705633e7cd4259001ccf730c8860c9d514145138d0f150eaf6da3ad"
+}

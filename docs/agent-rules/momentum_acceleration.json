@@ -1,0 +1,70 @@
+{
+  "id": "momentum_acceleration",
+  "school": "تسارع الزخم السعري",
+  "strategy": "momentum_acceleration",
+  "version": "1.0.0",
+  "indicators": [
+    "Normalized momentum acceleration"
+  ],
+  "evidence_group": "momentum",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "momentum_acceleration",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "momentum",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Normalized momentum acceleration",
+      "rules": [
+        "20-bar price change freshly crosses +/- 2 prior ATR",
+        "Sign agrees with prior EMA20 slope"
+      ],
+      "parameters": {
+        "lookback": 20,
+        "threshold_atr": 2,
+        "ema": 20
+      },
+      "allowed_regimes": [
+        "TREND",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "تغير السعر خلال عشرين شمعة يعبر حديثًا عتبة ضعفي نطاق التقلب السابق.",
+        "اتجاه العبور يوافق ميل المتوسط الأسي السابق."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. تسارع الزخم السعري",
+  "execution_enabled": true,
+  "rules_python": "@specialist(\"momentum_acceleration\", \"تسارع الزخم السعري\", \"Normalized momentum acceleration\", \"momentum\",\n            [\"20-bar price change freshly crosses +/- 2 prior ATR\", \"Sign agrees with prior EMA20 slope\"],\n            {\"lookback\": 20, \"threshold_atr\": 2, \"ema\": 20}, (\"TREND\", \"MIXED\"))\ndef momentum_acceleration(b, c):\n    scale = atr(b[:-1])\n    if scale <= 0:\n        return signal(b, False, False, None, None, {\"scale\": scale})\n    previous, current = (b[-2][\"close\"]-b[-22][\"close\"])/scale, (b[-1][\"close\"]-b[-21][\"close\"])/scale\n    means = ema([x[\"close\"] for x in b[:-1]], 20)\n    return signal(b, previous <= 2 < current and means[-1] > means[-2], previous >= -2 > current and means[-1] < means[-2],\n                  min(x[\"low\"] for x in b[-5:]), max(x[\"high\"] for x in b[-5:]), {\"previous\": previous, \"current\": current})\n",
+  "rules_sha256": "18ea99e82b8ab14c81d6a37ceabff5dcd18bf28a676fc83d40e70c3dadf001f0",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

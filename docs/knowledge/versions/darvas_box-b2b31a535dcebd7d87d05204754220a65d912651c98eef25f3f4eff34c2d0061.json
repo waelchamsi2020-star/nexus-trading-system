@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "id": "darvas_box",
+  "name_ar": "Darvas Box",
+  "version": "1.0.0",
+  "scope_ar": "نسخة محددة لصندوق سعري سابق وتأكيد السقف ثم الاختراق، وليست كل قراءات دارفاس.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 35,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "darvas_box",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 35,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.darvas_box",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "top_index <= len(window) - 4",
+    "b[-2]['close'] <= top < b[-1]['close']",
+    "b[-2]['close'] >= bottom > b[-1]['close']",
+    "x['high'] == top",
+    "x['high'] < top"
+  ],
+  "algorithm_python": "@_register(\"darvas_box\", \"Darvas Box\", [\"confirmed 20 bar box\"], \"structure\", 35)\ndef darvas_box(b, c):\n    window = b[-21:-1]\n    top = max(x[\"high\"] for x in window)\n    bottom = min(x[\"low\"] for x in window)\n    top_index = next(i for i, x in enumerate(window) if x[\"high\"] == top)\n    confirmed = top_index <= len(window)-4 and all(x[\"high\"] < top for x in window[top_index+1:])\n    bull = confirmed and b[-2][\"close\"] <= top < b[-1][\"close\"]\n    bear = confirmed and b[-2][\"close\"] >= bottom > b[-1][\"close\"]\n    return _result(\"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\", bull or bear, top if bull else bottom,\n                   bottom if bull else top, [_evidence(\"box\", {\"top\": top, \"bottom\": bottom}, b, \"three closes confirm top\")],\n                   [\"box confirmed\"] if confirmed else [], [] if bull or bear else [\"fresh box breakout\"],\n                   [\"Fixed 20-bar Darvas variant; not every discretionary box interpretation\"])\n",
+  "source_hashes": {
+    "strategies.py": "12360f91e67dbf9e0ffe00165d5945c078d1fdda1967ad94b7febc24b98fea5a",
+    "specialists.py": "bfb845771766b997aa571c2fd4bb9259a73cc34d69959b5d15d2c5f19be16880",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "b2b31a535dcebd7d87d05204754220a65d912651c98eef25f3f4eff34c2d0061"
+}

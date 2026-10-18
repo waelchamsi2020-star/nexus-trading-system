@@ -1,0 +1,2 @@
+# Preserve exact bytes used by immutable source/reference SHA256 guards.
+* -text

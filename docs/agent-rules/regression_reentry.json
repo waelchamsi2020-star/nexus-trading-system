@@ -1,0 +1,69 @@
+{
+  "id": "regression_reentry",
+  "school": "عودة إلى قناة الانحدار",
+  "strategy": "regression_reentry",
+  "version": "1.0.0",
+  "indicators": [
+    "Regression residual reentry"
+  ],
+  "evidence_group": "statistical",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "regression_reentry",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "statistical",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Regression residual reentry",
+      "rules": [
+        "OLS on 30 closes preceding both trigger bars; population residual deviation",
+        "Previous residual outside 2 deviations; latest residual recross inside toward projected center"
+      ],
+      "parameters": {
+        "lookback": 30,
+        "deviations": 2
+      },
+      "allowed_regimes": [
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "انحدار خطي على ثلاثين إغلاقًا قبل شمعتي الدخول مع انحراف البواقي.",
+        "عودة الباقي السعري من خارج انحرافين إلى داخلهما باتجاه المركز المتوقع."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. عودة إلى قناة الانحدار",
+  "execution_enabled": true,
+  "rules_python": "@specialist(\"regression_reentry\", \"عودة إلى قناة الانحدار\", \"Regression residual reentry\", \"statistical\",\n            [\"OLS on 30 closes preceding both trigger bars; population residual deviation\", \"Previous residual outside 2 deviations; latest residual recross inside toward projected center\"],\n            {\"lookback\": 30, \"deviations\": 2}, (\"RANGE\", \"MIXED\"))\ndef regression_reentry(b, c):\n    values = [x[\"close\"] for x in b[-32:-2]]\n    n, mean = len(values), statistics.fmean(values)\n    center = (n-1)/2\n    slope = sum((i-center)*(y-mean) for i, y in enumerate(values))/sum((i-center)**2 for i in range(n))\n    fitted = [mean+slope*(i-center) for i in range(n)]\n    sd = (sum((a-z)**2 for a, z in zip(values, fitted))/n)**.5\n    prev_center, now_center = mean+slope*(n-center), mean+slope*(n+1-center)\n    prev, now = b[-2][\"close\"]-prev_center, b[-1][\"close\"]-now_center\n    return signal(b, sd > 1e-12 and prev < -2*sd <= now < 0, sd > 1e-12 and prev > 2*sd >= now > 0,\n                  min(x[\"low\"] for x in b[-2:]), max(x[\"high\"] for x in b[-2:]), {\"mean\": now_center, \"slope\": slope, \"deviation\": sd}, now_center)\n",
+  "rules_sha256": "c0f7c7f9afd1fc441aaafd44ab1aa510db3da96f2043ce0f2885fb749d43e5b2",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

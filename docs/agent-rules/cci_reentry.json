@@ -1,0 +1,86 @@
+{
+  "id": "cci_reentry",
+  "school": "مؤشر قناة السلع: عودة من التطرف",
+  "strategy": "cci_reentry",
+  "version": "1.0.0",
+  "indicators": [
+    "cci"
+  ],
+  "evidence_group": "momentum",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "cci_reentry",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "momentum",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "CCI reentry",
+      "rules": [
+        "CCI20 of typical price using mean absolute deviation and scale .015; flat=0.",
+        "Fresh reentry above -100 with rising close or below +100 with falling close; five-bar stop."
+      ],
+      "rules_en": [
+        "CCI20 of typical price using mean absolute deviation and scale .015; flat=0.",
+        "Fresh reentry above -100 with rising close or below +100 with falling close; five-bar stop."
+      ],
+      "rules_ar": [
+        "سعر نموذجي ومتوسط وانحراف مطلق لعشرين شمعة، ومعامل مقياس قدره 0.015.",
+        "عودة جديدة فوق سالب مئة مع إغلاق صاعد أو تحت موجب مئة مع إغلاق هابط؛ وقف من خمس شموع."
+      ],
+      "parameters": {
+        "indicators": [
+          "cci"
+        ],
+        "period": 20,
+        "scale": 0.015,
+        "levels": [
+          -100,
+          100
+        ]
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.cci_reentry",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+      "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators/cci"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. مؤشر قناة السلع: عودة من التطرف",
+  "execution_enabled": true,
+  "rules_python": "@model('cci_reentry', 'مؤشر قناة السلع: عودة من التطرف', 'CCI reentry', 'momentum',\n       ['سعر نموذجي ومتوسط وانحراف مطلق لعشرين شمعة، ومعامل مقياس قدره 0.015.',\n        'عودة جديدة فوق سالب مئة مع إغلاق صاعد أو تحت موجب مئة مع إغلاق هابط؛ وقف من خمس شموع.'],\n       ['CCI20 of typical price using mean absolute deviation and scale .015; flat=0.',\n        'Fresh reentry above -100 with rising close or below +100 with falling close; five-bar stop.'],\n       {'indicators': ['cci'], 'period': 20, 'scale': .015, 'levels': [-100, 100]}, source=MT5_OSC+'/cci')\ndef cci_reentry(b, c):\n    return _rebound(b, ind.cci(b), -100, 100)\n",
+  "rules_sha256": "b8ff4087a6b22267d338e119c7819b108a5366ef1452d75bd6310744c0664f30",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

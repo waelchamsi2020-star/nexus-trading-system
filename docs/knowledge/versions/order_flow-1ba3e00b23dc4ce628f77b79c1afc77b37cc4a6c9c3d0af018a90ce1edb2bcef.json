@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "id": "order_flow",
+  "name_ar": "تدفق النشاط: تقريب من شموع التكات",
+  "version": "3.0.0",
+  "scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: تدفق النشاط: تقريب من شموع التكات",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc",
+    "positive_tick_volume"
+  ],
+  "minimum_bars": 65,
+  "family": "volume",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "order_flow",
+    "rule_version": "3.0.0",
+    "data_requirements": [
+      "completed_ohlc",
+      "positive_tick_volume"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "volume",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Activity flow: bar-tick approximation",
+      "implementation": "nexus.local_models.activity_flow",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "Bar tick count at least 1.2 times the prior median; close-location pressure crosses ±0.35 and breaks a five-bar boundary. No signed trade volume or depth."
+      ],
+      "rules_ar": [
+        "عدد تكات لا يقل عن 1.2 من الوسيط السابق؛ ضغط موقع الإغلاق يعبر موجب أو سالب 0.35 مع كسر حد خمس شموع. لا يستخدم حجم صفقات محدد الاتجاه أو عمق سوق."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "volumes[-1] >= 1.2 * statistics.median(volumes[:-1])",
+    "v <= 0",
+    "span > 0",
+    "previous <= 0.35 < current",
+    "x['close'] > hi",
+    "previous >= -0.35 > current",
+    "x['close'] < lo"
+  ],
+  "algorithm_python": "def activity_flow(b,c):\n    sample=b[-21:];volumes=[x.get(\"tick_volume\",0) for x in sample]\n    if any(v<=0 for v in volumes):return wait(b,\"positive bar tick counts required for local activity proxy\",missing=True)\n    def pressure(x):\n        span=x[\"high\"]-x[\"low\"]\n        return (2*x[\"close\"]-x[\"high\"]-x[\"low\"])/span if span>0 else 0.\n    x=b[-1];previous,current=pressure(b[-2]),pressure(x)\n    active=volumes[-1]>=1.2*statistics.median(volumes[:-1])\n    hi=max(z[\"high\"] for z in b[-6:-1]);lo=min(z[\"low\"] for z in b[-6:-1])\n    result=signal(b,active and previous<=.35<current and x[\"close\"]>hi,\n                  active and previous>=-.35>current and x[\"close\"]<lo,lo,hi,\n                  dict(previous=previous,current=current,activity_ratio=volumes[-1]/statistics.median(volumes[:-1])))\n    result[\"assumptions\"].append(\"Bar tick activity and close-location proxy; not real order flow or signed volume\")\n    return result\n",
+  "source_hashes": {
+    "strategies.py": "12360f91e67dbf9e0ffe00165d5945c078d1fdda1967ad94b7febc24b98fea5a",
+    "specialists.py": "bfb845771766b997aa571c2fd4bb9259a73cc34d69959b5d15d2c5f19be16880",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": {
+    "url": "https://www.cmegroup.com/articles/faqs/market-by-order-mbo.html",
+    "principles_ar": [
+      "بيانات عمق دفتر الأوامر تختلف عن شموع السعر وعدد تحديثات السعر.",
+      "المؤشر الحالي تقريب نشاط من الشموع، وليس إعادة بناء دفتر أوامر أو دلتا حقيقية."
+    ]
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "1ba3e00b23dc4ce628f77b79c1afc77b37cc4a6c9c3d0af018a90ce1edb2bcef"
+}

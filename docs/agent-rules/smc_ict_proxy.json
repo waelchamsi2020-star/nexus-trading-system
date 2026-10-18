@@ -1,0 +1,64 @@
+{
+  "id": "smc_ict_proxy",
+  "school": "السيولة: سحب مستوى وعودة فجوة",
+  "strategy": "smc_ict_proxy",
+  "version": "3.0.0",
+  "indicators": [
+    "three-bar gap",
+    "sweep",
+    "structure"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "smc_ict_proxy",
+    "rule_version": "3.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Liquidity: sweep and gap return",
+      "implementation": "nexus.local_models.liquidity_gap",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "Sweep of a prior 10-bar boundary before a displacement gap; first valid gap return within 20 bars."
+      ],
+      "rules_ar": [
+        "سحب حد عشر شموع قبل فجوة اندفاع؛ أول عودة صالحة للفجوة خلال عشرين شمعة."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: السيولة: سحب مستوى وعودة فجوة",
+  "execution_enabled": true,
+  "rules_python": "def liquidity_gap(b,c):\n    result=first_return(b,\"gap\")\n    if not result[\"triggered\"]:return result\n    details=result[\"evidence\"][0][\"value\"]\n    end=next(i for i,x in enumerate(b) if x[\"time\"]==details[\"formation_time\"])\n    sweep=b[end-2];prior=b[end-12:end-2]\n    if len(prior)!=10:return wait(b)\n    lo=min(x[\"low\"] for x in prior);hi=max(x[\"high\"] for x in prior)\n    valid=(sweep[\"low\"]<lo<sweep[\"close\"] if result[\"direction\"]==\"BUY\" else sweep[\"high\"]>hi>sweep[\"close\"])\n    if not valid:return wait(b,\"prior sweep required for local liquidity model\",details)\n    result[\"assumptions\"].append(\"Local sweep plus gap return; no institutional orders or full ICT interpretation\")\n    return result\n",
+  "rules_sha256": "4178c12910f5dc79f6f18ae33f4422cd16b49097acfc6d800285affeed7c356d",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

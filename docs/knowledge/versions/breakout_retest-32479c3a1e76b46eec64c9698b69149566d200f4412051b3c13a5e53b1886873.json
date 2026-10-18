@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "id": "breakout_retest",
+  "name_ar": "الاختراق وإعادة الاختبار",
+  "version": "1.0.0",
+  "scope_ar": "اختراق نطاق سابق ثم إعادة اختبار ناجحة وفق ترتيب زمني محدد.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 30,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "breakout_retest",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 30,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.breakout_retest",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "breakout['close'] > top",
+    "retest['low'] <= top + 0.15 * c['atr']",
+    "retest['close'] > top",
+    "breakout['close'] < bottom",
+    "retest['high'] >= bottom - 0.15 * c['atr']",
+    "retest['close'] < bottom"
+  ],
+  "algorithm_python": "@_register(\"breakout_retest\", \"الاختراق وإعادة الاختبار\", [\"20 bar range\"], \"structure\", 30)\ndef breakout_retest(b, c):\n    history, breakout, retest = b[-23:-2], b[-2], b[-1]\n    top, bottom = max(x[\"high\"] for x in history), min(x[\"low\"] for x in history)\n    bull = breakout[\"close\"] > top and retest[\"low\"] <= top+.15*c[\"atr\"] and retest[\"close\"] > top\n    bear = breakout[\"close\"] < bottom and retest[\"high\"] >= bottom-.15*c[\"atr\"] and retest[\"close\"] < bottom\n    level = top if bull else bottom if bear else None\n    return _result(\"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\", bull or bear, level,\n                   min(retest[\"low\"], top-.25*c[\"atr\"]) if bull else max(retest[\"high\"], bottom+.25*c[\"atr\"]),\n                   [_evidence(\"horizontal_level\", top, b, \"prior range top\"), _evidence(\"horizontal_level\", bottom, b, \"prior range bottom\")],\n                   [\"close breakout\", \"subsequent retest holds\"] if bull or bear else [], [] if bull or bear else [\"breakout followed by retest\"])\n",
+  "source_hashes": {
+    "strategies.py": "82214308617a53c4b8198ef22031a5f37be30c9917e47f6410e5108cb03cb5e6",
+    "specialists.py": "a030bc1a3abe16e31b1fe3eba4da9e683968561acb87c83c2d394a41a40e428c",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "32479c3a1e76b46eec64c9698b69149566d200f4412051b3c13a5e53b1886873"
+}

@@ -1,0 +1,82 @@
+{
+  "id": "utc_opening_range",
+  "school": "اختراق نطاق بداية اليوم العالمي",
+  "strategy": "utc_opening_range",
+  "version": "1.0.0",
+  "indicators": [
+    "UTC first-hour range breakout"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "utc_opening_range",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "UTC first-hour range breakout",
+      "rules": [
+        "Exact continuous first UTC hour available on M1/M2/M3/M4/M5/M6/M10/M12/M15/M20/M30",
+        "Fresh close beyond first-hour range on same UTC day; explicitly not exchange opening hours"
+      ],
+      "parameters": {
+        "start_utc_hour": 0,
+        "range_minutes": 60
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": [
+        "M1",
+        "M2",
+        "M3",
+        "M4",
+        "M5",
+        "M6",
+        "M10",
+        "M12",
+        "M15",
+        "M20",
+        "M30"
+      ],
+      "rules_ar": [
+        "توفر كل شموع الساعة الأولى من اليوم بالتوقيت العالمي دون فجوات.",
+        "إغلاق جديد خارج هذا النطاق في اليوم نفسه؛ هذا ليس توقيت افتتاح بورصة بعينها."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختراق نطاق بداية اليوم العالمي",
+  "execution_enabled": true,
+  "rules_python": "@specialist(\"utc_opening_range\", \"اختراق نطاق بداية اليوم العالمي\", \"UTC first-hour range breakout\", \"structure\",\n            [\"Exact continuous first UTC hour available on M1/M2/M3/M4/M5/M6/M10/M12/M15/M20/M30\", \"Fresh close beyond first-hour range on same UTC day; explicitly not exchange opening hours\"],\n            {\"start_utc_hour\": 0, \"range_minutes\": 60})\ndef utc_opening_range(b, c):\n    from .strategies import PERIODS\n    step = PERIODS[c[\"timeframe\"]]\n    day = int(b[-1][\"time\"]//86400)*86400\n    window = [x for x in b if day <= x[\"time\"] < day+3600]\n    expected = list(range(day, day+3600, step)) if step <= 1800 and 3600 % step == 0 else []\n    if not expected or [x[\"time\"] for x in window] != expected or b[-2][\"time\"] < day+3600:\n        return signal(b, False, False, None, None, {\"anchor_time\": day, \"complete\": False})\n    hi, lo = max(x[\"high\"] for x in window), min(x[\"low\"] for x in window)\n    return signal(b, b[-2][\"close\"] <= hi < b[-1][\"close\"], b[-2][\"close\"] >= lo > b[-1][\"close\"],\n                  lo, hi, {\"high\": hi, \"low\": lo, \"anchor_time\": day})\n",
+  "rules_sha256": "b7be5f7af53d9e5f05b48c43609b9956c5fc346107236c2ba2615253c6750d9f",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

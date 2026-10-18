@@ -1,0 +1,53 @@
+{
+  "id": "engulfing",
+  "school": "حركة السعر والشموع",
+  "strategy": "engulfing",
+  "version": "1.0.0",
+  "indicators": [
+    "body engulfing"
+  ],
+  "evidence_group": "candle",
+  "min_bars": 20,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "engulfing",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 20,
+    "completed_bars_only": true,
+    "evidence_group": "candle",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.engulfing",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "ابتلاع جسم الشمعة السابقة مع حد أدنى لحجم الجسم نسبة إلى التقلب.",
+  "execution_enabled": true,
+  "rules_python": "@_register(\"engulfing\", \"حركة السعر والشموع\", [\"body engulfing\"], \"candle\", 20)\ndef engulfing(b, c):\n    prev, now = b[-2:]\n    bull = prev[\"close\"] < prev[\"open\"] and now[\"close\"] > now[\"open\"] and now[\"open\"] <= prev[\"close\"] and now[\"close\"] >= prev[\"open\"]\n    bear = prev[\"close\"] > prev[\"open\"] and now[\"close\"] < now[\"open\"] and now[\"open\"] >= prev[\"close\"] and now[\"close\"] <= prev[\"open\"]\n    size = abs(now[\"close\"]-now[\"open\"])\n    valid = size >= .5*c[\"atr\"] and (bull or bear)\n    side = \"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\"\n    return _result(side, valid, now[\"close\"], min(prev[\"low\"], now[\"low\"]) if bull else max(prev[\"high\"], now[\"high\"]),\n                   [_evidence(\"candle\", size, b, \"engulfing body / ATR\", ratio=size/max(c[\"atr\"], 1e-12))],\n                   [\"engulfing body\"] if side != \"NEUTRAL\" else [], [] if valid else [\"body >= 0.5 ATR and engulfing\"])\n",
+  "rules_sha256": "ac81f13259c35e6b5759134f2525d3d0abd4bbaf43331bdf92bdeaecb84aa3cb",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

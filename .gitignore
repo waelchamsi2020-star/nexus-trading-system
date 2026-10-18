@@ -1,0 +1,30 @@
+# Local runtimes and generated binaries
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+node_modules/
+build-work/
+Windows/
+.coverage
+# Account data and research exports are private
+*.db
+*.db-*
+*.sqlite3
+*.sqlite3-*
+.env
+.env.*
+config.json
+/data/real/M5/*
+/data/real/H1/*
+/reports/
+
+# Private engineering journals and local handoff paths are not public source
+/docs/development/
+/docs/USER_ACTIONS.md
+
+# Historical operator journals stay local; publish rule libraries and source only
+/docs/[0-9]*.md

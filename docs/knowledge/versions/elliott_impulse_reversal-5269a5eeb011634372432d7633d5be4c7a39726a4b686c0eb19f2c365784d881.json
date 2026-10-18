@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "id": "elliott_impulse_reversal",
+  "name_ar": "إليوت: عودة بعد هندسة خمس موجات",
+  "version": "1.0.0",
+  "dependency_schema": 3,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. إليوت: عودة بعد هندسة خمس موجات",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "elliott_impulse_reversal",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Elliott five-swing geometry reversal",
+      "rules": [
+        "Six strict confirmed alternating pivots, with terminal confirmation complete before trigger; no assumed ordering of outside-bar extremes",
+        "Wave 2 stays beyond origin; wave 3 extends wave 1 and is not the shortest arithmetic motive leg; wave 4 does not overlap wave 1; nontruncated wave 5 extends wave 3",
+        "House range at least 3 prior ATR; fresh reversal break of two-bar terminal confirmation range within eight bars, terminal pivot intact and wave-4 target not reached",
+        "Geometry hypothesis only: 5-3-5-3-5 subdivisions, diagonals, truncations, nested degrees and unique counts are not inferred"
+      ],
+      "parameters": {
+        "left_right": 2,
+        "minimum_range_atr": 3,
+        "max_confirmation_age": 8,
+        "wave3_measure": "arithmetic_price_distance"
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "source": "https://www.elliottwave.com/waveopedia/impulse/",
+      "additional_source": "https://www.elliottwave.com/waveopedia/motive-waves/",
+      "scope": "House causal reversal of standard six-pivot impulse geometry; nested 5-3-5-3-5 structure and alternate degrees remain unverified",
+      "rules_ar": [
+        "ستة محاور مؤكدة متعاقبة مع اكتمال تأكيد المحور الأخير قبل شمعة التفعيل؛ لا يفترض ترتيب القمة والقاع في شمعة خارجية واحدة.",
+        "الثانية لا تتجاوز البداية، والثالثة تتجاوز الأولى ولا تكون الأقصر بقياس فرق السعر، والرابعة لا تتداخل مع الأولى، والخامسة غير المنقطعة تتجاوز الثالثة.",
+        "نطاق لا يقل عن ثلاثة أمثال التقلب السابق؛ كسر عكسي جديد لنطاق شموع التأكيد خلال ثماني شموع مع سلامة المحور الأخير وهدف عند الرابعة.",
+        "فرضية هندسة موجية فقط؛ تقسيم الموجات الفرعية والقطريات والانقطاعات والدرجات المتداخلة والترقيم الفريد غير محسومة."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [],
+  "algorithm_python": "@specialist(\"elliott_impulse_reversal\", \"إليوت: عودة بعد هندسة خمس موجات\", \"Elliott five-swing geometry reversal\", \"structure\",\n            [\"Six strict confirmed alternating pivots, with terminal confirmation complete before trigger; no assumed ordering of outside-bar extremes\",\n             \"Wave 2 stays beyond origin; wave 3 extends wave 1 and is not the shortest arithmetic motive leg; wave 4 does not overlap wave 1; nontruncated wave 5 extends wave 3\",\n             \"House range at least 3 prior ATR; fresh reversal break of two-bar terminal confirmation range within eight bars, terminal pivot intact and wave-4 target not reached\",\n             \"Geometry hypothesis only: 5-3-5-3-5 subdivisions, diagonals, truncations, nested degrees and unique counts are not inferred\"],\n            {\"left_right\": 2, \"minimum_range_atr\": 3, \"max_confirmation_age\": 8, \"wave3_measure\": \"arithmetic_price_distance\"})\ndef elliott_impulse_reversal(b, c):\n    return _wave_reversal(b, c, \"impulse\")\n",
+  "source_hashes": {
+    "strategies.py": "1f6f553617bade455372616b5cf528927e167465f6c664293e4def6702f9580d",
+    "specialists.py": "a030bc1a3abe16e31b1fe3eba4da9e683968561acb87c83c2d394a41a40e428c",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f",
+    "confluence.py": "bb8bb3c3cb832b7f48d8c0cd0e8f7c6a02a23030ec35b06eefaccfce74bbe2a2",
+    "confluence_registry.py": "a8b0a67bd7287e94a7c7aa5403b69b2713c4bfbb16b4b0aa03c18c1771049c11",
+    "indicators.py": "3288110b9b542d83cf3804fbc46b006f5b5d8eae83041f4ebc762f1c47945e60",
+    "extended_models.py": "c3854ff2ce8ac07270e9c70278c77d5f9eec9a6906bef8877b0169a3dbb9144e"
+  },
+  "source_reference": {
+    "url": "https://www.elliottwave.com/waveopedia/impulse/"
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "5269a5eeb011634372432d7633d5be4c7a39726a4b686c0eb19f2c365784d881"
+}

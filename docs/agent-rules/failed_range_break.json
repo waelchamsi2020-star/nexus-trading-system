@@ -1,0 +1,69 @@
+{
+  "id": "failed_range_break",
+  "school": "فشل اختراق النطاق",
+  "strategy": "failed_range_break",
+  "version": "1.0.0",
+  "indicators": [
+    "Failed range breakout"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "failed_range_break",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Failed range breakout",
+      "rules": [
+        "Sweep prior 20-bar boundary and close back inside",
+        "Close in inner 60% of bar toward reversal; reject simultaneous two-edge sweeps"
+      ],
+      "parameters": {
+        "lookback": 20,
+        "close_fraction": 0.6
+      },
+      "allowed_regimes": [
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "تجاوز طرف نطاق العشرين شمعة السابقة ثم إغلاق داخل النطاق.",
+        "الإغلاق ضمن ستين بالمئة من الشمعة باتجاه العودة؛ تجاوز الطرفين معًا مرفوض."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. فشل اختراق النطاق",
+  "execution_enabled": true,
+  "rules_python": "@specialist(\"failed_range_break\", \"فشل اختراق النطاق\", \"Failed range breakout\", \"structure\",\n            [\"Sweep prior 20-bar boundary and close back inside\", \"Close in inner 60% of bar toward reversal; reject simultaneous two-edge sweeps\"],\n            {\"lookback\": 20, \"close_fraction\": .6}, (\"RANGE\", \"MIXED\"))\ndef failed_range_break(b, c):\n    p, x = b[-21:-1], b[-1]\n    hi, lo = max(z[\"high\"] for z in p), min(z[\"low\"] for z in p)\n    span = x[\"high\"]-x[\"low\"]\n    bull = x[\"low\"] < lo < x[\"close\"] < hi and x[\"high\"] <= hi and x[\"close\"]-x[\"low\"] >= .6*span\n    bear = x[\"high\"] > hi > x[\"close\"] > lo and x[\"low\"] >= lo and x[\"high\"]-x[\"close\"] >= .6*span\n    return signal(b, bull, bear, x[\"low\"], x[\"high\"], {\"high\": hi, \"low\": lo})\n",
+  "rules_sha256": "f9059a070f3942f2d8432e63486673be795245ad0d6f42e10f607c9c9cd040d6",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

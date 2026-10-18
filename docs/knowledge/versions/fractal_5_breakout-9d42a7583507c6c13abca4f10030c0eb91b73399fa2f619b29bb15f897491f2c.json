@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "id": "fractal_5_breakout",
+  "name_ar": "اختراق فراكتال خماسي مؤكد",
+  "version": "1.0.0",
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختراق فراكتال خماسي مؤكد",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 61,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "fractal_5_breakout",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 61,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Confirmed five-bar fractal breakout",
+      "rules": [
+        "Fixed 60 bars preceding the trigger; every strict pivot has two lower highs / higher lows on each side, with both right bars already closed before the trigger; ties and dual high/low pivot bars excluded",
+        "Use the newest confirmed high and newest confirmed low; require high > low and a fresh completed close above the high / below the low from the previous close",
+        "Trigger must remain strictly inside the opposite structural boundary; bars crossing both boundaries are rejected; structural stop reference is the newest opposite pivot",
+        "House definition of five-bar breakout only; no Alligator filter or complete Bill Williams trading system"
+      ],
+      "parameters": {
+        "lookback": 60,
+        "left_bars": 2,
+        "right_closed_bars": 2,
+        "strict_pivots": true
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_en": [
+        "Fixed 60 bars preceding the trigger; every strict pivot has two lower highs / higher lows on each side, with both right bars already closed before the trigger; ties and dual high/low pivot bars excluded",
+        "Use the newest confirmed high and newest confirmed low; require high > low and a fresh completed close above the high / below the low from the previous close",
+        "Trigger must remain strictly inside the opposite structural boundary; bars crossing both boundaries are rejected; structural stop reference is the newest opposite pivot",
+        "House definition of five-bar breakout only; no Alligator filter or complete Bill Williams trading system"
+      ],
+      "source": "https://www.metatrader5.com/en/terminal/help/indicators/bw_indicators/fractals",
+      "scope": "House strict five-bar breakout, fixed window and stop; not the complete Bill Williams system",
+      "rules_ar": [
+        "نافذة ثابتة من ستين شمعة قبل شمعة التفعيل؛ محور خماسي صارم بقمتين أدنى أو قاعين أعلى على كل جانب، مع اكتمال الشمعتين اللاحقتين قبل التفعيل؛ التعادل والمحور المزدوج مستبعدان.",
+        "أحدث قمة وأحدث قاع مؤكدين، مع القمة أعلى من القاع؛ يعبر الإغلاق المكتمل حديثًا القمة للشراء أو القاع للبيع مقارنة بالإغلاق السابق.",
+        "تبقى شمعة التفعيل داخل الحد البنيوي المقابل بصورة صارمة؛ تجاوز الحدين مرفوض، ومرجع الوقف أحدث محور مقابل.",
+        "تعريف محلي محدد للاختراق الخماسي؛ لا يتضمن فلتر التمساح ولا نظام بيل ويليامز الكامل."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "len(b) < 61",
+    "high['price'] > low['price']",
+    "previous['close'] <= high['price'] < last['close']",
+    "last['low'] > low['price']",
+    "previous['close'] >= low['price'] > last['close']",
+    "last['high'] < high['price']",
+    "p['kind'] == 'HIGH'",
+    "p['kind'] == 'LOW'",
+    "last['high'] >= high['price']",
+    "last['low'] <= low['price']"
+  ],
+  "algorithm_python": "@specialist(\"fractal_5_breakout\", \"اختراق فراكتال خماسي مؤكد\", \"Confirmed five-bar fractal breakout\", \"structure\",\n            [\"Fixed 60 bars preceding the trigger; every strict pivot has two lower highs / higher lows on each side, with both right bars already closed before the trigger; ties and dual high/low pivot bars excluded\",\n             \"Use the newest confirmed high and newest confirmed low; require high > low and a fresh completed close above the high / below the low from the previous close\",\n             \"Trigger must remain strictly inside the opposite structural boundary; bars crossing both boundaries are rejected; structural stop reference is the newest opposite pivot\",\n             \"House definition of five-bar breakout only; no Alligator filter or complete Bill Williams trading system\"],\n            {\"lookback\": 60, \"left_bars\": 2, \"right_closed_bars\": 2, \"strict_pivots\": True})\ndef fractal_5_breakout(b, c):\n    if len(b) < 61:\n        return _result(status=\"DATA_MISSING\", missing=[\"61 completed bars required for bounded fractal breakout\"])\n    pivots = _prior_five_bar_pivots(b)\n    highs = [p for p in pivots if p[\"kind\"] == \"HIGH\"]\n    lows = [p for p in pivots if p[\"kind\"] == \"LOW\"]\n    if not highs or not lows:\n        return signal(b, False, False, None, None, dict(lookback=60, confirmed_high=None, confirmed_low=None))\n    high, low, previous, last = highs[-1], lows[-1], b[-2], b[-1]\n    valid = high[\"price\"] > low[\"price\"]\n    bull = valid and previous[\"close\"] <= high[\"price\"] < last[\"close\"] and last[\"low\"] > low[\"price\"]\n    bear = valid and previous[\"close\"] >= low[\"price\"] > last[\"close\"] and last[\"high\"] < high[\"price\"]\n    return signal(b, bull, bear, low[\"price\"], high[\"price\"],\n                  dict(lookback=60, confirmed_high=high, confirmed_low=low,\n                       previous_close=previous[\"close\"], reference_precedes_trigger=True,\n                       dual_boundary_cross=last[\"high\"] >= high[\"price\"] and last[\"low\"] <= low[\"price\"]))\n",
+  "source_hashes": {
+    "strategies.py": "82214308617a53c4b8198ef22031a5f37be30c9917e47f6410e5108cb03cb5e6",
+    "specialists.py": "a030bc1a3abe16e31b1fe3eba4da9e683968561acb87c83c2d394a41a40e428c",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f"
+  },
+  "source_reference": {
+    "url": "https://www.metatrader5.com/en/terminal/help/indicators/bw_indicators/fractals"
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Observation and outcome evaluation; no automatic mutation of rules, risk or live votes.",
+  "revision": "9d42a7583507c6c13abca4f10030c0eb91b73399fa2f619b29bb15f897491f2c"
+}

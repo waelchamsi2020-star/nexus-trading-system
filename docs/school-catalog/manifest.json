@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "catalog_version": "1.2.0",
+  "entries": 58,
+  "rule_count": 345,
+  "data_keys": [
+    "asset_appraisals",
+    "behavior_log",
+    "calendar",
+    "cash_forecasts",
+    "commodity_balance",
+    "completed_ohlc",
+    "corporate_actions",
+    "depth_history",
+    "discount_rates",
+    "dividends",
+    "filings",
+    "financial_statements",
+    "fund_holdings",
+    "futures_curve",
+    "index_membership",
+    "issuer_identity",
+    "long_history",
+    "macro_series",
+    "paired_history",
+    "peer_data",
+    "positioning",
+    "real_volume",
+    "security_terms",
+    "session_clock",
+    "signed_trades",
+    "tick_volume",
+    "yield_curves"
+  ],
+  "files": {
+    "catalog.json": "8db4280511765534498e3a9d3db3b2343e5022223f9f4035edbb168321b415b2",
+    "reference-ar.md": "274cbffeeab3534a7f9e56009950fd9411c14e89aa4a0e4817ec218caab7e0fb",
+    "reference-en.md": "2cfd2962d3b5f26cef7fb6128d7160f2056786db3a5333d156bdfb76493652d6"
+  }
+}

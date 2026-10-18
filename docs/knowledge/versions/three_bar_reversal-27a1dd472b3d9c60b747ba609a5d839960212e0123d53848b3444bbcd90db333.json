@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "id": "three_bar_reversal",
+  "name_ar": "الشموع: انعكاس ثلاثي مؤكد",
+  "version": "1.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الشموع: انعكاس ثلاثي مؤكد",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "candle",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "three_bar_reversal",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "candle",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Three-bar reversal without gap assumption",
+      "rules": [
+        "Prior EMA20 slope/context; first body >=.8 prior ATR, middle body <=one third of first.",
+        "Opposite third body >=.5 prior ATR and closes beyond first body midpoint; no gap assumption."
+      ],
+      "rules_en": [
+        "Prior EMA20 slope/context; first body >=.8 prior ATR, middle body <=one third of first.",
+        "Opposite third body >=.5 prior ATR and closes beyond first body midpoint; no gap assumption."
+      ],
+      "rules_ar": [
+        "اتجاه سابق من متوسط عشرين وميله؛ جسم أول لا يقل عن 0.8 من التقلب السابق، وجسم وسط لا يتجاوز ثلثه.",
+        "جسم ثالث معاكس لا يقل عن نصف التقلب وإغلاق يتجاوز منتصف الجسم الأول؛ لا يشترط فجوات لأسواق التداول المتصل."
+      ],
+      "parameters": {
+        "indicators": [
+          "prior_ema20",
+          "prior_atr_simple"
+        ],
+        "first_body_atr": 0.8,
+        "middle_fraction": 0.3333333333333333,
+        "third_body_atr": 0.5
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.three_bar_reversal",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "abs(middle['close'] - middle['open']) <= body / 3",
+    "a > 0",
+    "body >= 0.8 * a",
+    "abs(last['close'] - last['open']) >= 0.5 * a",
+    "means[-1] < means[-2]",
+    "first['close'] < first['open']",
+    "first['open'] < means[-1]",
+    "last['close'] > last['open']",
+    "last['close'] > midpoint",
+    "means[-1] > means[-2]",
+    "first['close'] > first['open']",
+    "first['open'] > means[-1]",
+    "last['close'] < last['open']",
+    "last['close'] < midpoint"
+  ],
+  "algorithm_python": "@model('three_bar_reversal', 'الشموع: انعكاس ثلاثي مؤكد', 'Three-bar reversal without gap assumption', 'candle',\n       ['اتجاه سابق من متوسط عشرين وميله؛ جسم أول لا يقل عن 0.8 من التقلب السابق، وجسم وسط لا يتجاوز ثلثه.',\n        'جسم ثالث معاكس لا يقل عن نصف التقلب وإغلاق يتجاوز منتصف الجسم الأول؛ لا يشترط فجوات لأسواق التداول المتصل.'],\n       ['Prior EMA20 slope/context; first body >=.8 prior ATR, middle body <=one third of first.',\n        'Opposite third body >=.5 prior ATR and closes beyond first body midpoint; no gap assumption.'],\n       {'indicators': ['prior_ema20', 'prior_atr_simple'], 'first_body_atr': .8, 'middle_fraction': 1/3, 'third_body_atr': .5})\ndef three_bar_reversal(b, c):\n    first, middle, last = b[-3:]; prior = b[:-3]; a = st.atr(prior)\n    means = st.ema([x['close'] for x in prior], 20); midpoint = (first['open']+first['close'])/2\n    body = abs(first['close']-first['open']); small = abs(middle['close']-middle['open']) <= body/3\n    valid = a > 0 and body >= .8*a and small and abs(last['close']-last['open']) >= .5*a\n    bull = valid and means[-1] < means[-2] and first['close'] < first['open'] and first['open'] < means[-1] and last['close'] > last['open'] and last['close'] > midpoint\n    bear = valid and means[-1] > means[-2] and first['close'] > first['open'] and first['open'] > means[-1] and last['close'] < last['open'] and last['close'] < midpoint\n    lo, hi = _stops(b, 3)\n    return signal(b, bull, bear, lo, hi, {'first_body': body, 'middle_small': small, 'midpoint': midpoint, 'prior_atr': a})\n",
+  "source_hashes": {
+    "strategies.py": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+    "specialists.py": "b80ac3ec42b2f169becbb6295007440ce654ea01fa5e2e39bfb4581bdeff3cd8",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "41a35b875aa9ad7ef0e1c3218329f0b39be491db2eb735d2ac90b46a69ea34d8",
+    "confluence_registry.py": "1d3a0d34c3cfabccdfa64bea784a58ffcd037d9e177d6cad5b2a6f87543da065",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "f360b0f9f69fd8a1cc5724b2dc5207210dd22b6091b5ba9096b202040e10e7b1",
+    "config/models.yaml": "5a2a25132504b314dbd85d6e013913fda7f9a220db88c6c2ee1e2e36b30bd619",
+    "config/models.schema.json": "151116766f8f956dd0f69c5f53a4132010ef193add42abe6dff04ebac6e8941f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "27a1dd472b3d9c60b747ba609a5d839960212e0123d53848b3444bbcd90db333"
+}

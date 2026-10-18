@@ -1,0 +1,72 @@
+{
+  "id": "pin_rejection",
+  "school": "رفض الذيل عند حد سعري",
+  "strategy": "pin_rejection",
+  "version": "1.0.0",
+  "indicators": [
+    "Boundary pin rejection"
+  ],
+  "evidence_group": "candle",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "pin_rejection",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "candle",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Boundary pin rejection",
+      "rules": [
+        "Touch or sweep prior 20-bar extreme and close back inside",
+        "Dominant wick >= 2 bodies and >= 60% of range; opposite wick <= 20%; range >= 0.5 prior ATR"
+      ],
+      "parameters": {
+        "lookback": 20,
+        "wick_body": 2,
+        "wick_range": 0.6,
+        "opposite_wick": 0.2
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "ملامسة أو تجاوز الحد السعري للعشرين شمعة السابقة والإغلاق داخله.",
+        "الذيل الرئيسي ضعف الجسم على الأقل وستون بالمئة من الشمعة، والذيل المقابل لا يتجاوز عشرين بالمئة."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. رفض الذيل عند حد سعري",
+  "execution_enabled": true,
+  "rules_python": "@specialist(\"pin_rejection\", \"رفض الذيل عند حد سعري\", \"Boundary pin rejection\", \"candle\",\n            [\"Touch or sweep prior 20-bar extreme and close back inside\", \"Dominant wick >= 2 bodies and >= 60% of range; opposite wick <= 20%; range >= 0.5 prior ATR\"],\n            {\"lookback\": 20, \"wick_body\": 2, \"wick_range\": .6, \"opposite_wick\": .2})\ndef pin_rejection(b, c):\n    x, p = b[-1], b[-21:-1]\n    span, body = x[\"high\"]-x[\"low\"], abs(x[\"close\"]-x[\"open\"])\n    lower, upper = min(x[\"open\"], x[\"close\"])-x[\"low\"], x[\"high\"]-max(x[\"open\"], x[\"close\"])\n    hi, lo = max(z[\"high\"] for z in p), min(z[\"low\"] for z in p)\n    valid = span >= .5*atr(b[:-1]) and span > 0\n    bull = valid and lower >= max(2*body, .6*span) and upper <= .2*span and x[\"low\"] <= lo < x[\"close\"]\n    bear = valid and upper >= max(2*body, .6*span) and lower <= .2*span and x[\"high\"] >= hi > x[\"close\"]\n    return signal(b, bull, bear, x[\"low\"], x[\"high\"], {\"low\": lo, \"high\": hi, \"lower_wick\": lower, \"upper_wick\": upper})\n",
+  "rules_sha256": "fec1795c938b7da4c2c0ea380b455e3b4178b636c006926dbcddb59a5266dd44",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

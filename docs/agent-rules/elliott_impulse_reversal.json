@@ -1,0 +1,79 @@
+{
+  "id": "elliott_impulse_reversal",
+  "school": "إليوت: عودة بعد هندسة خمس موجات",
+  "strategy": "elliott_impulse_reversal",
+  "version": "1.0.0",
+  "indicators": [
+    "Elliott five-swing geometry reversal"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "elliott_impulse_reversal",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Elliott five-swing geometry reversal",
+      "rules": [
+        "Six strict confirmed alternating pivots, with terminal confirmation complete before trigger; no assumed ordering of outside-bar extremes",
+        "Wave 2 stays beyond origin; wave 3 extends wave 1 and is not the shortest arithmetic motive leg; wave 4 does not overlap wave 1; nontruncated wave 5 extends wave 3",
+        "House range at least 3 prior ATR; fresh reversal break of two-bar terminal confirmation range within eight bars, terminal pivot intact and wave-4 target not reached",
+        "Geometry hypothesis only: 5-3-5-3-5 subdivisions, diagonals, truncations, nested degrees and unique counts are not inferred"
+      ],
+      "parameters": {
+        "left_right": 2,
+        "minimum_range_atr": 3,
+        "max_confirmation_age": 8,
+        "wave3_measure": "arithmetic_price_distance"
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "source": "https://www.elliottwave.com/waveopedia/impulse/",
+      "additional_source": "https://www.elliottwave.com/waveopedia/motive-waves/",
+      "scope": "House causal reversal of standard six-pivot impulse geometry; nested 5-3-5-3-5 structure and alternate degrees remain unverified",
+      "rules_ar": [
+        "ستة محاور مؤكدة متعاقبة مع اكتمال تأكيد المحور الأخير قبل شمعة التفعيل؛ لا يفترض ترتيب القمة والقاع في شمعة خارجية واحدة.",
+        "الثانية لا تتجاوز البداية، والثالثة تتجاوز الأولى ولا تكون الأقصر بقياس فرق السعر، والرابعة لا تتداخل مع الأولى، والخامسة غير المنقطعة تتجاوز الثالثة.",
+        "نطاق لا يقل عن ثلاثة أمثال التقلب السابق؛ كسر عكسي جديد لنطاق شموع التأكيد خلال ثماني شموع مع سلامة المحور الأخير وهدف عند الرابعة.",
+        "فرضية هندسة موجية فقط؛ تقسيم الموجات الفرعية والقطريات والانقطاعات والدرجات المتداخلة والترقيم الفريد غير محسومة."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. إليوت: عودة بعد هندسة خمس موجات",
+  "execution_enabled": true,
+  "rules_python": "@specialist(\"elliott_impulse_reversal\", \"إليوت: عودة بعد هندسة خمس موجات\", \"Elliott five-swing geometry reversal\", \"structure\",\n            [\"Six strict confirmed alternating pivots, with terminal confirmation complete before trigger; no assumed ordering of outside-bar extremes\",\n             \"Wave 2 stays beyond origin; wave 3 extends wave 1 and is not the shortest arithmetic motive leg; wave 4 does not overlap wave 1; nontruncated wave 5 extends wave 3\",\n             \"House range at least 3 prior ATR; fresh reversal break of two-bar terminal confirmation range within eight bars, terminal pivot intact and wave-4 target not reached\",\n             \"Geometry hypothesis only: 5-3-5-3-5 subdivisions, diagonals, truncations, nested degrees and unique counts are not inferred\"],\n            {\"left_right\": 2, \"minimum_range_atr\": 3, \"max_confirmation_age\": 8, \"wave3_measure\": \"arithmetic_price_distance\"})\ndef elliott_impulse_reversal(b, c):\n    return _wave_reversal(b, c, \"impulse\")\n",
+  "rules_sha256": "27010b30f821a98821d102ccd262f21db00d8cd5df905f29586390350a31baa7",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

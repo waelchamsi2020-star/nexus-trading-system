@@ -1,0 +1,85 @@
+{
+  "id": "williams_reentry",
+  "school": "ويليامز: استعادة نطاق الزخم",
+  "strategy": "williams_reentry",
+  "version": "1.0.1",
+  "indicators": [
+    "williams_r"
+  ],
+  "evidence_group": "momentum",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "williams_reentry",
+    "rule_version": "1.0.1",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "momentum",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Williams percent-range reentry",
+      "rules": [
+        "Williams R14=-100*(HH-C)/(HH-LL); flat=-50.",
+        "Fresh reentry above -80 with rising close or below -20 with falling close; five-bar stop."
+      ],
+      "rules_en": [
+        "Williams R14=-100*(HH-C)/(HH-LL); flat=-50.",
+        "Fresh reentry above -80 with rising close or below -20 with falling close; five-bar stop."
+      ],
+      "rules_ar": [
+        "موقع الإغلاق ضمن أعلى وأدنى أربع عشرة شمعة على مقياس سالب مئة إلى صفر.",
+        "عودة فوق سالب ثمانين مع ارتفاع الإغلاق أو تحت سالب عشرين مع انخفاضه؛ وقف من خمس شموع."
+      ],
+      "parameters": {
+        "indicators": [
+          "williams_r"
+        ],
+        "period": 14,
+        "levels": [
+          -80,
+          -20
+        ]
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.williams_reentry",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+      "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators/wpr"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. ويليامز: استعادة نطاق الزخم",
+  "execution_enabled": true,
+  "rules_python": "@model('williams_reentry', 'ويليامز: استعادة نطاق الزخم', 'Williams percent-range reentry', 'momentum',\n       ['موقع الإغلاق ضمن أعلى وأدنى أربع عشرة شمعة على مقياس سالب مئة إلى صفر.',\n        'عودة فوق سالب ثمانين مع ارتفاع الإغلاق أو تحت سالب عشرين مع انخفاضه؛ وقف من خمس شموع.'],\n       ['Williams R14=-100*(HH-C)/(HH-LL); flat=-50.',\n        'Fresh reentry above -80 with rising close or below -20 with falling close; five-bar stop.'],\n       {'indicators': ['williams_r'], 'period': 14, 'levels': [-80, -20]}, source=MT5_OSC+'/wpr')\ndef williams_reentry(b, c):\n    return _rebound(b, ind.williams_r(b), -80, -20)\n",
+  "rules_sha256": "d2755ffa39214a2ccdc16822ce8e3d2aa865913a77fc229ebfdeef473f340b31",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

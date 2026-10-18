@@ -1,0 +1,55 @@
+{
+  "id": "ichimoku_cross",
+  "school": "إيشيموكو",
+  "strategy": "ichimoku_cross",
+  "version": "1.0.0",
+  "indicators": [
+    "Tenkan 9",
+    "Kijun 26",
+    "Senkou 52 lagged 26"
+  ],
+  "evidence_group": "trend",
+  "min_bars": 80,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "ichimoku_cross",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 80,
+    "completed_bars_only": true,
+    "evidence_group": "trend",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.ichimoku_cross",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تقاطع واتجاه خطي تنكان وكيجون خارج سحابة سببية محسوبة من الماضي.",
+  "execution_enabled": true,
+  "rules_python": "@_register(\"ichimoku_cross\", \"إيشيموكو\", [\"Tenkan 9\", \"Kijun 26\", \"Senkou 52 lagged 26\"], \"trend\", 80)\ndef ichimoku_cross(b, c):\n    tenkan, kijun = _mid(b, 9), _mid(b, 26)\n    previous_tenkan, previous_kijun = _mid(b[:-1], 9), _mid(b[:-1], 26)\n    historical = b[:-26]\n    span_a, span_b = (_mid(historical, 9)+_mid(historical, 26))/2, _mid(historical, 52)\n    bull = previous_tenkan <= previous_kijun and tenkan > kijun and b[-1][\"close\"] > max(span_a, span_b)\n    bear = previous_tenkan >= previous_kijun and tenkan < kijun and b[-1][\"close\"] < min(span_a, span_b)\n    return _result(\"BUY\" if tenkan > kijun else \"SELL\" if tenkan < kijun else \"NEUTRAL\", bull or bear, kijun, kijun,\n                   [_evidence(\"ichimoku\", {\"tenkan\": tenkan, \"kijun\": kijun, \"current_cloud_a\": span_a, \"current_cloud_b\": span_b,\n                               \"cloud_origin_time\": historical[-1][\"time\"]}, b, \"cloud calculated 26 completed bars earlier\")],\n                   ([\"Tenkan/Kijun directional ordering\"] if tenkan != kijun else []) + ([\"fresh cross outside causal cloud\"] if bull or bear else []), [] if bull or bear else [\"fresh cross and cloud filter\"],\n                   [\"Chikou drawn retrospectively is not used as predictive input\"])\n",
+  "rules_sha256": "7ba0da89c4b326ef7c587a70779cd44cc5fcba1f7f9055341603ac5978705297",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

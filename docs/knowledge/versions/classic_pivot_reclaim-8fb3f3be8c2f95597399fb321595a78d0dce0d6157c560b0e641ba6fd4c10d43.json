@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "id": "classic_pivot_reclaim",
+  "name_ar": "استعادة النقطة المحورية اليومية",
+  "version": "1.0.0",
+  "dependency_schema": 3,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. استعادة النقطة المحورية اليومية",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc",
+    "broker_daily_history"
+  ],
+  "minimum_bars": 60,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "classic_pivot_reclaim",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc",
+      "broker_daily_history"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Previous-session classic pivot reclaim",
+      "rules": [
+        "P=(H+L+C)/3, R1=2P-L, S1=2P-H, R2=P+(H-L), S2=P-(H-L), from a completed MT5 D1 bar only",
+        "Intraday trigger pair shares the declared daily clock; reference closes before both trigger bars and is at most four days old",
+        "Fresh directional close through P, inside first resistance/support; structural stop and first level target"
+      ],
+      "parameters": {
+        "reference_timeframe": "D1",
+        "max_reference_age_seconds": 345600,
+        "entry_definition": "fresh pivot reclaim; no entry merely because price touches a level"
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": [
+        "M1",
+        "M2",
+        "M3",
+        "M4",
+        "M5",
+        "M6",
+        "M10",
+        "M12",
+        "M15",
+        "M20",
+        "M30",
+        "H1",
+        "H2",
+        "H3",
+        "H4",
+        "H6",
+        "H8",
+        "H12"
+      ],
+      "rules_ar": [
+        "النقطة المحورية متوسط أعلى وأدنى وإغلاق يوم مكتمل من منصة التداول، مع حساب الدعم والمقاومة الكلاسيكيين.",
+        "مرجع اليوم متاح قبل شمعتي التفعيل، ولا يزيد عمره على أربعة أيام، والشمعتان في اليوم نفسه وفق ساعة مرجع المنصة.",
+        "عبور جديد بالإغلاق للنقطة المحورية داخل أول دعم أو مقاومة؛ وقف بنيوي وهدف عند المستوى الأول."
+      ],
+      "source": "https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/pivot-points-resistance-support",
+      "scope": "Classic pivot formula with explicit intraday house trigger; not every pivot variant or a profitability claim"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "int((previous['time'] - ref['time']) / 86400) == int((last['time'] - ref['time']) / 86400)",
+    "c.get('timeframe') not in PERIODS",
+    "PERIODS[c['timeframe']] >= 86400",
+    "last['time'] - close_time > 345600",
+    "ref['high'] <= ref['low']",
+    "previous['close'] <= pivot < last['close'] < r1",
+    "last['close'] > last['open']",
+    "previous['close'] >= pivot > last['close'] > s1",
+    "last['close'] < last['open']",
+    "bar_close_time(x['time'], 'D1') <= b[-2]['time']",
+    "p <= 0"
+  ],
+  "algorithm_python": "@specialist(\"classic_pivot_reclaim\", \"استعادة النقطة المحورية اليومية\", \"Previous-session classic pivot reclaim\", \"structure\",\n            [\"P=(H+L+C)/3, R1=2P-L, S1=2P-H, R2=P+(H-L), S2=P-(H-L), from a completed MT5 D1 bar only\",\n             \"Intraday trigger pair shares the declared daily clock; reference closes before both trigger bars and is at most four days old\",\n             \"Fresh directional close through P, inside first resistance/support; structural stop and first level target\"],\n            {\"reference_timeframe\": \"D1\", \"max_reference_age_seconds\": 345600,\n             \"entry_definition\": \"fresh pivot reclaim; no entry merely because price touches a level\"})\ndef classic_pivot_reclaim(b, c):\n    from .strategies import PERIODS, DataError, bar_close_time, validate_bars\n    if c.get(\"timeframe\") not in PERIODS or PERIODS[c[\"timeframe\"]] >= 86400:\n        return _result(missing=[\"daily pivot reclaim is an intraday model\"])\n    daily = c.get(\"daily_bars\")\n    if not daily:\n        return _result(status=\"DATA_MISSING\", missing=[\"completed MT5 daily reference required for classic pivots\"])\n    # Walk-forward context may include later history. It never enters this\n    # reference; a new daily level must have existed before BOTH trigger bars.\n    try:\n        eligible = [x for x in daily if bar_close_time(x[\"time\"], \"D1\") <= b[-2][\"time\"]]\n        refs = validate_bars(eligible, \"D1\", c[\"as_of\"])\n    except (DataError, KeyError, TypeError, ValueError, OverflowError):\n        return _result(status=\"DATA_MISSING\", missing=[\"completed MT5 daily reference required for classic pivots\"])\n    if not refs:\n        return _result(status=\"DATA_MISSING\", missing=[\"completed MT5 daily reference required for classic pivots\"])\n    ref, previous, last = refs[-1], b[-2], b[-1]\n    close_time = bar_close_time(ref[\"time\"], \"D1\")\n    same_clock_day = int((previous[\"time\"]-ref[\"time\"])/86400) == int((last[\"time\"]-ref[\"time\"])/86400)\n    if not same_clock_day or last[\"time\"]-close_time > 345600 or ref[\"high\"] <= ref[\"low\"]:\n        return _result(missing=[\"daily pivot reference or trigger session is outside declared scope\"])\n    pivot = ref[\"high\"]/3+ref[\"low\"]/3+ref[\"close\"]/3\n    r1, s1 = 2*pivot-ref[\"low\"], 2*pivot-ref[\"high\"]\n    r2, s2 = pivot+ref[\"high\"]-ref[\"low\"], pivot-ref[\"high\"]+ref[\"low\"]\n    if any(not math.isfinite(p) or p <= 0 for p in (pivot, r1, s1, r2, s2)):\n        return _result(missing=[\"classic pivot levels must be finite and positive\"])\n    bull = previous[\"close\"] <= pivot < last[\"close\"] < r1 and last[\"close\"] > last[\"open\"]\n    bear = previous[\"close\"] >= pivot > last[\"close\"] > s1 and last[\"close\"] < last[\"open\"]\n    result = signal(b, bull, bear, min(last[\"low\"], s1), max(last[\"high\"], r1),\n                    {\"pivot\": pivot, \"resistance_1\": r1, \"support_1\": s1,\n                         \"resistance_2\": r2, \"support_2\": s2,\n                         \"reference_open\": ref[\"time\"], \"reference_close\": close_time,\n                         \"daily_clock\": \"MT5 D1 opening clock; no exchange-session claim\"},\n                    r1 if bull else s1 if bear else None)\n    result[\"assumptions\"].append(\"Classic pivot formula; reclaim, four-day expiry and exits are house definitions\")\n    if result[\"targets\"]:\n        result[\"targets\"][0][\"method\"] = \"first classic pivot resistance or support\"\n    return result\n",
+  "source_hashes": {
+    "strategies.py": "139024427bca030f0ac5058c727b9cf25b4af7f3e45085241080dba103794cf1",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c"
+  },
+  "source_reference": {
+    "url": "https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/pivot-points-resistance-support"
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "8fb3f3be8c2f95597399fb321595a78d0dce0d6157c560b0e641ba6fd4c10d43"
+}

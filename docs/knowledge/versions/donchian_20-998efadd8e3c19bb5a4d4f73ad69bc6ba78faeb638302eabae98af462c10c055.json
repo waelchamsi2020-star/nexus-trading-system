@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "id": "donchian_20",
+  "name_ar": "اختراق قناة عشرين شمعة",
+  "version": "1.0.0",
+  "dependency_schema": 2,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختراق قناة عشرين شمعة",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "donchian_20",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "20-bar channel breakout",
+      "rules": [
+        "Latest close crosses highest high / lowest low of 20 previous bars",
+        "Stop reference is opposite channel boundary"
+      ],
+      "parameters": {
+        "lookback": 20
+      },
+      "allowed_regimes": [
+        "TREND",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "إغلاق جديد خلف أعلى قمة أو أدنى قاع للعشرين شمعة السابقة.",
+        "مرجع الوقف هو الطرف المقابل للقناة."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "b[-2]['close'] <= hi < last['close']",
+    "b[-2]['close'] >= lo > last['close']"
+  ],
+  "algorithm_python": "@specialist(\"donchian_20\", \"اختراق قناة عشرين شمعة\", \"20-bar channel breakout\", \"structure\",\n            [\"Latest close crosses highest high / lowest low of 20 previous bars\", \"Stop reference is opposite channel boundary\"],\n            {\"lookback\": 20}, (\"TREND\", \"MIXED\"))\ndef donchian_20(b, c):\n    prior, last = b[-21:-1], b[-1]\n    hi, lo = max(x[\"high\"] for x in prior), min(x[\"low\"] for x in prior)\n    return signal(b, b[-2][\"close\"] <= hi < last[\"close\"], b[-2][\"close\"] >= lo > last[\"close\"], lo, hi, dict(high=hi, low=lo))\n",
+  "source_hashes": {
+    "strategies.py": "f22840877ad950939b771bcb08ae16f1e93ff53e45f8d3a4eb4b6fc7c98a6aa2",
+    "specialists.py": "a030bc1a3abe16e31b1fe3eba4da9e683968561acb87c83c2d394a41a40e428c",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f",
+    "confluence.py": "bb8bb3c3cb832b7f48d8c0cd0e8f7c6a02a23030ec35b06eefaccfce74bbe2a2",
+    "confluence_registry.py": "a8b0a67bd7287e94a7c7aa5403b69b2713c4bfbb16b4b0aa03c18c1771049c11"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "998efadd8e3c19bb5a4d4f73ad69bc6ba78faeb638302eabae98af462c10c055"
+}

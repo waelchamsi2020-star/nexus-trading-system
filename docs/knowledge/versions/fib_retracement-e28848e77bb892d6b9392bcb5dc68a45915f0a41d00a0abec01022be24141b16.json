@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "id": "fib_retracement",
+  "name_ar": "فيبوناتشي",
+  "version": "1.1.0",
+  "dependency_schema": 2,
+  "scope_ar": "تصحيح لموجة مؤكدة ولمس 61.8% ثم استعادة 50%؛ تعريف محدد وليس جميع تطبيقات فيبوناتشي.",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "fib_retracement",
+    "rule_version": "1.1.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.fib_retracement",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "a['kind'] == 'LOW'",
+    "z['kind'] == 'HIGH'",
+    "b[-1]['low'] <= level + 0.1 * c['atr']",
+    "b[-1]['high'] >= level - 0.1 * c['atr']",
+    "span > 2 * c['atr']",
+    "a['kind'] != z['kind']",
+    "z['confirmed_at'] <= b[-1]['time']",
+    "b[-2]['close'] <= recovery < b[-1]['close']",
+    "b[-2]['close'] >= recovery > b[-1]['close']"
+  ],
+  "algorithm_python": "@_register(\"fib_retracement\", \"فيبوناتشي\", [\"confirmed swing\", \"0.618 retracement\"], \"structure\", 60)\ndef fib_retracement(b, c):\n    p = _alternating_pivots(c[\"pivots\"])\n    pair = None\n    for a, z in zip(p, p[1:]):\n        if a[\"kind\"] != z[\"kind\"] and z[\"confirmed_at\"] <= b[-1][\"time\"]:\n            pair = a, z\n    if not pair:\n        return _result(missing=[\"confirmed alternating swing pair\"])\n    a, z = pair\n    bull_swing = a[\"kind\"] == \"LOW\" and z[\"kind\"] == \"HIGH\"\n    span = abs(z[\"price\"]-a[\"price\"])\n    level = z[\"price\"]-.618*span if bull_swing else z[\"price\"]+.618*span\n    recovery = z[\"price\"]-.5*span if bull_swing else z[\"price\"]+.5*span\n    touched = b[-1][\"low\"] <= level+.1*c[\"atr\"] if bull_swing else b[-1][\"high\"] >= level-.1*c[\"atr\"]\n    valid = span > 2*c[\"atr\"] and touched and (b[-2][\"close\"] <= recovery < b[-1][\"close\"] if bull_swing else b[-2][\"close\"] >= recovery > b[-1][\"close\"])\n    return _result(\"BUY\" if bull_swing else \"SELL\", valid, recovery, a[\"price\"],\n                   [a, z, _evidence(\"horizontal_level\", level, b, \"0.618 pullback\"), _evidence(\"horizontal_level\", recovery, b, \"0.5 recovery trigger\")],\n                   [\"confirmed swing\"] + ([\"pullback recovery\"] if valid else []), [] if valid else [\"0.618 touch and fresh 0.5 recovery\"])\n",
+  "source_hashes": {
+    "strategies.py": "6f4a5becbb893d61c22b10b2e28e07951cf29490c967c8a16d7a7b9ce7ed173c",
+    "specialists.py": "a030bc1a3abe16e31b1fe3eba4da9e683968561acb87c83c2d394a41a40e428c",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f",
+    "confluence.py": "bb8bb3c3cb832b7f48d8c0cd0e8f7c6a02a23030ec35b06eefaccfce74bbe2a2",
+    "confluence_registry.py": "a8b0a67bd7287e94a7c7aa5403b69b2713c4bfbb16b4b0aa03c18c1771049c11"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "e28848e77bb892d6b9392bcb5dc68a45915f0a41d00a0abec01022be24141b16"
+}

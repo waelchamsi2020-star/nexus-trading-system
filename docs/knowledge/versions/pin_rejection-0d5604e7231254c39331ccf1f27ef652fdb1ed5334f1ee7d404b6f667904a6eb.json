@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "id": "pin_rejection",
+  "name_ar": "رفض الذيل عند حد سعري",
+  "version": "1.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. رفض الذيل عند حد سعري",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 60,
+  "family": "candle",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "pin_rejection",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "candle",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Boundary pin rejection",
+      "rules": [
+        "Touch or sweep prior 20-bar extreme and close back inside",
+        "Dominant wick >= 2 bodies and >= 60% of range; opposite wick <= 20%; range >= 0.5 prior ATR"
+      ],
+      "parameters": {
+        "lookback": 20,
+        "wick_body": 2,
+        "wick_range": 0.6,
+        "opposite_wick": 0.2
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "ملامسة أو تجاوز الحد السعري للعشرين شمعة السابقة والإغلاق داخله.",
+        "الذيل الرئيسي ضعف الجسم على الأقل وستون بالمئة من الشمعة، والذيل المقابل لا يتجاوز عشرين بالمئة."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "span >= 0.5 * atr(b[:-1])",
+    "span > 0",
+    "lower >= max(2 * body, 0.6 * span)",
+    "upper <= 0.2 * span",
+    "x['low'] <= lo < x['close']",
+    "upper >= max(2 * body, 0.6 * span)",
+    "lower <= 0.2 * span",
+    "x['high'] >= hi > x['close']"
+  ],
+  "algorithm_python": "@specialist(\"pin_rejection\", \"رفض الذيل عند حد سعري\", \"Boundary pin rejection\", \"candle\",\n            [\"Touch or sweep prior 20-bar extreme and close back inside\", \"Dominant wick >= 2 bodies and >= 60% of range; opposite wick <= 20%; range >= 0.5 prior ATR\"],\n            {\"lookback\": 20, \"wick_body\": 2, \"wick_range\": .6, \"opposite_wick\": .2})\ndef pin_rejection(b, c):\n    x, p = b[-1], b[-21:-1]\n    span, body = x[\"high\"]-x[\"low\"], abs(x[\"close\"]-x[\"open\"])\n    lower, upper = min(x[\"open\"], x[\"close\"])-x[\"low\"], x[\"high\"]-max(x[\"open\"], x[\"close\"])\n    hi, lo = max(z[\"high\"] for z in p), min(z[\"low\"] for z in p)\n    valid = span >= .5*atr(b[:-1]) and span > 0\n    bull = valid and lower >= max(2*body, .6*span) and upper <= .2*span and x[\"low\"] <= lo < x[\"close\"]\n    bear = valid and upper >= max(2*body, .6*span) and lower <= .2*span and x[\"high\"] >= hi > x[\"close\"]\n    return signal(b, bull, bear, x[\"low\"], x[\"high\"], {\"low\": lo, \"high\": hi, \"lower_wick\": lower, \"upper_wick\": upper})\n",
+  "source_hashes": {
+    "strategies.py": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+    "specialists.py": "b80ac3ec42b2f169becbb6295007440ce654ea01fa5e2e39bfb4581bdeff3cd8",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "41a35b875aa9ad7ef0e1c3218329f0b39be491db2eb735d2ac90b46a69ea34d8",
+    "confluence_registry.py": "1d3a0d34c3cfabccdfa64bea784a58ffcd037d9e177d6cad5b2a6f87543da065",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "f360b0f9f69fd8a1cc5724b2dc5207210dd22b6091b5ba9096b202040e10e7b1",
+    "config/models.yaml": "5a2a25132504b314dbd85d6e013913fda7f9a220db88c6c2ee1e2e36b30bd619",
+    "config/models.schema.json": "151116766f8f956dd0f69c5f53a4132010ef193add42abe6dff04ebac6e8941f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "0d5604e7231254c39331ccf1f27ef652fdb1ed5334f1ee7d404b6f667904a6eb"
+}

@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "definition": {
+    "id": "multi_school_v1",
+    "version": "1.4.0",
+    "agents": "all_implemented_registry_models",
+    "cash_protection": {
+      "currency": "USD",
+      "trigger": 1,
+      "attempt_target": 2,
+      "fallback": "close_if_legal_floor_unavailable",
+      "scope": "explicit_current_authorization_owned_fast_positions",
+      "net": "paid_cashflows_swap_exit_commission_and_adverse_slippage",
+      "entry_trend": "completed_M15_and_H1_close_above_EMA20_above_EMA50_and_rising_EMA20_or_inverse_for_sell"
+    },
+    "frames": [
+      "M1",
+      "M5",
+      "M15"
+    ],
+    "fast_entry_frames": [
+      "M1"
+    ],
+    "normal_entry_frames": [
+      "M1",
+      "M5"
+    ],
+    "corroboration": "fast_M1_two_dependency_families_strict_net_advantage_no_fixed_vote_percentage_other_modes_two_timeframes",
+    "conflict": "fast_directional_family_vote_not_individual_school_veto_other_modes_triggered_veto",
+    "default_target": "3R_from_original_completed_close_and_original_stop_when_model_has_default_2R",
+    "fast_prefilter": "fresh_quote_and_completed_M1_only",
+    "fast_entry_zone": "original_completed_close_plus_minus_half_original_structural_risk_then_independent_net_RR",
+    "fast_spread_gate": "actual_broker_net_RR_no_fixed_ATR_or_stop_spread_cutoff_on_authorized_Demo",
+    "fast_exit": "SL_TP_invalidation_and_shared_daily_risk_no_fixed_bar_timer",
+    "fast_dedup": "one_entry_attempt_per_symbol_completed_M1_bar_across_all_schools",
+    "model_specific_targets": "preserved",
+    "minimum_net_rr": 2,
+    "missing_data": "abstain",
+    "source": "MT5_only",
+    "volume": "tick_proxy_when_declared_never_real_transaction_volume",
+    "scope": "bounded_local_models_not_all_original_school_interpretations",
+    "authority": "Demo_forward_only"
+  },
+  "modules": {
+    "multischool.py": "6b24aab65efe0eedff2ab5380c57f8ee134cb82a572c8572aa37c12f9a445ca6",
+    "committee.py": "bc193270fc1e1bb1023c1eced4e1e2b8b67383f4fc88407981bdc3d5d186f553",
+    "engine.py": "90d8cec4c337f40f1276cd1705dab5b06cacfa74f134511ed45fb910c8d506a6",
+    "risk.py": "900782649d87e454c6e1ace231ed100c4a885ea742d02441a565e4de2da1dcfd",
+    "execution.py": "e8ca6702bed97c5ca7f295fa66a070e77d7b1b640d3cb97717dcf8f01a7367d9",
+    "scalping.py": "a3c43a53ce75623723d91eb896b8e0bb16bd150cc1d9f9269144266b8447d6ad",
+    "market.py": "c1647d661d6225f14293be965ba635e44ee621b99a5be96189fa243d37fe578b",
+    "strategies.py": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+    "specialists.py": "b80ac3ec42b2f169becbb6295007440ce654ea01fa5e2e39bfb4581bdeff3cd8",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "f360b0f9f69fd8a1cc5724b2dc5207210dd22b6091b5ba9096b202040e10e7b1",
+    "store.py": "29b85aa17756bc3586e2ced5129f362573c7fc6384d88b4dac1cf29318e5c1bb",
+    "config/models.yaml": "5a2a25132504b314dbd85d6e013913fda7f9a220db88c6c2ee1e2e36b30bd619",
+    "config/models.schema.json": "151116766f8f956dd0f69c5f53a4132010ef193add42abe6dff04ebac6e8941f"
+  },
+  "revision": "a4149beada1ac86e661cb9732b87c874efeeb14d5e72aef1b1d7dbc8e6f391bc"
+}

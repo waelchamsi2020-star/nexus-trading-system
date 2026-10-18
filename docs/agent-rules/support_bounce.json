@@ -1,0 +1,54 @@
+{
+  "id": "support_bounce",
+  "school": "الدعم والمقاومة",
+  "strategy": "support_bounce",
+  "version": "1.1.0",
+  "indicators": [
+    "confirmed pivots",
+    "rejection wick"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 40,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "support_bounce",
+    "rule_version": "1.1.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 40,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.support_bounce",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "ملامسة دعم أو مقاومة من محور مؤكد ثم رفض سعري بإغلاق مكتمل.",
+  "execution_enabled": true,
+  "rules_python": "@_register(\"support_bounce\", \"الدعم والمقاومة\", [\"confirmed pivots\", \"rejection wick\"], \"structure\", 40)\ndef support_bounce(b, c):\n    last, prev, tolerance = b[-1], b[-2], .25*c[\"atr\"]\n    lows = [p for p in c[\"pivots\"] if p[\"kind\"] == \"LOW\"]\n    highs = [p for p in c[\"pivots\"] if p[\"kind\"] == \"HIGH\"]\n    support = lows[-1][\"price\"] if lows else None\n    resistance = highs[-1][\"price\"] if highs else None\n    bull = support is not None and last[\"close\"] > support and abs(last[\"low\"]-support) <= tolerance and last[\"close\"] > prev[\"close\"] and last[\"close\"]-last[\"low\"] > .6*(last[\"high\"]-last[\"low\"])\n    bear = resistance is not None and last[\"close\"] < resistance and abs(last[\"high\"]-resistance) <= tolerance and last[\"close\"] < prev[\"close\"] and last[\"high\"]-last[\"close\"] > .6*(last[\"high\"]-last[\"low\"])\n    return _result(\"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\", bull or bear,\n                   support if bull else resistance, support if bull else resistance,\n                   [_evidence(\"horizontal_level\", support, b, \"support\"), _evidence(\"horizontal_level\", resistance, b, \"resistance\")],\n                   [\"touch and close rejection\"] if bull or bear else [], [] if bull or bear else [\"confirmed level rejection\"])\n",
+  "rules_sha256": "90dbff3fff0c5f960c5c5de53c1301d8323cd0b559c2ec554dbeebfa38e2a2f0",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

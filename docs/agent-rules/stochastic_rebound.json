@@ -1,0 +1,90 @@
+{
+  "id": "stochastic_rebound",
+  "school": "الاستوكاستيك: عودة زخم مؤكدة",
+  "strategy": "stochastic_rebound",
+  "version": "1.0.1",
+  "indicators": [
+    "stochastic_sma"
+  ],
+  "evidence_group": "momentum",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "stochastic_rebound",
+    "rule_version": "1.0.1",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "momentum",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Stochastic SMA rebound",
+      "rules": [
+        "Raw K(14), slow K=SMA(raw,3), D=SMA(K,3); flat raw=50.",
+        "K crosses above 20 with K>D and rising close; inverse below 80 with K<D.",
+        "Five-bar structural stop reference; no entry on an overbought/oversold label alone."
+      ],
+      "rules_en": [
+        "Raw K(14), slow K=SMA(raw,3), D=SMA(K,3); flat raw=50.",
+        "K crosses above 20 with K>D and rising close; inverse below 80 with K<D.",
+        "Five-bar structural stop reference; no entry on an overbought/oversold label alone."
+      ],
+      "rules_ar": [
+        "خام أربعة عشر شمعة؛ خط رئيسي بمتوسط ثلاث قيم وخط إشارة بمتوسط ثلاث قيم أخرى.",
+        "عبور الخط الرئيسي صعوداً فوق عشرين وهو أعلى من الإشارة مع إغلاق صاعد؛ عكسه عند ثمانين للبيع.",
+        "مرجع الوقف أدنى أو أعلى خمس شموع؛ لا يكفي وجود المؤشر في منطقة تشبع."
+      ],
+      "parameters": {
+        "indicators": [
+          "stochastic_sma"
+        ],
+        "period": 14,
+        "slowing": 3,
+        "signal": 3,
+        "levels": [
+          20,
+          80
+        ]
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.stochastic_rebound",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+      "source": "https://www.metatrader5.com/en/terminal/help/indicators/oscillators"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الاستوكاستيك: عودة زخم مؤكدة",
+  "execution_enabled": true,
+  "rules_python": "@model('stochastic_rebound', 'الاستوكاستيك: عودة زخم مؤكدة', 'Stochastic SMA rebound', 'momentum',\n       ['خام أربعة عشر شمعة؛ خط رئيسي بمتوسط ثلاث قيم وخط إشارة بمتوسط ثلاث قيم أخرى.',\n        'عبور الخط الرئيسي صعوداً فوق عشرين وهو أعلى من الإشارة مع إغلاق صاعد؛ عكسه عند ثمانين للبيع.',\n        'مرجع الوقف أدنى أو أعلى خمس شموع؛ لا يكفي وجود المؤشر في منطقة تشبع.'],\n       ['Raw K(14), slow K=SMA(raw,3), D=SMA(K,3); flat raw=50.',\n        'K crosses above 20 with K>D and rising close; inverse below 80 with K<D.',\n        'Five-bar structural stop reference; no entry on an overbought/oversold label alone.'],\n       {'indicators': ['stochastic_sma'], 'period': 14, 'slowing': 3, 'signal': 3, 'levels': [20, 80]}, source=MT5_OSC)\ndef stochastic_rebound(b, c):\n    values = ind.stochastic(b); k = values['k']; d = values['d']; lo, hi = _stops(b)\n    return signal(b, k[-2] <= 20 < k[-1] and k[-1] > d[-1] and b[-1]['close'] > b[-2]['close'],\n                  k[-2] >= 80 > k[-1] and k[-1] < d[-1] and b[-1]['close'] < b[-2]['close'], lo, hi,\n                  {'k_previous': k[-2], 'k': k[-1], 'd': d[-1], 'variant': 'SMA_of_raw_ratios'})\n",
+  "rules_sha256": "2056c53a7f73854b8e38b22de5297b4c7b8296f988fafea3ea184a64192dac97",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

@@ -1,0 +1,54 @@
+{
+  "id": "zscore_reversion",
+  "school": "العودة إلى المتوسط والتحليل الإحصائي",
+  "strategy": "zscore_reversion",
+  "version": "1.0.0",
+  "indicators": [
+    "rolling zscore 40",
+    "mean slope filter"
+  ],
+  "evidence_group": "statistical",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "zscore_reversion",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "statistical",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.zscore_reversion",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "عودة درجة معيارية عبر عتبة مع هدف متوسط صالح؛ لا يفترض ثبات التوزيع.",
+  "execution_enabled": true,
+  "rules_python": "@_register(\"zscore_reversion\", \"العودة إلى المتوسط والتحليل الإحصائي\", [\"rolling zscore 40\", \"mean slope filter\"], \"statistical\", 65)\ndef zscore_reversion(b, c):\n    closes = [x[\"close\"] for x in b]\n    training = closes[-42:-2]\n    mean, sd = statistics.fmean(training), statistics.pstdev(training)\n    if sd <= 0:\n        return _result(missing=[\"nonzero dispersion\"])\n    before, now = (closes[-2]-mean)/sd, (closes[-1]-mean)/sd\n    stable = abs(statistics.fmean(training[-10:])-statistics.fmean(training[:10])) < sd\n    bull, bear = stable and before <= -2 < now, stable and before >= 2 > now\n    side = \"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\"\n    target = mean if (bull and mean > closes[-1]) or (bear and mean < closes[-1]) else None\n    return _result(side, bool((bull or bear) and target), closes[-1],\n                   min(x[\"low\"] for x in b[-5:]) if bull else max(x[\"high\"] for x in b[-5:]),\n                   [_evidence(\"zscore\", {\"mean\": mean, \"sd\": sd, \"before\": before, \"current\": now, \"stable\": stable}, b, \"mean estimated before both trigger bars\")],\n                   [\"stable mean\"] if stable else [], [] if target else [\"fresh zscore recross with valid mean target\"],\n                   [\"No stationarity or Gaussian distribution claim\"], targets=[{\"price\": target, \"method\": \"pre-trigger sample mean\", \"fraction\": 1.0}] if target else None)\n",
+  "rules_sha256": "218329459865a4420ec2d7f5cfc0bee9fad3d99f757ab36be2f043e2b8c16603",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "version": "1.0.0",
+  "rules": {
+    "adx_di_cross": {
+      "rule_version": "1.0.1",
+      "min_bars": 65
+    },
+    "atr_channel_break": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "band_reentry": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "base_first_return": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "breakout_retest": {
+      "rule_version": "1.0.0",
+      "min_bars": 30
+    },
+    "cci_reentry": {
+      "rule_version": "1.0.0",
+      "min_bars": 65
+    },
+    "classic_pivot_reclaim": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "classic_reversal_patterns": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "darvas_box": {
+      "rule_version": "1.0.0",
+      "min_bars": 35
+    },
+    "darvas_rising_boxes": {
+      "rule_version": "1.0.0",
+      "min_bars": 65
+    },
+    "donchian_20": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "dow_structure": {
+      "rule_version": "1.0.0",
+      "min_bars": 40
+    },
+    "elliott_candidate": {
+      "rule_version": "3.0.0",
+      "min_bars": 65
+    },
+    "elliott_impulse_reversal": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "elliott_zigzag_reversal": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "ema_cross": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "engulfing": {
+      "rule_version": "1.0.0",
+      "min_bars": 20
+    },
+    "failed_range_break": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "fib_retracement": {
+      "rule_version": "1.1.0",
+      "min_bars": 60
+    },
+    "flag_breakout": {
+      "rule_version": "1.0.0",
+      "min_bars": 65
+    },
+    "four_school_confluence": {
+      "rule_version": "1.0.0",
+      "min_bars": 40
+    },
+    "fractal_5_breakout": {
+      "rule_version": "1.0.0",
+      "min_bars": 61
+    },
+    "fvg_first_return": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "gann": {
+      "rule_version": "3.0.0",
+      "min_bars": 65
+    },
+    "geometric_triangle_breakout": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "harmonic_abcd": {
+      "rule_version": "2.0.0",
+      "min_bars": 60
+    },
+    "harmonic_bat": {
+      "rule_version": "1.1.0",
+      "min_bars": 65
+    },
+    "harmonic_butterfly": {
+      "rule_version": "1.1.0",
+      "min_bars": 65
+    },
+    "harmonic_gartley": {
+      "rule_version": "1.1.0",
+      "min_bars": 65
+    },
+    "ichimoku_cross": {
+      "rule_version": "1.0.0",
+      "min_bars": 80
+    },
+    "inside_bar_break": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "interasset_confirmation": {
+      "rule_version": "3.0.1",
+      "min_bars": 65
+    },
+    "liquidity_bos_retest": {
+      "rule_version": "1.0.0",
+      "min_bars": 65
+    },
+    "macd_signal_cross": {
+      "rule_version": "1.0.0",
+      "min_bars": 65
+    },
+    "mfi_tick_rebound": {
+      "rule_version": "1.0.1",
+      "min_bars": 65
+    },
+    "momentum_acceleration": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "obv_divergence_reclaim": {
+      "rule_version": "1.0.0",
+      "min_bars": 61
+    },
+    "order_flow": {
+      "rule_version": "3.0.0",
+      "min_bars": 65
+    },
+    "pin_rejection": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "rectangle_breakout": {
+      "rule_version": "1.0.0",
+      "min_bars": 65
+    },
+    "regression_reentry": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "rsi_rebound": {
+      "rule_version": "1.0.1",
+      "min_bars": 30
+    },
+    "rsi_wilder_rebound": {
+      "rule_version": "1.0.1",
+      "min_bars": 65
+    },
+    "seasonality": {
+      "rule_version": "3.0.0",
+      "min_bars": 65
+    },
+    "smc_ict_proxy": {
+      "rule_version": "3.0.0",
+      "min_bars": 65
+    },
+    "smt_proxy": {
+      "rule_version": "3.0.1",
+      "min_bars": 65
+    },
+    "stochastic_rebound": {
+      "rule_version": "1.0.1",
+      "min_bars": 65
+    },
+    "supply_demand_proxy": {
+      "rule_version": "3.0.0",
+      "min_bars": 65
+    },
+    "support_bounce": {
+      "rule_version": "1.1.0",
+      "min_bars": 40
+    },
+    "three_bar_reversal": {
+      "rule_version": "1.0.0",
+      "min_bars": 65
+    },
+    "tick_activity_rejection": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "utc_opening_range": {
+      "rule_version": "1.0.0",
+      "min_bars": 60
+    },
+    "volatility_breakout": {
+      "rule_version": "1.0.0",
+      "min_bars": 65
+    },
+    "vwap_reclaim": {
+      "rule_version": "1.0.0",
+      "min_bars": 30
+    },
+    "williams_reentry": {
+      "rule_version": "1.0.1",
+      "min_bars": 65
+    },
+    "wyckoff_range_expansion": {
+      "rule_version": "1.0.0",
+      "min_bars": 65
+    },
+    "wyckoff_spring": {
+      "rule_version": "3.0.0",
+      "min_bars": 65
+    },
+    "zscore_reversion": {
+      "rule_version": "1.0.0",
+      "min_bars": 65
+    }
+  }
+}

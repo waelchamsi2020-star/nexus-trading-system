@@ -1,0 +1,63 @@
+{
+  "id": "elliott_candidate",
+  "school": "إليوت: فرضية موجتين محلية",
+  "strategy": "elliott_candidate",
+  "version": "3.0.0",
+  "indicators": [
+    "confirmed pivots",
+    "alternative wave counts"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "elliott_candidate",
+    "rule_version": "3.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Elliott: local wave 1-2 hypothesis",
+      "implementation": "nexus.local_models.wave12",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "Three confirmed alternating pivots; first leg at least 2 ATR, retracement 0.382–0.786, fresh first-leg break within 16 bars with retracement intact."
+      ],
+      "rules_ar": [
+        "ثلاثة محاور مؤكدة متناوبة؛ الضلع الأول ضعفا نطاق التقلب على الأقل والتصحيح بين 38.2 و78.6 بالمئة، ثم كسر جديد خلال ست عشرة شمعة مع سلامة قاع أو قمة التصحيح."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: إليوت: فرضية موجتين محلية",
+  "execution_enabled": true,
+  "rules_python": "def wave12(b,c):\n    p=st._alternating_pivots(c[\"pivots\"])[-3:]\n    if len(p)<3:return wait(b)\n    a,peak,retrace=p;bull=a[\"kind\"]==\"LOW\";sign=1 if bull else -1\n    wave=sign*(peak[\"price\"]-a[\"price\"])\n    pullback=sign*(peak[\"price\"]-retrace[\"price\"])\n    geometry=wave>=2*c[\"atr\"] and .382<=pullback/wave<=.786 if wave>0 else False\n    age=len(b)-1-(retrace[\"index\"]+2)\n    intact=all(x[\"low\"]>=retrace[\"price\"] if bull else x[\"high\"]<=retrace[\"price\"] for x in b[retrace[\"index\"]+1:])\n    trigger=(b[-2][\"close\"]<=peak[\"price\"]<b[-1][\"close\"] if bull else b[-2][\"close\"]>=peak[\"price\"]>b[-1][\"close\"])\n    active=geometry and 1<=age<=16 and intact and trigger\n    result=signal(b,active and bull,active and not bull,retrace[\"price\"],retrace[\"price\"],\n                  {\"pivots\": p,\"retracement\": pullback/wave if wave>0 else None,\"age\": age})\n    result[\"assumptions\"].append(\"Local wave 1-2 hypothesis; nested Elliott counts and future wave completion are not asserted\")\n    return result\n",
+  "rules_sha256": "83d04531ce3686a5d1e886d8b133b6212c8feba7163ccc9c95ac9b45038b3bc3",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

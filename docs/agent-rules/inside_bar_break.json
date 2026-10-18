@@ -1,0 +1,69 @@
+{
+  "id": "inside_bar_break",
+  "school": "اختراق الشمعة الداخلية",
+  "strategy": "inside_bar_break",
+  "version": "1.0.0",
+  "indicators": [
+    "Inside bar breakout"
+  ],
+  "evidence_group": "candle",
+  "min_bars": 60,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "inside_bar_break",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 60,
+    "completed_bars_only": true,
+    "evidence_group": "candle",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Inside bar breakout",
+      "rules": [
+        "Previous bar strictly inside mother bar",
+        "Latest close crosses mother boundary in prior EMA20 direction"
+      ],
+      "parameters": {
+        "ema": 20
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_ar": [
+        "الشمعة السابقة تقع بالكامل داخل الشمعة الأم.",
+        "إغلاق جديد خارج حد الشمعة الأم في اتجاه المتوسط الأسي السابق لعشرين شمعة."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختراق الشمعة الداخلية",
+  "execution_enabled": true,
+  "rules_python": "@specialist(\"inside_bar_break\", \"اختراق الشمعة الداخلية\", \"Inside bar breakout\", \"candle\",\n            [\"Previous bar strictly inside mother bar\", \"Latest close crosses mother boundary in prior EMA20 direction\"], {\"ema\": 20})\ndef inside_bar_break(b, c):\n    mother, inside, x = b[-3:]\n    center = ema([z[\"close\"] for z in b[:-1]], 20)[-1]\n    valid = inside[\"high\"] < mother[\"high\"] and inside[\"low\"] > mother[\"low\"]\n    return signal(b, valid and x[\"close\"] > mother[\"high\"] and inside[\"close\"] > center,\n                  valid and x[\"close\"] < mother[\"low\"] and inside[\"close\"] < center,\n                  mother[\"low\"], mother[\"high\"], {\"low\": mother[\"low\"], \"high\": mother[\"high\"], \"mean\": center})\n",
+  "rules_sha256": "c74ffcab9b79f1d1f127a4ecb45f94a8025985f8e95a26fe2d8d25f1ce99676a",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

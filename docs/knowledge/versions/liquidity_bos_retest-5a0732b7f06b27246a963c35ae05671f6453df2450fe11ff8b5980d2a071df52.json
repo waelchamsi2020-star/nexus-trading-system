@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "id": "liquidity_bos_retest",
+  "name_ar": "السيولة: سحب ثم كسر وإعادة اختبار",
+  "version": "1.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. السيولة: سحب ثم كسر وإعادة اختبار",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "liquidity_bos_retest",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Liquidity sweep BOS first retest",
+      "rules": [
+        "Sweep/reclaim of a prior 10-bar boundary, then later close beyond opposite boundary with body>=pre-sweep ATR.",
+        "First retest within eight bars of sweep, tolerance .15 ATR, directional rejection, sweep extreme unbroken."
+      ],
+      "rules_en": [
+        "Sweep/reclaim of a prior 10-bar boundary, then later close beyond opposite boundary with body>=pre-sweep ATR.",
+        "First retest within eight bars of sweep, tolerance .15 ATR, directional rejection, sweep extreme unbroken."
+      ],
+      "rules_ar": [
+        "سحب أحد حدي عشر شموع وإغلاق داخله، ثم إغلاق لاحق خارج الحد المقابل بجسم لا يقل عن التقلب السابق.",
+        "أول إعادة اختبار للحد المكسور خلال ثماني شموع من السحب بسماح 0.15 من التقلب وإغلاق موافق؛ يبقى حد السحب سليماً."
+      ],
+      "parameters": {
+        "indicators": [
+          "prior_10_bar_range",
+          "prior_atr_simple"
+        ],
+        "max_sweep_age": 8,
+        "retest_tolerance_atr": 0.15
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.liquidity_bos_retest",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "a <= 0",
+    "sweep['low'] < lo < sweep['close'] <= hi",
+    "sweep['high'] > hi > sweep['close'] >= lo",
+    "level - 0.15 * a <= x['low'] <= level + 0.15 * a",
+    "x['close'] > level",
+    "x['close'] > x['open']",
+    "level - 0.15 * a <= x['high'] <= level + 0.15 * a",
+    "x['close'] < level",
+    "x['close'] < x['open']",
+    "z['low'] <= level + 0.15 * a",
+    "z['high'] >= level - 0.15 * a",
+    "z['low'] > sweep['low']",
+    "z['high'] < sweep['high']",
+    "b[j - 1]['close'] <= level < b[j]['close']",
+    "b[j]['close'] - b[j]['open'] >= a",
+    "b[j - 1]['close'] >= level > b[j]['close']",
+    "b[j]['open'] - b[j]['close'] >= a"
+  ],
+  "algorithm_python": "@model('liquidity_bos_retest', 'السيولة: سحب ثم كسر وإعادة اختبار', 'Liquidity sweep BOS first retest', 'structure',\n       ['سحب أحد حدي عشر شموع وإغلاق داخله، ثم إغلاق لاحق خارج الحد المقابل بجسم لا يقل عن التقلب السابق.',\n        'أول إعادة اختبار للحد المكسور خلال ثماني شموع من السحب بسماح 0.15 من التقلب وإغلاق موافق؛ يبقى حد السحب سليماً.'],\n       ['Sweep/reclaim of a prior 10-bar boundary, then later close beyond opposite boundary with body>=pre-sweep ATR.',\n        'First retest within eight bars of sweep, tolerance .15 ATR, directional rejection, sweep extreme unbroken.'],\n       {'indicators': ['prior_10_bar_range', 'prior_atr_simple'], 'max_sweep_age': 8, 'retest_tolerance_atr': .15})\ndef liquidity_bos_retest(b, c):\n    x = b[-1]\n    for i in range(len(b)-4, len(b)-10, -1):\n        sweep = b[i]; prior = b[i-10:i]; a = st.atr(b[:i]); lo = min(z['low'] for z in prior); hi = max(z['high'] for z in prior)\n        if a <= 0:\n            continue\n        for bull in (True, False):\n            valid = sweep['low'] < lo < sweep['close'] <= hi if bull else sweep['high'] > hi > sweep['close'] >= lo\n            if not valid:\n                continue\n            level = hi if bull else lo\n            breaks = [j for j in range(i+1, len(b)-1) if (b[j-1]['close'] <= level < b[j]['close'] and b[j]['close']-b[j]['open'] >= a if bull else\n                      b[j-1]['close'] >= level > b[j]['close'] and b[j]['open']-b[j]['close'] >= a)]\n            if not breaks:\n                continue\n            j = breaks[0]; between = b[j+1:-1]\n            consumed = any(z['low'] <= level+.15*a if bull else z['high'] >= level-.15*a for z in between)\n            intact = all(z['low'] > sweep['low'] if bull else z['high'] < sweep['high'] for z in b[i+1:])\n            rejected = (level-.15*a <= x['low'] <= level+.15*a and x['close'] > level and x['close'] > x['open'] if bull else\n                        level-.15*a <= x['high'] <= level+.15*a and x['close'] < level and x['close'] < x['open'])\n            if not consumed and intact and rejected:\n                return signal(b, bull, not bull, sweep['low'], sweep['high'],\n                              {'sweep_time': sweep['time'], 'bos_time': b[j]['time'], 'level': level, 'first_touch': True, 'reference_atr': a})\n    return signal(b, False, False, None, None, {'first_touch': False})\n",
+  "source_hashes": {
+    "strategies.py": "abc88bcb1d0f1776ed10307024cc5ba8f877206b406b20da9e39d51072a96e23",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "config/models.yaml": "5a2a25132504b314dbd85d6e013913fda7f9a220db88c6c2ee1e2e36b30bd619",
+    "config/models.schema.json": "151116766f8f956dd0f69c5f53a4132010ef193add42abe6dff04ebac6e8941f"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "5a0732b7f06b27246a963c35ae05671f6453df2450fe11ff8b5980d2a071df52"
+}

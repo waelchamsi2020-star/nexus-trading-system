@@ -1,0 +1,109 @@
+{
+  "id": "harmonic_bat",
+  "school": "الهارمونيك: بات مؤكد",
+  "strategy": "harmonic_bat",
+  "version": "1.1.0",
+  "indicators": [
+    "causal_five_bar_pivots",
+    "fibonacci_ratios"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 65,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "harmonic_bat",
+    "rule_version": "1.1.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Confirmed Bat house model",
+      "rules": [
+        "Five confirmed alternating XABCD pivots; every ratio interval is explicit in parameters.",
+        "Fresh break of two D-confirmation bars 1..8 bars after confirmation; D intact and target C ahead.",
+        "Retain the newest matching XABCD window within its lifetime despite minor later confirmation pivots; never reuse expired windows."
+      ],
+      "rules_en": [
+        "Five confirmed alternating XABCD pivots; every ratio interval is explicit in parameters.",
+        "Fresh break of two D-confirmation bars 1..8 bars after confirmation; D intact and target C ahead.",
+        "Retain the newest matching XABCD window within its lifetime despite minor later confirmation pivots; never reuse expired windows."
+      ],
+      "rules_ar": [
+        "خمسة محاور متناوبة مؤكدة؛ النسب والسماحات العددية محفوظة كاملة في معاملات النموذج.",
+        "عبور جديد لمستوى الشمعتين المؤكدتين للنقطة الأخيرة بعد تأكيدها بواحدة إلى ثماني شموع؛ بقاء النقطة سليمة والهدف عند النقطة السابقة.",
+        "يبقى أحدث تسلسل مطابق ضمن عمره صالحاً رغم محور تأكيد صغير لاحق؛ لا يُبحث عن تسلسل انتهى عمره."
+      ],
+      "parameters": {
+        "indicators": [
+          "causal_five_bar_pivots",
+          "fibonacci_ratios"
+        ],
+        "ratios": {
+          "ab_xa": [
+            0.382,
+            0.5
+          ],
+          "bc_ab": [
+            0.382,
+            0.886
+          ],
+          "ad_xa": [
+            0.856,
+            0.916
+          ],
+          "cd_bc": [
+            1.618,
+            2.618
+          ],
+          "cd_ab": [
+            1.0,
+            1.618
+          ]
+        },
+        "ratio_policy": "house_intervals_not_universal_tolerances",
+        "max_confirmation_age": 8
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.harmonic_bat",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+      "source": "https://harmonictrader.com/harmonic-patterns/bat-pattern/"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الهارمونيك: بات مؤكد",
+  "execution_enabled": true,
+  "rules_python": "@_harmonic_decorator('bat', 'الهارمونيك: بات مؤكد', 'Confirmed Bat house model')\ndef harmonic_bat(b, c):\n    return _harmonic(b, c, 'bat')\n",
+  "rules_sha256": "bfa6d315ce70ad4077aa50ea6b9cf7a361fa7c216cc2556f20073659541b6a37",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "id": "harmonic_gartley",
+  "name_ar": "الهارمونيك: غارتلي مؤكد",
+  "version": "1.1.0",
+  "dependency_schema": 3,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. الهارمونيك: غارتلي مؤكد",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc"
+  ],
+  "minimum_bars": 65,
+  "family": "structure",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "harmonic_gartley",
+    "rule_version": "1.1.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Confirmed Gartley house model",
+      "rules": [
+        "Five confirmed alternating XABCD pivots; every ratio interval is explicit in parameters.",
+        "Fresh break of two D-confirmation bars 1..8 bars after confirmation; D intact and target C ahead.",
+        "Retain the newest matching XABCD window within its lifetime despite minor later confirmation pivots; never reuse expired windows."
+      ],
+      "rules_en": [
+        "Five confirmed alternating XABCD pivots; every ratio interval is explicit in parameters.",
+        "Fresh break of two D-confirmation bars 1..8 bars after confirmation; D intact and target C ahead.",
+        "Retain the newest matching XABCD window within its lifetime despite minor later confirmation pivots; never reuse expired windows."
+      ],
+      "rules_ar": [
+        "خمسة محاور متناوبة مؤكدة؛ النسب والسماحات العددية محفوظة كاملة في معاملات النموذج.",
+        "عبور جديد لمستوى الشمعتين المؤكدتين للنقطة الأخيرة بعد تأكيدها بواحدة إلى ثماني شموع؛ بقاء النقطة سليمة والهدف عند النقطة السابقة.",
+        "يبقى أحدث تسلسل مطابق ضمن عمره صالحاً رغم محور تأكيد صغير لاحق؛ لا يُبحث عن تسلسل انتهى عمره."
+      ],
+      "parameters": {
+        "indicators": [
+          "causal_five_bar_pivots",
+          "fibonacci_ratios"
+        ],
+        "ratios": {
+          "ab_xa": [
+            0.588,
+            0.648
+          ],
+          "bc_ab": [
+            0.382,
+            0.886
+          ],
+          "ad_xa": [
+            0.756,
+            0.816
+          ],
+          "cd_bc": [
+            1.27,
+            1.618
+          ],
+          "cd_ab": [
+            0.95,
+            1.05
+          ]
+        },
+        "ratio_policy": "house_intervals_not_universal_tolerances",
+        "max_confirmation_age": 8
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "implementation": "nexus.extended_models.harmonic_gartley",
+      "rules_source": "extended_models.py",
+      "scope_ar": "قاعدة تنفيذ محلية موثقة؛ لا تمثل جميع تفسيرات المدرسة ولا تثبت ربحيتها.",
+      "scope": "Explicit house interpretation; not complete school coverage or profitability evidence",
+      "source": "https://harmonictrader.com/harmonic-patterns/gartley-pattern/"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [],
+  "algorithm_python": "@_harmonic_decorator('gartley', 'الهارمونيك: غارتلي مؤكد', 'Confirmed Gartley house model')\ndef harmonic_gartley(b, c):\n    return _harmonic(b, c, 'gartley')\n",
+  "source_hashes": {
+    "strategies.py": "5d98ec4402f2e46ea6870a949dbd2d5d909ff1d7f55e0a0744a96d012e2be2e4",
+    "specialists.py": "a030bc1a3abe16e31b1fe3eba4da9e683968561acb87c83c2d394a41a40e428c",
+    "local_models.py": "60618291b43a8fced1b73e740c58f5a829a882f44bfa77763bb80518c850f607",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f",
+    "confluence.py": "bb8bb3c3cb832b7f48d8c0cd0e8f7c6a02a23030ec35b06eefaccfce74bbe2a2",
+    "confluence_registry.py": "a8b0a67bd7287e94a7c7aa5403b69b2713c4bfbb16b4b0aa03c18c1771049c11",
+    "indicators.py": "3288110b9b542d83cf3804fbc46b006f5b5d8eae83041f4ebc762f1c47945e60",
+    "extended_models.py": "641b0b535290b641fc1e9d744797f15b60023c75d40bf85940628c83cd56e2a9"
+  },
+  "source_reference": {
+    "url": "https://harmonictrader.com/harmonic-patterns/gartley-pattern/"
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "2bbd62f0b7fbb12dc9f1c3078a6d70289e8ef1de4d45b5277fbb438672ad54fa"
+}

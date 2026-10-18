@@ -1,0 +1,53 @@
+{
+  "id": "darvas_box",
+  "school": "Darvas Box",
+  "strategy": "darvas_box",
+  "version": "1.0.0",
+  "indicators": [
+    "confirmed 20 bar box"
+  ],
+  "evidence_group": "structure",
+  "min_bars": 35,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "darvas_box",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 35,
+    "completed_bars_only": true,
+    "evidence_group": "structure",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.darvas_box",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "نسخة محددة لصندوق سعري سابق وتأكيد السقف ثم الاختراق، وليست كل قراءات دارفاس.",
+  "execution_enabled": true,
+  "rules_python": "@_register(\"darvas_box\", \"Darvas Box\", [\"confirmed 20 bar box\"], \"structure\", 35)\ndef darvas_box(b, c):\n    window = b[-21:-1]\n    top = max(x[\"high\"] for x in window)\n    bottom = min(x[\"low\"] for x in window)\n    top_index = next(i for i, x in enumerate(window) if x[\"high\"] == top)\n    confirmed = top_index <= len(window)-4 and all(x[\"high\"] < top for x in window[top_index+1:])\n    bull = confirmed and b[-2][\"close\"] <= top < b[-1][\"close\"]\n    bear = confirmed and b[-2][\"close\"] >= bottom > b[-1][\"close\"]\n    return _result(\"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\", bull or bear, top if bull else bottom,\n                   bottom if bull else top, [_evidence(\"box\", {\"top\": top, \"bottom\": bottom}, b, \"three closes confirm top\")],\n                   [\"box confirmed\"] if confirmed else [], [] if bull or bear else [\"fresh box breakout\"],\n                   [\"Fixed 20-bar Darvas variant; not every discretionary box interpretation\"])\n",
+  "rules_sha256": "e4485d6b33155cfe8706996fda37c557d4feedc1c756b257897d16e65a1a725e",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

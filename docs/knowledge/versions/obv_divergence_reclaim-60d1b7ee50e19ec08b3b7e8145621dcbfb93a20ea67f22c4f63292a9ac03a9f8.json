@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "id": "obv_divergence_reclaim",
+  "name_ar": "اختلاف OBV التقريبي واستعادة المستوى",
+  "version": "1.0.0",
+  "dependency_schema": 3,
+  "scope_ar": "تعريف تخصص خوارزمي؛ القواعد والمعاملات موثقة في العقد المرفق. اختلاف OBV التقريبي واستعادة المستوى",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc",
+    "positive_tick_volume"
+  ],
+  "minimum_bars": 61,
+  "family": "volume",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "obv_divergence_reclaim",
+    "rule_version": "1.0.0",
+    "data_requirements": [
+      "completed_ohlc",
+      "positive_tick_volume"
+    ],
+    "minimum_bars": 61,
+    "completed_bars_only": true,
+    "evidence_group": "volume",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "Tick-count OBV divergence and price reclaim proxy",
+      "rules": [
+        "Fixed 60 completed bars preceding the trigger plus the trigger; positive finite MT5 tick_volume on every bar; never substitute real_volume or silently fill missing activity",
+        "Start OBV at zero at the window's first bar; add / subtract the current bar tick count when close rises / falls versus the preceding close; unchanged closes add zero",
+        "Newest two strict confirmed five-bar lows: lower price low with strictly higher OBV; bearish mirror is higher price high with strictly lower OBV; dual high/low pivots and ties excluded",
+        "Pivot separation <= 30 bars; trigger occurs 1..8 bars after the second right confirmation bar, which must precede the trigger",
+        "Fresh completed close reclaims the maximum intervening high for BUY / minimum intervening low for SELL; latest divergence pivot remains unbroken through trigger and supplies the structural stop; opposing simultaneous triggers abstain",
+        "House divergence, confirmation, expiry and reclaim definition; tick-count candle-volume proxy, not actual order flow or the complete OBV theory"
+      ],
+      "parameters": {
+        "lookback": 60,
+        "left_bars": 2,
+        "right_closed_bars": 2,
+        "max_pivot_separation": 30,
+        "max_confirmation_age": 8,
+        "volume_source": "tick_volume"
+      },
+      "allowed_regimes": [
+        "TREND",
+        "RANGE",
+        "MIXED"
+      ],
+      "timeframe_scope": "all_completed_ohlc",
+      "rules_en": [
+        "Fixed 60 completed bars preceding the trigger plus the trigger; positive finite MT5 tick_volume on every bar; never substitute real_volume or silently fill missing activity",
+        "Start OBV at zero at the window's first bar; add / subtract the current bar tick count when close rises / falls versus the preceding close; unchanged closes add zero",
+        "Newest two strict confirmed five-bar lows: lower price low with strictly higher OBV; bearish mirror is higher price high with strictly lower OBV; dual high/low pivots and ties excluded",
+        "Pivot separation <= 30 bars; trigger occurs 1..8 bars after the second right confirmation bar, which must precede the trigger",
+        "Fresh completed close reclaims the maximum intervening high for BUY / minimum intervening low for SELL; latest divergence pivot remains unbroken through trigger and supplies the structural stop; opposing simultaneous triggers abstain",
+        "House divergence, confirmation, expiry and reclaim definition; tick-count candle-volume proxy, not actual order flow or the complete OBV theory"
+      ],
+      "source": "https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/OBV",
+      "volume_source_reference": "https://www.mql5.com/en/docs/constants/structures/mqlrates",
+      "scope": "House tick-count candle-volume divergence/reclaim proxy; not actual order flow or complete OBV theory",
+      "rules_ar": [
+        "ستون شمعة مكتملة قبل التفعيل مع شمعة التفعيل؛ عدد تكات MT5 موجب ومحدود لكل شمعة، دون استبداله بحجم فعلي أو تعويض القيم المفقودة.",
+        "يبدأ OBV بصفر عند أول شمعة؛ يضاف أو يطرح عدد تكات الشمعة وفق ارتفاع الإغلاق أو انخفاضه عن السابق، والتعادل لا يغير القيمة.",
+        "أحدث قاعين خماسيين مؤكدين: قاع سعري أدنى مع OBV أعلى بصورة صارمة؛ للبيع قمة سعرية أعلى مع OBV أدنى؛ يستبعد التعادل والمحاور المزدوجة.",
+        "المسافة بين المحورين لا تتجاوز ثلاثين شمعة؛ التفعيل بعد شمعة تأكيد المحور الثاني بواحدة إلى ثماني شموع، والتأكيد يسبق شمعة التفعيل.",
+        "إغلاق جديد فوق أعلى قمة بين القاعين للشراء أو أسفل أدنى قاع بين القمتين للبيع؛ يبقى المحور الأخير دون كسر حتى التفعيل وهو مرجع الوقف؛ التفعيل المتعارض يمتنع.",
+        "الاختلاف والتأكيد والعمر والاستعادة قواعد محلية؛ الحجم بديل تقريبي لشموع التكات وليس تدفق أوامر فعليًا أو نظرية OBV كاملة."
+      ]
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "len(b) < 61",
+    "len(selected) < 2",
+    "kind == 'LOW'",
+    "current['close'] > previous['close']",
+    "b[-2]['close'] <= level < b[-1]['close']",
+    "b[-2]['close'] >= level > b[-1]['close']",
+    "v <= 0",
+    "current['close'] < previous['close']",
+    "p['kind'] == kind",
+    "second['price'] < first['price']",
+    "second_obv > first_obv",
+    "second['price'] > first['price']",
+    "second_obv < first_obv",
+    "distance <= 30",
+    "1 <= age <= 8",
+    "x['low'] >= second['price']",
+    "x['high'] <= second['price']"
+  ],
+  "algorithm_python": "@specialist(\"obv_divergence_reclaim\", \"اختلاف OBV التقريبي واستعادة المستوى\", \"Tick-count OBV divergence and price reclaim proxy\", \"volume\",\n            [\"Fixed 60 completed bars preceding the trigger plus the trigger; positive finite MT5 tick_volume on every bar; never substitute real_volume or silently fill missing activity\",\n             \"Start OBV at zero at the window's first bar; add / subtract the current bar tick count when close rises / falls versus the preceding close; unchanged closes add zero\",\n             \"Newest two strict confirmed five-bar lows: lower price low with strictly higher OBV; bearish mirror is higher price high with strictly lower OBV; dual high/low pivots and ties excluded\",\n             \"Pivot separation <= 30 bars; trigger occurs 1..8 bars after the second right confirmation bar, which must precede the trigger\",\n             \"Fresh completed close reclaims the maximum intervening high for BUY / minimum intervening low for SELL; latest divergence pivot remains unbroken through trigger and supplies the structural stop; opposing simultaneous triggers abstain\",\n             \"House divergence, confirmation, expiry and reclaim definition; tick-count candle-volume proxy, not actual order flow or the complete OBV theory\"],\n            {\"lookback\": 60, \"left_bars\": 2, \"right_closed_bars\": 2,\n             \"max_pivot_separation\": 30, \"max_confirmation_age\": 8, \"volume_source\": \"tick_volume\"})\ndef obv_divergence_reclaim(b, c):\n    if len(b) < 61:\n        return _result(status=\"DATA_MISSING\", missing=[\"61 completed bars required for bounded OBV proxy\"],\n                       assumptions=[OBV_TICK_ASSUMPTION])\n    offset = len(b)-61\n    window = b[offset:]\n    volumes = [x.get(\"tick_volume\") for x in window]\n    if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v <= 0 for v in volumes):\n        return _result(status=\"DATA_MISSING\", missing=[\"positive finite tick counts required for every bounded OBV bar\"],\n                       assumptions=[OBV_TICK_ASSUMPTION])\n    obv = [0.0]\n    for previous, current, volume in zip(window, window[1:], volumes[1:]):\n        change = volume if current[\"close\"] > previous[\"close\"] else -volume if current[\"close\"] < previous[\"close\"] else 0\n        obv.append(obv[-1]+change)\n    if any(not math.isfinite(value) for value in obv):\n        return _result(status=\"DATA_INVALID\", missing=[\"bounded OBV cumulative value must be finite\"],\n                       assumptions=[OBV_TICK_ASSUMPTION])\n    pivots = _prior_five_bar_pivots(b)\n    details = dict(lookback=60, volume_source=\"tick_volume\", volume_units=\"tick_count\",\n                   obv_origin_time=window[0][\"time\"], obv_current=obv[-1],\n                   reference_precedes_trigger=True, bullish_setup=None, bearish_setup=None)\n    setups = {}\n    for kind in (\"LOW\", \"HIGH\"):\n        selected = [p for p in pivots if p[\"kind\"] == kind]\n        if len(selected) < 2:\n            continue\n        first, second = selected[-2:]\n        distance = second[\"index\"]-first[\"index\"]\n        age = len(b)-1-(second[\"index\"]+2)\n        first_obv, second_obv = obv[first[\"index\"]-offset], obv[second[\"index\"]-offset]\n        bullish = kind == \"LOW\"\n        divergence = (second[\"price\"] < first[\"price\"] and second_obv > first_obv if bullish else\n                      second[\"price\"] > first[\"price\"] and second_obv < first_obv)\n        between = b[first[\"index\"]+1:second[\"index\"]]\n        level = max(x[\"high\"] for x in between) if bullish else min(x[\"low\"] for x in between)\n        intact = all(x[\"low\"] >= second[\"price\"] if bullish else x[\"high\"] <= second[\"price\"]\n                     for x in b[second[\"index\"]+1:])\n        crossed = b[-2][\"close\"] <= level < b[-1][\"close\"] if bullish else b[-2][\"close\"] >= level > b[-1][\"close\"]\n        setup = dict(first_pivot=first, second_pivot=second, first_obv=first_obv, second_obv=second_obv,\n                     divergence=divergence, pivot_separation=distance, confirmation_age=age,\n                     reclaim_level=level, pivot_intact=intact)\n        details[\"bullish_setup\" if bullish else \"bearish_setup\"] = setup\n        setups[kind] = (divergence and distance <= 30 and 1 <= age <= 8 and intact and crossed, second[\"price\"])\n    bull, stop_buy = setups.get(\"LOW\", (False, None))\n    bear, stop_sell = setups.get(\"HIGH\", (False, None))\n    result = signal(b, bull, bear, stop_buy, stop_sell, details)\n    result[\"assumptions\"].append(OBV_TICK_ASSUMPTION)\n    return result\n",
+  "source_hashes": {
+    "strategies.py": "d7a6d841dab9e47ddc0c4a3170c7fa665f5df33119ff59ee13ca2ffa3069f387",
+    "specialists.py": "a030bc1a3abe16e31b1fe3eba4da9e683968561acb87c83c2d394a41a40e428c",
+    "local_models.py": "2b06b9bf50435d7209d5b0c45460f2174dd2184f5deb2167721d0c32f053e65d",
+    "timeframes.py": "89ef609f15ebe3519898275b71de3a72d9135a15b809bd17ed3b56b2f549f81f",
+    "confluence.py": "bb8bb3c3cb832b7f48d8c0cd0e8f7c6a02a23030ec35b06eefaccfce74bbe2a2",
+    "confluence_registry.py": "a8b0a67bd7287e94a7c7aa5403b69b2713c4bfbb16b4b0aa03c18c1771049c11",
+    "indicators.py": "3288110b9b542d83cf3804fbc46b006f5b5d8eae83041f4ebc762f1c47945e60",
+    "extended_models.py": "641b0b535290b641fc1e9d744797f15b60023c75d40bf85940628c83cd56e2a9"
+  },
+  "source_reference": {
+    "url": "https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/OBV"
+  },
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "60d1b7ee50e19ec08b3b7e8145621dcbfb93a20ea67f22c4f63292a9ac03a9f8"
+}

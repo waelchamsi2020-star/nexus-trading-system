@@ -1,0 +1,53 @@
+{
+  "id": "rsi_rebound",
+  "school": "مؤشرات الزخم",
+  "strategy": "rsi_rebound",
+  "version": "1.0.1",
+  "indicators": [
+    "simple RSI 14"
+  ],
+  "evidence_group": "momentum",
+  "min_bars": 30,
+  "coverage": "IMPLEMENTED",
+  "data_requirements": [
+    "completed_ohlc"
+  ],
+  "news_requirements": [
+    "calendar"
+  ],
+  "agent_type": "local_deterministic_research_agent",
+  "authority": "research_only_no_broker_access",
+  "input_contract": "completed chronological bars; no unfinished or future bar",
+  "output_contract": "inspectable evidence card; committee and risk remain authoritative",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "rsi_rebound",
+    "rule_version": "1.0.1",
+    "data_requirements": [
+      "completed_ohlc"
+    ],
+    "minimum_bars": 30,
+    "completed_bars_only": true,
+    "evidence_group": "momentum",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "implementation": "nexus.strategies.rsi_rebound",
+      "scope": "existing versioned algorithm; see exported exact rule source"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "theory_scope_ar": "عودة مؤشر القوة النسبية عبر 30 أو70؛ النسخة الحالية بمتوسط بسيط لا بتنعيم وايلدر.",
+  "execution_enabled": true,
+  "rules_python": "@_register(\"rsi_rebound\", \"مؤشرات الزخم\", [\"simple RSI 14\"], \"momentum\", 30)\ndef rsi_rebound(b, c):\n    closes = [x[\"close\"] for x in b]\n    before, now = rsi(closes[:-1]), rsi(closes)\n    bull, bear = before <= 30 < now, before >= 70 > now\n    return _result(\"BUY\" if bull else \"SELL\" if bear else \"NEUTRAL\", bull or bear, closes[-1],\n                   min(x[\"low\"] for x in b[-5:]) if bull else max(x[\"high\"] for x in b[-5:]),\n                   [_evidence(\"oscillator\", {\"previous\": before, \"current\": now}, b, \"simple RSI14\")],\n                   [\"fresh threshold recovery\"] if bull or bear else [], [] if bull or bear else [\"RSI recross 30 or 70\"],\n                   [\"Simple rolling gain/loss RSI; deliberately not Wilder smoothing\"])\n",
+  "rules_sha256": "98f2d201f760d50a4a7a9629d91830f9a906de759c6b687f845b7d35218c79cf",
+  "source_module_sha256": "d24461b71450c6dc9b82c9de21d91531d1c6bd305243830f93320e61233efce3",
+  "execution_note": "Implemented rules still require committee, quote, risk and broker approval; this is not a profitability certificate."
+}

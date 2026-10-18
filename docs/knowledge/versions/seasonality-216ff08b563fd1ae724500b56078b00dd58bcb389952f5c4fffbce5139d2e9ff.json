@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "id": "seasonality",
+  "name_ar": "موسمية العملات: نموذج شهري محلي",
+  "version": "3.0.0",
+  "dependency_schema": 4,
+  "scope_ar": "نموذج محلي محدد القواعد، وليس المدرسة كاملة: موسمية العملات: نموذج شهري محلي",
+  "school_complete": false,
+  "definition_type": "VERSIONED_COMPUTATIONAL_DEFINITION",
+  "inputs": [
+    "completed_ohlc",
+    "broker_daily_history"
+  ],
+  "minimum_bars": 65,
+  "family": "statistical",
+  "contract": {
+    "schema_version": 1,
+    "rule_id": "seasonality",
+    "rule_version": "3.0.0",
+    "data_requirements": [
+      "completed_ohlc",
+      "broker_daily_history"
+    ],
+    "minimum_bars": 65,
+    "completed_bars_only": true,
+    "evidence_group": "statistical",
+    "coverage": "IMPLEMENTED",
+    "school_complete": false,
+    "definition": {
+      "name_en": "FX seasonality: local monthly model",
+      "implementation": "nexus.local_models.monthly_bias",
+      "scope": "Bounded local model; not the complete original school. Data availability and entry conditions are checked separately.",
+      "scope_ar": "نموذج محلي محدد القواعد؛ لا يمثل المدرسة الأصلية بكاملها. يجري فحص توفر البيانات وشروط الدخول بشكل منفصل.",
+      "rules": [
+        "Declared FX only; at least three completed prior same-month samples from MT5 D1, absolute t-score at least 2, direction agreement at least two thirds, fresh 20-bar break."
+      ],
+      "rules_ar": [
+        "أزواج العملات المعلنة فقط؛ ثلاث عينات شهرية سابقة مكتملة على الأقل من يوميات المنصة، ودرجة إحصائية مطلقة لا تقل عن اثنتين واتفاق ثلثي العينات مع كسر جديد لنطاق عشرين شمعة."
+      ],
+      "rules_source": "local_models.py"
+    },
+    "missing_data_policy": "abstain",
+    "direct_broker_authority": false,
+    "promotion_policy": "versioned code change plus tests; never automatic self-modification",
+    "data_policy": "MT5_ONLY",
+    "external_model_api_required": false,
+    "price_plan": "closed-bar entry zone +/- 0.15 ATR; structural stop buffered 0.1 ATR; default 2R or explicit model target",
+    "portfolio_authority": "independent shared daily risk; no agent may alter limits",
+    "executable_specialists": []
+  },
+  "conditions_code": [
+    "len(returns) < 3",
+    "base not in currencies",
+    "quote not in currencies",
+    "base == quote",
+    "sd > 0",
+    "d.month == now.month",
+    "d.year < now.year",
+    "len(group) >= 15",
+    "first.day <= 7",
+    "last.day >= 24",
+    "abs(value) > 0.5",
+    "score >= 2",
+    "agreement >= 2 / 3",
+    "b[-2]['close'] <= hi < b[-1]['close']",
+    "score <= -2",
+    "b[-2]['close'] >= lo > b[-1]['close']",
+    "x * mean > 0",
+    "x['time'] + 86400 <= c['as_of']"
+  ],
+  "algorithm_python": "def monthly_bias(b,c):\n    info=c.get(\"symbol_info\",{});base=info.get(\"currency_base\",\"\");quote=info.get(\"currency_profit\",\"\")\n    currencies={\"USD\",\"EUR\",\"GBP\",\"JPY\",\"CHF\",\"CAD\",\"AUD\",\"NZD\",\"ZAR\",\"MXN\",\"HKD\",\"SGD\",\"NOK\",\"SEK\",\"PLN\",\"TRY\",\"CNH\"}\n    if base not in currencies or quote not in currencies or base==quote:\n        return wait(b,\"local monthly model supports declared currency pairs only\",missing=True)\n    daily=c.get(\"daily_bars\",[])\n    try:daily=st.validate_bars([x for x in daily if x[\"time\"]+86400<=c[\"as_of\"]],\"D1\",c[\"as_of\"])\n    except (st.DataError,KeyError,TypeError):return wait(b,\"completed multi-year MT5 daily history required\",missing=True)\n    now=datetime.fromtimestamp(c[\"as_of\"],UTC)\n    groups={}\n    for x in daily:\n        d=datetime.fromtimestamp(x[\"time\"],UTC)\n        if d.month==now.month and d.year<now.year:groups.setdefault(d.year,[]).append(x)\n    returns=[]\n    for group in groups.values():\n        first=datetime.fromtimestamp(group[0][\"time\"],UTC);last=datetime.fromtimestamp(group[-1][\"time\"],UTC)\n        if len(group)>=15 and first.day<=7 and last.day>=24:\n            value=group[-1][\"close\"]/group[0][\"open\"]-1\n            if abs(value)>.5:return wait(b,\"historical discontinuity in local monthly sample\",missing=True)\n            returns.append(value)\n    if len(returns)<3:return wait(b,\"three complete earlier same-month samples required\",missing=True)\n    mean=statistics.fmean(returns);sd=statistics.stdev(returns)\n    score=mean/(sd/math.sqrt(len(returns))) if sd>0 else 0.\n    agreement=sum(x*mean>0 for x in returns)/len(returns)\n    hi=max(x[\"high\"] for x in b[-21:-1]);lo=min(x[\"low\"] for x in b[-21:-1])\n    result=signal(b,score>=2 and agreement>=2/3 and b[-2][\"close\"]<=hi<b[-1][\"close\"],\n                  score<=-2 and agreement>=2/3 and b[-2][\"close\"]>=lo>b[-1][\"close\"],lo,hi,\n                  {\"sample_count\": len(returns),\"mean\": mean,\"score\": score,\"agreement\": agreement,\"month\": now.month})\n    result[\"assumptions\"].append(\"Raw broker FX monthly sample; no adjusted futures history, stationarity or seasonal profitability claim\")\n    return result\n",
+  "source_hashes": {
+    "strategies.py": "46d65a27827a7851139109182d589b9ffeb9f297e9f459630a64dd76ecdaa293",
+    "specialists.py": "ba9b98564cc965a602f0bf34c40b0e0f0f4753015a50e90dfd5afd69092ab4af",
+    "local_models.py": "48795e470d1f971ff736a78d612877e955a4ca896554b4c84fd63ae781872b37",
+    "timeframes.py": "5e927c246b484a0388aa1538e6d8647d373436912c080efcf2af5053509e0070",
+    "confluence.py": "b72580fe87cb662fbf0e03a906a0c680c12ff6fe6f9d67ee71f4f42fe3df437b",
+    "confluence_registry.py": "199e45ce844dbdf4e5b3386bf56bac9dfba262a419319a477579c8121af3812f",
+    "indicators.py": "f23dccebe52ebc4a8a3a827eea60b03be4b259f4d9e5528da6801d7daf7e5cef",
+    "extended_models.py": "46c5fe93a058437b66efb4b3ad4700fd3aa296fdbc4741edab8a527c1e7bec0c",
+    "config/models.yaml": "ae0b53519cd32666c7ece681fcec8c095711a26f67bb75963b6ca5d1c74c075b",
+    "config/models.schema.json": "56ad04230dd939cd1dca8caaf3a0a4f0801392851b4bf9d912ab06b2a64cdd83"
+  },
+  "source_reference": null,
+  "reference_note": "Source principles and house thresholds are distinct; no claim to cover all interpretations.",
+  "invariants": [
+    "completed_bars_only",
+    "no_future_data",
+    "missing_data_abstains",
+    "single_risk_authority",
+    "no_direct_broker_access"
+  ],
+  "change_process": [
+    "new_immutable_revision",
+    "positive_and_negative_fixtures",
+    "chronological_holdout_after_costs",
+    "demo_forward_review",
+    "versioned_release"
+  ],
+  "learning_policy": "Versioned observations, attributable closed outcomes and local chart-feature classifier evaluation; no automatic mutation of rules, risk or live votes.",
+  "learning_contract": {
+    "feature_version": "ohlc-v1",
+    "model_version": "chart-logistic-v1",
+    "features": [
+      "return_1_atr",
+      "return_5_atr",
+      "ema_gap_atr",
+      "rsi_centered",
+      "close_location",
+      "efficiency_20",
+      "volatility_ratio_log",
+      "tick_activity_log"
+    ],
+    "feature_input_window": 41,
+    "feature_snapshot": "original_completed_mt5_entry_decision",
+    "label": "broker_confirmed_owned_closed_trade_net_r_after_costs > 0",
+    "identity": [
+      "rule_revision",
+      "protocol_revision",
+      "execution_style",
+      "scalp_policy_revision",
+      "execution_policy_revision",
+      "symbol",
+      "timeframe"
+    ],
+    "minimum_samples": 60,
+    "minimum_train_samples": 40,
+    "minimum_holdout_samples": 12,
+    "split": "chronological_70_30_with_unavailable_training_labels_purged",
+    "normalization": "training_only",
+    "evaluation": [
+      "holdout_brier",
+      "holdout_log_loss",
+      "training_prevalence_baseline"
+    ],
+    "mode": "SHADOW_ONLY",
+    "execution_authority": false,
+    "legacy_feature_backfill": false,
+    "automatic_rule_mutation": false
+  },
+  "revision": "216ff08b563fd1ae724500b56078b00dd58bcb389952f5c4fffbce5139d2e9ff"
+}
