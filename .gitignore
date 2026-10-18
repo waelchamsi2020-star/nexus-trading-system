@@ -20,6 +20,8 @@ Windows/
 config.json
 /data/real/M5/*
 /data/real/H1/*
+/data/real/archive/
+/data/demo/
 /reports/
 
 # Private engineering journals and local handoff paths are not public source
