@@ -190,3 +190,25 @@ against separate authoritative quant.replay runs. Historical spread and adverse
 observed net R with at least one trade, not statistical significance, independent
 portfolio profitability, complete school coverage or permission to execute.
 All results remain `qualified=false` and carry no execution authority.
+
+## Long rolling native-history research
+
+The explicit `--long-history` route uses H1 5000/1000/500 or M5
+20000/5000/2500 train/test/step bars, with24 embargo bars. It preserves all
+three USD0/3/7 commission scenarios, native spread and10-point adverse slippage
+per side. Overlapping full-window diagnostics are kept separate from the
+unique chronological primary book; unknown gap exposures retain `R=null`.
+No rule, live risk limit, learner or broker position is modified.
+
+```powershell
+python tools/edge_test.py --long-history --csv data/real/H1/EURUSD_H1.csv --metadata data/real/H1/EURUSD_H1.metadata.json --output reports/long-study/H1.json --workers 6
+python tools/edge_test.py --long-history --csv data/real/M5/EURUSD_M5.csv --metadata data/real/M5/EURUSD_M5.metadata.json --output reports/long-study/M5.json --workers 6
+```
+
+Native metadata must include source `MT5_NATIVE`, `aggregated=false`, exact
+`csv_sha256`, symbol/frame, point, contract size, profit currency and calendar
+profile. Unknown actual fees remain unknown; hypothetical research scenarios
+do not become broker fee evidence. Interrupted computation resumes verified
+atomic signal-cache chunks. See [the full protocol](docs/LONG_HISTORY_PROTOCOL.md)
+for training isolation, censoring, currency conversion, ranking, multiplicity
+and retrospective temporal-validation limits.

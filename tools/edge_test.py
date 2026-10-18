@@ -140,10 +140,20 @@ def main():
     inputs.add_argument('--data-root',type=Path,help='Read M5/*.csv and H1/*.csv with .metadata.json sidecars')
     parser.add_argument('--metadata',type=Path)
     parser.add_argument('--preliminary-segments',action='store_true')
+    parser.add_argument('--long-history', action='store_true', help='Fixed rolling H1/M5 research; censored unknown fills, unique overlapping-fold book; no qualification')
+    parser.add_argument('--workers', type=int, default=6)
     parser.add_argument('--commission-scenarios',type=float,nargs='+',default=[0.,3.,7.])
     parser.add_argument('--output',type=Path,default=ROOT/'reports/edge-test.json')
     parser.add_argument('--output-dir',type=Path,default=ROOT/'reports/edge-native')
     args=parser.parse_args()
+    if args.long_history:
+        if not args.csv or not args.metadata or args.preliminary_segments:
+            parser.error('--long-history requires explicit --csv/--metadata and excludes --preliminary-segments')
+        if args.commission_scenarios != [0.,3.,7.]:
+            parser.error('--long-history protocol fixes commission scenarios to 0/3/7')
+        from long_walkforward import run_native
+        run_native(args.csv, args.metadata, args.output, args.workers)
+        return
     if args.data_root:
         if args.preliminary_segments:parser.error('--preliminary-segments requires an explicit --csv and --metadata')
         if args.metadata:parser.error('--metadata is only valid with --csv')
