@@ -225,6 +225,17 @@ def test_desktop_browser_recovers_from_invalid_status_and_superseded_edit(direct
         assert 'غير متاحة' in page.locator('#header-execution-mode').inner_text()
         # Limits remain editable when the journal is valid but the sender is stopped.
         assert page.locator('#demo-limits-form [type="submit"]').is_enabled()
+        page.locator('[name="daily_loss_amount"]').fill('43')
+        page.locator('#demo-limits-form [type="submit"]').click()
+        page.wait_for_function("document.querySelector('#demo-feedback').textContent.includes('حُفظت')")
+        assert submitted[1]['values']['daily_loss_amount'] == 43
+        assert submitted[1]['revision'] == 2
+        assert page.locator('#demo-toggle').is_disabled()
+        # An unreadable status with a potentially live sender blocks limit edits.
+        state.update(running=True, fresh=False)
+        page.evaluate('data => renderDemoPanel(data)', state)
+        assert page.locator('#demo-toggle').is_disabled()
+        assert page.locator('#demo-limits-form [type="submit"]').is_disabled()
         assert errors == []
         browser.close()
 
