@@ -19,7 +19,11 @@
   document.querySelector('#view-overview .account-grid').insertAdjacentElement('afterend',panel);
   const form = panel.querySelector('form'), feedback = panel.querySelector('#demo-feedback');
   const toggle=panel.querySelector('#demo-toggle'), save=form.querySelector('[type="submit"]');
-  const buttons=()=>{toggle.disabled=busy||Boolean(latest?.error)||!latest?.running;save.disabled=busy||!latest?.limits||revision===null;};
+  const buttons=()=>{toggle.disabled=busy||Boolean(latest?.error)||!latest?.running;
+    // A valid, persisted limits journal remains editable while the sender is
+    // known stopped; if status is unreadable while it may still be running,
+    // fail closed until the operator can confirm the execution state.
+    save.disabled=busy||!latest?.limits||revision===null||Boolean(latest?.error&&latest?.running);};
   const fillLimits=()=>{if(!latest?.limits)return;revision=latest.limits.revision;
     for(const [key,value] of Object.entries(latest.limits.values)){const input=form.elements.namedItem(key);if(input)input.value=value;}};
   panel.querySelector('#demo-reload-limits').addEventListener('click',()=>{

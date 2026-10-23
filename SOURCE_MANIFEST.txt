@@ -6,8 +6,11 @@ e5b730ff6e88bd726c59c2162c4bcaba3ab81b2408b3b696e5a7a908743a0191       2035 byte
 dad88c2d47f49179c8ffd127a60858f68b7cc867773240f5c987a4aefa6ca470       592 bytes  .gitignore
 bd38e3695ed78599125b077e332b14fd472bf2c4aa8540650e329b1a992f9358       1750 bytes  .ruff.toml
 eeae08ce62ea6a162c25153098201c1c8bf8e5a5e077e8cd2572cdcca3b222cd       1107 bytes  AI_REVIEW_HANDOFF.md
+44f88189916c8ec167d4817d4b9a3d93fc7edfd18e2a9fdb4ad9b9fa29b1d218       7365 bytes  CHANGELOG.md
+ae4f9a59d21cc8667cd81ba6a5caa078ed517716eb6e36d944fccdbe0e1827d8       15091 bytes  README.md
+afc7e604da6480b135c3d06af72754e7d752fc608259bdda727b9ac61d7e2451       1547 bytes  THIRD-PARTY-NOTICES.md
 0f82885c2e6f8e91f00d4a1a603b18e56676f20e09af3ae8101ef14d83493fef       2246 bytes  build.ps1
-8b6d1f64678b701b8a26425198cf364fecde259098c176e3dea3f346744b9254       7239 bytes  CHANGELOG.md
+eaa00145380858e14da6cc040544c8f28fdc991c76ac70db4b4a88a14947ad59       18903 bytes  docs/AGENT_ARCHITECTURE_PLAN_AR_EN.md
 f7c77b73cecc827ac93fff3a84968de0b78f82e1a92772669b89c06d81220352       5157 bytes  docs/agent-rules/adx_di_cross.json
 d3ce70196fd5e1cf0ab4001240ab3b6d6e28f051743532ec9eee1ff9c0ba3d41       593 bytes  docs/agent-rules/adx_di_cross.py
 8baf3a78b65ddecc3607524cb83a8de38b71b97cf00d3e0537563091cdd98b47       3443 bytes  docs/agent-rules/atr_channel_break.json
@@ -140,13 +143,12 @@ b9549e22bd491cbaaf70a5f41cf604005b0a546037285eef57ce955b8dc8d6cb       4519 byte
 2491c9e1bef4b11dfabc7d49dabae927bbcaf39ce708cde86517117a9832d38e       566 bytes  docs/agent-rules/wyckoff_spring.py
 4f8a71aeea17d9de9d95bc20d7968573788d6ca2a789c51405b591568eb6280a       3721 bytes  docs/agent-rules/zscore_reversion.json
 9e56723ed6bdf823bf77b4af7e1013b6a7226ed50970d4ddcc5fab5e6d9e7917       554 bytes  docs/agent-rules/zscore_reversion.py
-eaa00145380858e14da6cc040544c8f28fdc991c76ac70db4b4a88a14947ad59       18903 bytes  docs/AGENT_ARCHITECTURE_PLAN_AR_EN.md
+3d301350430cda32b760e1543bdebd07d6241f0ac474f70b5a2696b485ad5213       20814 bytes  docs/knowledge/README.md
 ecb812f97720f418542858a7b1c1594f82cdb6848365f78159526e77bad458bd       339762 bytes  docs/knowledge/execution-reference.json
 a936969927edb62ebfadeae831e6416f81d34c51fd27809942e772f1b0063673       3592 bytes  docs/knowledge/indicator-library.json
 366b96ad8d797d78bebf1d6e9edc549277ce757205cb8b167ab6a14e3c064439       129012 bytes  docs/knowledge/learning-reference.json
 01504881681bf8055cb41916f49b664f67d81d88d18a73c44c4e1ee137892057       450602 bytes  docs/knowledge/library.json
 a882dea44c50616289428ca024218e998e5da51b7050449ad3e4e1bed4e85b94       3304 bytes  docs/knowledge/multi-school-reference.json
-3d301350430cda32b760e1543bdebd07d6241f0ac474f70b5a2696b485ad5213       20814 bytes  docs/knowledge/README.md
 139024427bca030f0ac5058c727b9cf25b4af7f3e45085241080dba103794cf1       72117 bytes  docs/knowledge/sources/139024427bca030f0ac5058c727b9cf25b4af7f3e45085241080dba103794cf1-strategies.py
 143634dc372f0bf2116ff8c1c97fdfe3f324cac036f71fa24d9a5d30a5fa34fe       39220 bytes  docs/knowledge/sources/143634dc372f0bf2116ff8c1c97fdfe3f324cac036f71fa24d9a5d30a5fa34fe-specialists.py
 151116766f8f956dd0f69c5f53a4132010ef193add42abe6dff04ebac6e8941f       43971 bytes  docs/knowledge/sources/151116766f8f956dd0f69c5f53a4132010ef193add42abe6dff04ebac6e8941f-config/models.schema.json
@@ -1511,7 +1513,6 @@ bd0c35a1e9f4edbf4e7fb23252146457df5592ae22c529aa59391255de95e5ee       5785 byte
 274cbffeeab3534a7f9e56009950fd9411c14e89aa4a0e4817ec218caab7e0fb       261712 bytes  docs/school-catalog/reference-ar.md
 2cfd2962d3b5f26cef7fb6128d7160f2056786db3a5333d156bdfb76493652d6       192470 bytes  docs/school-catalog/reference-en.md
 c35cc51f0eed2ee386fd6c7e10be2e3b499cdf35b07e52e0ba9747994656c247       298 bytes  pyproject.toml
-ae4f9a59d21cc8667cd81ba6a5caa078ed517716eb6e36d944fccdbe0e1827d8       15091 bytes  README.md
 a935f2f6fe69f29dcbdd875cd623267ff8f6b57e5e9f874ea4aa1c61d0739be3       166 bytes  requirements-build.txt
 53f57b35b8ee49a3af60a69adc3f3ee863464e1763aa68943a4689e949f2739a       135 bytes  requirements-dev.txt
 3c4be908aa05a23a7dd1828b549872eebd127f9fe1f30056da7ecaa7ed4d4ba0       193 bytes  requirements.txt
@@ -1672,7 +1673,6 @@ f11f4586d89ef83f05f409544c8e610b675dbf344f07ef6ff5100ce4534338c1       2404 byte
 a3af7d9a26106b600fd5d92d9c8d7811153ecb0ccec1cd8239231c0a915dce33       3225 bytes  tests/test_walkforward_review.py
 3b6fe78037c14839fd720c80eb6c233ec71455152d76652917ba7f513323e5a7       1183 bytes  tests/test_window_geometry.py
 838a03eb9674b3ae576684c88dcac8da3275e92953f8f7fda8e748fc3fad99bd       64609 bytes  tests/ui_static_check.cjs
-afc7e604da6480b135c3d06af72754e7d752fc608259bdda727b9ac61d7e2451       1547 bytes  THIRD-PARTY-NOTICES.md
 8524935fbb855d1d0d9b23eeb18e8a7459f3eb101a73200f66762fd0dd05d579       5451 bytes  tools/assess_readiness.py
 a04e8b17121f98f832e85a914bbd64bafebd6ac0af339796708a745a8fd20d07       5607 bytes  tools/audit_entry_acceptance.py
 a75fc3952035efc7ef1ae2355845bd4fdc5339bd79842a1987d78dc84fea5296       3054 bytes  tools/audit_mt5_models.py
@@ -1723,7 +1723,7 @@ e2b95e40c1b3d1a8e3279ebbc63ab39c591f7716054b2edd637d0bbddcebf26f       4539 byte
 abbd21b20518ee04a62b54fef022abf13d8e606b7ca5e5c9153893e1fe52b1f2       9753 bytes  tools/temporal_validation.py
 58854c9757fc73adc03a86ec74107d4a86a49cd72d09d02741034841a2aefb55       4500 bytes  tools/verify_mt5_readonly.py
 7d56f7efc82d9504aeb2c9b100be102d8dbe7adbe162611d58615299a008288e       155549 bytes  ui/app.js
-e3e7621d99d3507e32285dc8c1292af8d55492637ecbde0402aa3fbe55b824db       8849 bytes  ui/demo-panel.js
+1524fc45bf607fc7eee48f0dd37b6cae6cdaa278a094315751df1b66609b30d7       9125 bytes  ui/demo-panel.js
 b0afc3bfa8bc816fec0811735431ef92b2e2f9d68b612c1892faf6feed4fbaab       142500 bytes  ui/i18n.js
 116dc148617d6ae90a6fa5d8c14bcab15e74bb58db582c6e1decb54f1881c286       36204 bytes  ui/index.html
 c4521e283262f8714b820880b32759692c9922a090c05904215b9935b5e633f5       1158 bytes  ui/session-view.js

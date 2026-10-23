@@ -3,7 +3,7 @@
 - Move the executor state to the top bar, expose its reason accessibly, and remove the duplicate status from the lower trading panel.
 - Label the home decision card as the best-opportunity preview and direct users to the full opportunities list.
 - Add static and browser regressions for the single top status, error detail, and preview count. No school rules, account limits, or order permissions changed.
-- Keep the independent Demo limit form editable while the sender is stopped; corrupt execution status still blocks starting the sender.
+- Keep the independent Demo limit form editable while the sender is stopped; corrupt execution status still blocks starting the sender. When status is unreadable and the sender may still be running, fail closed on limit edits until execution state is confirmed.
 
 # 0.7.15 — 2026-10-23
 
