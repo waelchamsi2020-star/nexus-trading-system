@@ -231,7 +231,13 @@
   function go(view) {
     if (!titles[view]) view = 'overview'; currentView = view;
     document.querySelectorAll('.view').forEach((x) => x.classList.toggle('active',x.id === `view-${view}`));
-    document.querySelectorAll('.nav-item[data-view]').forEach((x) => x.classList.toggle('active',x.dataset.view === view));
+    document.querySelectorAll('.nav-item[data-view]').forEach((x) => {
+      const active=x.dataset.view === view;
+      x.classList.toggle('active',active);
+      if(active)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current');
+    });
+    const more=$('nav-more');
+    if(more)more.open=['news','knowledge','audit'].includes(view);
     set('view-title',uiText(titles[view])); document.querySelector('.shell').classList.remove('menu-open');
     if (location.hash !== `#${view}`) history.replaceState(null,'',`#${view}`);
     if (view === 'research') requestAnimationFrame(drawChart);
@@ -270,7 +276,11 @@
     set('account-login',a.login ? `# ${a.login}${accountName ? ` · ${accountName}` : ''}` : 'غير متصل'); set('account-server',a.server ? tr(a.server) : 'افتح الإعداد للاتصال بمنصة MT5');
     const type = a.trade_mode === 0 ? 'DEMO' : a.trade_mode === 1 ? 'CONTEST' : a.trade_mode === 2 ? 'REAL' : first(a.type,a.account_type,'UNKNOWN');
     $('account-type').className = `mini-pill ${cls(type)}`; set('account-type',tr(type));
-    set('header-execution-mode',mode==='AUTO_DEMO'?uiText('نشط'):tr(mode)); $('header-execution-mode').title=tr(obj(state.execution).reason||''); set('active-mode',tr(mode)); set('position-mode',tr(mode)); set('footer-state',mode === 'READ_ONLY' ? 'لا يوجد تفويض بالتنفيذ' : `تفويض: ${tr(mode)}`);
+    const headerMode=mode==='READ_ONLY'?'تحليل يعمل · التنفيذ متوقف':mode==='AUTO_DEMO'?uiText('نشط'):tr(mode);
+    set('header-execution-mode',headerMode);
+    $('header-execution-mode').title=mode==='READ_ONLY'?uiText('الواجهة تعرض التحليل للقراءة فقط ولا تملك تفويض إرسال أوامر.'):tr(obj(state.execution).reason||'');
+    $('header-execution-mode').setAttribute('aria-label',`${headerMode}. ${$('header-execution-mode').title}`);
+    set('active-mode',tr(mode)); set('position-mode',tr(mode)); set('footer-state',mode === 'READ_ONLY' ? 'لا يوجد تفويض بالتنفيذ' : `تفويض: ${tr(mode)}`);
     const status = typeof state.status === 'string' ? state.status : first(obj(state.status).state,obj(state.status).label,'STOPPED');
     $('engine-state').className = `pill ${cls(status) || (mode !== 'READ_ONLY' ? 'green' : 'neutral')}`; set('engine-state',tr(status)); $('engine-state').hidden=tr(status)===tr(mode);
     const received = first(state.last_update,state.updated_at,state.as_of,state.timestamp,obj(state.terminal).updated_at);
@@ -307,6 +317,7 @@
     updateControls();
     if (state.error) {set('service-error',plain(state.error));$('service-error').hidden = false;}
     applyI18n();
+    window.renderDemoPanel?.(state.demo_live);
   }
   function renderScan() {
     const s = obj(state.scan); const metrics = [['المكتشفة',s.discovered],['المفحوصة',s.checked],['المؤهلة',s.eligible],['المستبعدة',s.excluded]];
@@ -459,7 +470,10 @@
   function listHTML(values,missing = 'غير متاح') {const valuesArr = Array.isArray(values) ? values : values ? [values] : [];return valuesArr.length ? `<ul>${valuesArr.map((v) => {const card=typeof v==='string'?arr(state.cards).find((c)=>c.id===v):null;return `<li>${h(card?`${schoolName(card.school)} · ${card.timeframe}: ${tr(card.scenario)}`:plain(v))}</li>`;}).join('')}</ul>` : `<span class="muted">${h(missing)}</span>`;}
   function renderOpportunities() {
     const data = opportunities(), deferred = allOpportunities().length-data.length; $('opportunities').innerHTML = data.length ? data.map((o,i) => opportunityHTML(o,i)).join('') : empty('لا توجد فرص مؤهلة معروضة.',`${deferred ? `${uiText('نتائج الفحص غير المؤهلة')}: ${deferred}. ${uiText('تشمل الانتظار والرفض وانتهاء الصلاحية؛ ليست جميعها أوامر مرفوضة.')}` : ''} ${uiText('الانتظار قرار صالح؛ لا يُخفَّض معيار الدخول للاقتراب من الهدف.')}`);
-    $('committee-summary').className = data.length ? '' : 'empty compact'; $('committee-summary').innerHTML = data.length ? data.slice(0,1).map((o,i) => opportunityHTML(o,i,false)).join('') : 'لا توجد فرصة دخول مؤهلة الآن.';
+    $('committee-summary').className = data.length ? '' : 'empty compact';
+    $('committee-summary').innerHTML = data.length
+      ? `<p class="tiny-note committee-preview-count">${h(uiText('ملخص أفضل فرصة من الفرص المؤهلة'))}: ${num(data.length,0)} · ${h(uiText('افتح الأبحاث لرؤية القائمة كاملة'))}</p>${opportunityHTML(data[0],0,false)}`
+      : 'لا توجد فرصة دخول مؤهلة الآن.';
   }
   function renderResearch() {
     updateChartSymbols();
@@ -470,7 +484,8 @@
     set('chart-title',chart.symbol ? `${chart.symbol} · ${chart.timeframe || '—'}` : 'الشارت والأدلة'); set('chart-time',chart.data_time || chart.as_of ? `آخر بيانات: ${date(first(chart.data_time,chart.as_of))}` : 'وقت آخر شمعة يظهر على الشارت');
     chartBars = arr(chart.bars).filter((b) => ['open','high','low','close'].every((k) => finite(b[k])));
     $('chart-empty').hidden = chartBars.length > 0;
-    $('research-cards').innerHTML = cards.length ? cards.map(cardHTML).join('') : empty('لا توجد بطاقات مدارس بعد.','حدد الرمز والفريم ثم اضغط «عرض»، أو انتظر اكتمال تحليل السوق.');
+    const omittedCards=!arr(chart.cards).length&&state.cards_truncated?`<p class="tiny-note">يعرض آخر ${cards.length} بطاقة من أصل ${num(state.cards_total,0)} لتسريع الواجهة؛ اختيار رمز وفريم يعرض أدلتهما الكاملة.</p>`:'';
+    $('research-cards').innerHTML = omittedCards+(cards.length ? cards.map(cardHTML).join('') : empty('لا توجد بطاقات مدارس بعد.','حدد الرمز والفريم ثم اضغط «عرض»، أو انتظر اكتمال تحليل السوق.'));
     document.querySelectorAll('#research-cards details').forEach((d,i)=>{d.dataset.cardId=[cards[i].school,cards[i].symbol,cards[i].timeframe].join(':');d.open=openCards.has(d.dataset.cardId);});
     requestAnimationFrame(drawChart);
   }
@@ -545,6 +560,29 @@
     set('news-count',`${items.length} واقعة`);
     $('news-items').innerHTML=items.length?items.map((x)=>{const sourceName=newsSourceName(first(x.source,x.source_name,'مصدر غير مسمى')),headline=newsArabicText(first(x.title,x.headline,'خبر بلا عنوان'),`بيان رسمي جديد من ${sourceName}`);return `<article class="news-item"><h3>${h(headline)}</h3><div class="news-meta"><span>${h(sourceName)}</span>${safeLink(first(x.original_url,x.url),'الرابط الأصلي ↗')}<span>${h(newsAssets(first(x.assets,x.symbols)))}</span>${newsBadge(first(x.freshness,x.status,'UNKNOWN'))}</div><p class="facts">${h(newsArabicText(first(x.facts,x.summary,x.text),'تفاصيل البيان منشورة في رابط المصدر الأصلي.'))}</p><div class="effect"><b>تفسير الأثر المحتمل</b>${h(newsArabicText(first(x.interpretation,x.potential_effect,x.effect,'لا يوجد تفسير معتمد.'),'لم يُعتمد تفسير عربي للأثر؛ لا يُستنتج الاتجاه من العنوان.'))}</div><details><summary>التوقيت والمصدر والقيَم</summary><div class="detail-grid">${[['الحدث',date(x.event_time)],['النشر',date(first(x.published_at,x.publication_time))],['الاستلام',date(first(x.received_at,x.received_time))],['منطقة المصدر الزمنية',newsTimezone(x.timezone)],['مزود البيانات',newsSourceName(x.provider)],['السابق',newsMetric(x.previous)],['المتوقع',newsMetric(x.expected)],['الفعلي',newsMetric(x.actual)],['المراجعات',newsMetric(x.revisions)]].map(([k,v])=>`<div class="detail-item"><span>${h(k)}</span><b>${h(v)}</b></div>`).join('')}</div></details></article>`;}).join(''):empty('لا توجد وقائع مستلمة.','هذا لا يثبت غياب أحداث اقتصادية أو سياسية.');
     $('calendar-items').innerHTML=calendar.length?calendar.map((x)=>`<article class="calendar-item"><h3>${h(calendarEventName(first(x.name,x.title,x.event,'حدث اقتصادي'),x.currency))}</h3><small>${h(date(first(x.time,x.event_time)))} · ${h(newsCurrency(first(x.currency,x.country,'')))} · ${h(calendarImportance(first(x.importance,x.impact)))}</small><div class="calendar-values">${[['السابق',x.previous],['المتوقع',first(x.expected,x.forecast)],['الفعلي',x.actual]].map(([k,v])=>`<div><span>${h(k)}</span>${h(newsMetric(v))}</div>`).join('')}</div><div class="news-meta"><span>المراجعة: ${h(newsMetric(x.revised))}</span><span>${h(newsSourceName(first(x.source,'')))}</span>${safeLink(x.url,'المصدر ↗')}</div></article>`).join(''):empty('الجدول الاقتصادي غير متاح.','لا يُملأ بتوقعات أو أحداث مصطنعة.');
+    renderExternalResearch(n.external_research);
+    renderLLMResearch(state.llm_research);
+  }
+  function renderExternalResearch(value) {
+    const data=obj(value),providers=arr(data.providers),items=arr(data.items);
+    const labels={massive_fx:'Massive · بيانات فوركس تاريخية',frankfurter:'Frankfurter · سعر صرف يومي',bls_cpi:'BLS · التضخم الأمريكي',world_bank_gdp:'World Bank · النمو الاقتصادي'};
+    const status={OK:'متاح',ERROR:'تعذر الجلب',CONFIG_REQUIRED:'مفتاح API مطلوب'};
+    set('external-research-status',`${data.refreshing?'جارٍ جلب المصادر…':data.last_refresh?`آخر جلب: ${date(data.last_refresh)}`:'لم تُجلب البيانات بعد'} · استخدام تنفيذي: لا شيء؛ أسعار وأوامر MT5 هي المرجع.`);
+    $('external-research-providers').innerHTML=providers.length?providers.map((p)=>`<div class="source-card"><div class="source-card-head"><h3>${h(labels[p.id]||p.name||p.id||'مصدر')}</h3>${newsBadge(status[p.status]||p.status||'UNKNOWN')}</div><p>${h(newsArabicText(p.coverage||p.reason,'بيانات بحثية خارجية'))}</p><small>آخر استلام: ${h(date(p.received_at))}<br>الحداثة: ${p.fresh===true?'حديث بحسب سياسة المصدر':p.status==='OK'?'قديم':'غير متاح'}</small>${safeLink(p.url,'التوثيق الأصلي ↗')}</div>`).join(''):empty('لا توجد قراءة محفوظة.','اضغط تحديث المصادر لجلب البيانات العامة وإظهار حالة Massive.');
+    $('external-research-items').innerHTML=items.length?items.map((item)=>{
+      let detail='';
+      if(item.kind==='forex_daily_bars'){const bars=arr(item.bars),last=bars[bars.length-1];detail=`${h(item.symbol||'')} · ${bars.length} شمعة يومية · آخر إغلاق: ${h(last?last.close:'—')} · المصدر يسجل عروض أسعار Bid.`;}
+      else if(item.kind==='reference_fx_rate')detail=`${h(item.base||'')} / ${h(item.quote||'')} = ${h(item.rate)} · تاريخ الرصد: ${h(item.observation_date||'—')} · سعر يومي مرجعي.`;
+      else detail=`${h(item.name||item.series_id||'مؤشر اقتصادي')} · ${h(item.value)} · الفترة: ${h(item.period||item.observation_date||item.year||'—')}`;
+      return `<article class="panel"><h3>${h(labels[item.provider]||item.provider||'مصدر')}</h3><p>${detail}</p><small>وقت استلام NEXUS: ${h(date(item.observed_at))}</small></article>`;
+    }).join(''):'';
+  }
+  function renderLLMResearch(value) {
+    const data=obj(value),providers=arr(data.providers),results=arr(data.results);
+    const labels={READY:'جاهز',CONFIG_REQUIRED:'يحتاج مفتاح ونموذج',OK:'تم التحليل',ERROR:'تعذر التحليل'};
+    set('llm-research-status',`${data.refreshing?'يجري التحليل…':data.last_run?`آخر تحليل: ${date(data.last_run)}`:'لم يُشغّل التحليل'} · صلاحية التنفيذ: لا شيء.`);
+    $('llm-research-providers').innerHTML=providers.length?providers.map((p)=>`<div class="source-card"><div class="source-card-head"><h3>${h(p.name||p.id||'موفّر')}</h3>${newsBadge(labels[p.status]||p.status||'غير معروف')}</div><p>${h(p.model||'اضبط اسم النموذج ومفتاحه في متغيرات البيئة.')}</p></div>`).join(''):empty('لا توجد موفّرات.','اضبط مفاتيح API وأسماء النماذج اختيارياً ثم أعد فتح التطبيق.');
+    $('llm-research-results').innerHTML=results.length?results.map((r)=>{const result=obj(r.result);return `<article class="panel"><div class="panel-heading"><h3>${h(r.name||r.provider||'موفّر')}</h3>${newsBadge(labels[r.status]||r.status||'غير معروف')}</div><small>${h(r.model||'')}</small>${r.reason?`<p>${h(r.reason)}</p>`:''}${result.assessment?`<p>${h(result.assessment)}</p>`:''}${arr(result.observations).length?`<ul>${arr(result.observations).map((x)=>`<li>${h(x)}</li>`).join('')}</ul>`:''}${arr(result.limitations).length?`<p class="muted">حدود القراءة: ${arr(result.limitations).map((x)=>h(x)).join(' · ')}</p>`:''}<small>الصلاحية: بحث ظلي فقط · ${h(date(r.received_at))}</small></article>`;}).join(''):'';
   }
   function safeLink(url,label) {if(typeof url!=='string')return '';try{const parsed=new URL(url);if(!['http:','https:'].includes(parsed.protocol))return '';return `<a href="${h(parsed.href)}" target="_blank" rel="noopener noreferrer">${h(label)}</a>`;}catch(_){return '';}}
   function table(columns,data,none) {if(!data.length)return empty(none);return `<table><thead><tr>${columns.map(([label])=>`<th>${h(label)}</th>`).join('')}</tr></thead><tbody>${data.map((r)=>`<tr>${columns.map(([,value])=>`<td>${value(r)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;}
@@ -557,20 +595,21 @@
     $('positions-table').innerHTML=table([['رقم الوسيط',(x)=>h(x.ticket)],['الرمز',(x)=>`<span class="symbol-name">${h(x.symbol)}</span>`],['الاتجاه',(x)=>h(tr(first(x.side,x.direction,x.type===0?'BUY':x.type===1?'SELL':undefined)))],['الحجم',(x)=>num(x.volume,3)],['الدخول',(x)=>num(first(x.price_open,x.entry),6)],['السعر الحالي',(x)=>num(first(x.price_current,x.price),6)],['الوقف / الهدف',(x)=>`${num(x.sl,6)} / ${num(x.tp,6)}`],['الربح العائم',(x)=>`<span class="${x.profit<0?'negative':'positive'}">${money(x.profit)}</span>`],['التبييت',(x)=>money(x.swap)],['الملكية',(x)=>h(ownership(x))],['خطة الإدارة',(x)=>h(plain(first(x.management_reason,x.plan,x.comment)))]],positions,'لا توجد مراكز مفتوحة مستلمة.');
     $('orders-table').innerHTML=table([['رقم الوسيط',(x)=>h(x.ticket)],['الرمز',(x)=>h(x.symbol)],['نوع الأمر',(x)=>h(tr(first(x.side,x.direction,x.type)))],['الحجم',(x)=>num(first(x.volume_current,x.volume),3)],['سعر الأمر',(x)=>num(first(x.price_open,x.price),6)],['الحالة',(x)=>badge(first(x.status,x.state,'UNKNOWN'))],['الملكية',(x)=>h(ownership(x))],['وقت الإنشاء',(x)=>h(date(first(x.time_setup,x.time)))]],orders,'لا توجد أوامر معلقة مستلمة.');
     const sessionRows=window.QuantSessionView?window.QuantSessionView.select(intents,Date.now()/1000):{rows:intents,older:0,omitted:0};
-    set('intents-session-note',isEnglish()?`Day starts at 02:00 Dubai · ${sessionRows.rows.length} shown · ${sessionRows.older+sessionRows.omitted} archived`: `يبدأ اليوم 02:00 دبي · المعروض ${sessionRows.rows.length} · المؤرشف ${sessionRows.older+sessionRows.omitted}`);
+    const archivedIntents=sessionRows.older+sessionRows.omitted+Math.max(0,Number(state.intents_omitted)||0);
+    set('intents-session-note',isEnglish()?`Day starts at 02:00 Dubai · ${sessionRows.rows.length} shown · ${archivedIntents} archived`: `يبدأ اليوم 02:00 دبي · المعروض ${sessionRows.rows.length} · المؤرشف ${archivedIntents}`);
     $('intents-table').innerHTML=table([['هوية النية',(x)=>`<span dir="ltr" title="${h(x.id||x.intent_id)}">${h(String(x.id||x.intent_id||'—').slice(0,18))}</span>`],['الرمز',(x)=>h(x.symbol)],['الاتجاه',(x)=>h(tr(first(x.side,x.direction)))],['الحالة',(x)=>badge(first(x.status,'UNKNOWN'))],['المخاطرة',(x)=>money(first(x.risk_amount,x.reserved_risk))],['سبب القرار / النتيجة',(x)=>h(plain(first(x.reason,x.error,x.message)))],['آخر تحديث',(x)=>h(date(first(x.updated_at,x.created_at,x.time)))]],sessionRows.rows,'لا توجد نيات تداول مسجلة.');
   }
   function renderPerformance() {
     const p=obj(state.performance),strategyRows=arr(first(p.rows,p.by_strategy)),assetRows=arr(p.by_asset);
     const all=[...strategyRows,...assetRows].filter(x=>Number(first(x.closed_deals,x.trades,x.count,0))>0||
       ['gross','realized_pnl','gross_pnl','profit','costs','net_pnl','net','drawdown'].some(k=>finite(x[k])&&Number(x[k])!==0));
-    set('performance-label',state.simulation?'نتائج محاكاة اصطناعية':'نتائج الوسيط المؤكدة فقط');$('performance-label').className=`pill ${state.simulation?'amber':'neutral'}`;
+    set('performance-label',p.source==='DEMO_SERVICE_20261019'?(p.trades===null?'بانتظار سجل المنفّذ':p.complete?'المنفّذ التجريبي • سجل الوسيط':'المنفّذ التجريبي • سجل جزئي'):state.simulation?'نتائج محاكاة اصطناعية':'نتائج الوسيط المؤكدة فقط');$('performance-label').className=`pill ${state.simulation?'amber':'neutral'}`;
     $('performance-metrics').innerHTML=[['صفقات مكتملة',first(p.trades,p.closed_trades)],['صافي محقق',first(p.net_realized,p.realized_net)],['تكاليف',p.costs],['أقصى تراجع',p.max_drawdown]].map(([label,value],i)=>`<div class="scan-metric"><strong>${i===0?num(value,0):money(value)}</strong><span>${label}</span></div>`).join('');
     $('performance-table').innerHTML=table([['الاستراتيجية',(x)=>h(schoolName(first(x.school,x.strategy,x.name,'—')))],['الأصل',(x)=>h(x.symbol||'—')],['عمليات الخروج',(x)=>num(first(x.closed_deals,x.trades,x.count),0)],['المحقق قبل التكاليف',(x)=>money(first(x.gross,x.realized_pnl,x.gross_pnl,x.profit))],['التكاليف الموقعة',(x)=>money(x.costs)],['الصافي',(x)=>money(first(x.net_pnl,x.net))],['التراجع',(x)=>money(x.drawdown)],['نوع النتائج',(x)=>h(x.simulation===true?'محاكاة':state.simulation?'محاكاة':first(x.validation,'سجل الوسيط'))]],all,'لا توجد نتائج كافية لتقييم الأداء.');
     const coverage=Array.isArray(state.coverage)?state.coverage:arr(first(obj(state.coverage).schools,obj(state.coverage).items,obj(state.coverage).strategies));
     $('coverage-list').innerHTML=coverage.length?coverage.map((c)=>{
-      const definition=obj(obj(c.contract).definition),id=first(c.id,c.strategy),cards=arr(state.cards).filter(x=>first(x.strategy_id,x.id)===id),counts={};
-      cards.forEach(x=>{const key=x.status||'UNKNOWN';counts[key]=(counts[key]||0)+1;});
+      const definition=obj(obj(c.contract).definition),id=first(c.id,c.strategy),cards=arr(state.cards).filter(x=>first(x.strategy_id,x.id)===id),counts={...obj(obj(state.card_activity_by_strategy)[id])};
+      if(!Object.keys(counts).length)cards.forEach(x=>{const key=x.status||'UNKNOWN';counts[key]=(counts[key]||0)+1;});
       const activity=Object.entries(counts).map(([key,n])=>`${tr(key)}: ${n}`).join(' · ');
       const scope=isEnglish()?definition.scope:definition.scope_ar;
       const rules=isEnglish()?definition.rules:definition.rules_ar;
@@ -600,8 +639,8 @@
       const runtimeScope=knowledgeField(s,'runtime_scope');
       const calculatorName=id=>uiText({pv:'القيمة الحالية',dcf:'التدفقات النقدية المخصومة',ddm:'خصم الأرباح',nav:'صافي الأصول',multiples:'المضاعفات المالية',bond:'تسعير السند'}[id]||'نموذج مالي غير معروف');
       const runtime=linked.map(id=>{
-        const c=coverage.find(x=>first(x.id,x.strategy_id,x.strategy)===id),definition=obj(obj(c?.contract).definition),states={};
-        cards.filter(x=>first(x.strategy_id,x.strategy,x.id)===id).forEach(x=>{states[x.status||'UNKNOWN']=(states[x.status||'UNKNOWN']||0)+1;});
+        const c=coverage.find(x=>first(x.id,x.strategy_id,x.strategy)===id),definition=obj(obj(c?.contract).definition),states={...obj(obj(state.card_activity_by_strategy)[id])};
+        if(!Object.keys(states).length)cards.filter(x=>first(x.strategy_id,x.strategy,x.id)===id).forEach(x=>{const status=x.status||'UNKNOWN';states[status]=(states[status]||0)+1;});
         const activity=Object.entries(states).map(([status,n])=>`${tr(status)}: ${n}`).join(' · ');
         return `<div class="knowledge-runtime"><strong>${h(schoolName(first(c?.school,c?.name,id)))}</strong><span>${h(activity||uiText('لم يبدأ تحليل هذا النموذج بعد'))}</span></div>`;
       }).join('')+(runtimeScope?`<p class="tiny-note">${h(runtimeScope)}</p>`:'')+(arr(s.available_calculators).length?`<p class="tiny-note">${h(uiText('حاسبات محلية متاحة'))}: ${arr(s.available_calculators).map(id=>h(calculatorName(id))).join(' · ')}</p>`:'');
@@ -669,7 +708,9 @@
   document.querySelectorAll('input[name="mode"]').forEach((x)=>x.addEventListener('change',()=>{prefs.mode=x.value;savePrefs();updateControls();}));
   $('menu-toggle').addEventListener('click',()=>document.querySelector('.shell').classList.toggle('menu-open'));
   $('refresh-button').addEventListener('click',()=>poll(false));
-  const applyTheme=(name)=>{const allowed=['forest','midnight','graphite','sand','white'];name=allowed.includes(name)?name:'forest';document.documentElement.dataset.theme=name;prefs.theme=name;savePrefs();};
+  $('external-research-refresh').addEventListener('click',async()=>{if(!busy)await action('refresh_external_research',{},'بدأ تحديث مصادر البيانات البحثية.');});
+  $('llm-research-run').addEventListener('click',async()=>{if(!busy)await action('run_llm_research',{},'بدأ التحليل الظلي للمخرجات الحالية.');});
+  const applyTheme=(name)=>{const allowed=['neural','forest','midnight','graphite','sand','white'];name=allowed.includes(name)?name:'neural';document.documentElement.dataset.theme=name;prefs.theme=name;savePrefs();};
   const applyLanguage=(name)=>{name=name==='en'?'en':'ar';prefs.language=name;savePrefs();document.body.classList.toggle('language-en',name==='en');if(hasState)render();else applyI18n();set('view-title',uiText(titles[currentView]));};
   $('theme-select').addEventListener('change',(e)=>applyTheme(e.target.value));$('language-select').addEventListener('change',(e)=>applyLanguage(e.target.value));
   $('start-button').addEventListener('click',async(e)=>{
@@ -724,7 +765,7 @@
   $('valuation-analyze-button').addEventListener('click',async()=>{let data;try{data=JSON.parse($('valuation-input').value);if(!data||typeof data!=='object'||Array.isArray(data))throw new Error();}catch(_){toast('أدخل كائن بيانات منظمًا صالحًا قبل حساب السيناريو.',true);return;}const r=await action('fundamental_analyze',{data},'حُسب السيناريو المالي محليًا دون توصية تداول.');if(r?.valuation)renderValuation(r.valuation);});
   $('price-chart').addEventListener('mousemove',(e)=>{if(!chartGeometry)return;const rect=e.currentTarget.getBoundingClientRect(),x=e.clientX-rect.left,idx=Math.floor((x-chartGeometry.left)/chartGeometry.step),b=chartGeometry.bars[idx];if(!b){$('chart-tooltip').hidden=true;return;}$('chart-tooltip').hidden=false;set('chart-tooltip',`${date(b.time)} | O ${num(b.open,6)} · H ${num(b.high,6)} · L ${num(b.low,6)} · C ${num(b.close,6)} | Tick count ${num(b.tick_volume,0)}${finite(b.real_volume)&&b.real_volume>0?` · Real volume ${num(b.real_volume,0)}`:''}`);});
   $('price-chart').addEventListener('mouseleave',()=>$('chart-tooltip').hidden=true);window.addEventListener('resize',drawChart);window.addEventListener('hashchange',()=>go(location.hash.slice(1)));
-  $('terminal-path').value=prefs.terminal_path||'';$('bridge-path').value=prefs.bridge_path||'';unit=['money','percent'].includes(prefs.unit)?prefs.unit:'money';document.querySelector('input[name="mode"][value="AUTO_DEMO"]').checked=true;if(Array.from($('chart-timeframe').options||[]).some((o)=>o.value===prefs.timeframe))$('chart-timeframe').value=prefs.timeframe;$('theme-select').value=prefs.theme||'forest';$('language-select').value=prefs.language==='en'?'en':'ar';applyTheme($('theme-select').value);applyLanguage($('language-select').value);
+  $('terminal-path').value=prefs.terminal_path||'';$('bridge-path').value=prefs.bridge_path||'';unit=['money','percent'].includes(prefs.unit)?prefs.unit:'money';document.querySelector('input[name="mode"][value="AUTO_DEMO"]').checked=true;if(Array.from($('chart-timeframe').options||[]).some((o)=>o.value===prefs.timeframe))$('chart-timeframe').value=prefs.timeframe;if(prefs.design_theme_version!==1){prefs.theme='neural';prefs.design_theme_version=1;savePrefs();}$('theme-select').value=prefs.theme||'neural';$('language-select').value=prefs.language==='en'?'en':'ar';applyTheme($('theme-select').value);applyLanguage($('language-select').value);
   const tickClock=()=>set('clock',`${new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Dubai',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date())}  ${isEnglish()?'UTC+4':'بتوقيت دبي'}`);tickClock();setInterval(tickClock,1000);
   go(location.hash.slice(1));render();poll();
 })();

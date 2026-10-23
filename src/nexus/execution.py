@@ -13,6 +13,7 @@ import time
 from contextlib import nullcontext
 from decimal import ROUND_FLOOR, Decimal
 
+from . import regime_router
 from .broker import TIMEFRAMES
 from .risk import (
     FOUR_SCHOOL_PROTOCOL,
@@ -45,8 +46,16 @@ SETTLEMENT_MAX_READS = 25
 
 
 class Executor:
-    def __init__(self, broker, store, risk, clock=time.time, *, settlement_clock=time.monotonic, settlement_sleep=time.sleep):
+    def __init__(self, broker, store, risk, clock=time.time, *, settlement_clock=time.monotonic, settlement_sleep=time.sleep,
+                 regime_routing_enabled=False, routing_config_path=None):
+        if type(regime_routing_enabled) is not bool:
+            raise ValueError("Regime routing opt-in must be boolean")
         self.broker, self.store, self.risk, self.clock = broker, store, risk, clock
+        # Research-candidate opt-in only. Neither a route nor its configuration
+        # grants send authority; every existing Demo/risk guard still applies.
+        self.regime_routing_enabled = regime_routing_enabled
+        self.routing_config_path = routing_config_path
+        self._authorized_routing_fingerprint = None
         self.lock = threading.RLock()
         self.mode, self.entries_paused = "READ_ONLY", True
         self.authorization = None
@@ -61,7 +70,60 @@ class Executor:
                 self.store.set_intent_state(intent["id"], "UNKNOWN", reason="Restart during send")
 
     def _settings_digest(self):
-        return hashlib.sha256(json.dumps(self.risk.settings, sort_keys=True, allow_nan=False).encode()).hexdigest()
+        policy = {"risk_settings": self.risk.settings, "regime_routing_enabled": self.regime_routing_enabled,
+                  "routing_config_path": str(self.routing_config_path) if self.routing_config_path is not None else None}
+        return hashlib.sha256(json.dumps(policy, sort_keys=True, allow_nan=False).encode()).hexdigest()
+
+    def _regime_entry_check(self, proposal, *, phase, prior=None):
+        """Fresh causal filter before reservation and immediately before send.
+
+        Missing/changed context fails closed when explicitly opted in. The
+        receipt is attached to the intent, so post-read changes cannot silently
+        replace the closed-bar evidence accepted before reservation. A failed
+        audit insert itself also prevents reservation/send.
+        """
+        if not self.regime_routing_enabled:
+            return None
+        evidence = {"account_key": self.risk.key, "phase": phase,
+                    "model_id": proposal.get("strategy_id"), "regime": "UNCERTAIN",
+                    "symbol": proposal.get("symbol"), "timeframe": proposal.get("timeframe"),
+                    "signal_id": proposal.get("id"), "data_time": proposal.get("data_time"),
+                    "rule_version": None, "routing_fingerprint": None, "snapshot_sha256": None}
+        try:
+            config = regime_router.load_routing_config(self.routing_config_path)
+            evidence.update(rule_version=config["version"], routing_fingerprint=config["routing_fingerprint"])
+            if config["routing_fingerprint"] != self._authorized_routing_fingerprint:
+                raise ValueError("Authorized regime routing configuration changed")
+            if phase == "BEFORE_SEND" and not isinstance(prior, dict):
+                raise ValueError("Prepared entry has no regime routing receipt")
+            timeframe = proposal.get("timeframe")
+            if timeframe not in TIMEFRAMES:
+                raise ValueError("Regime routing requires an explicit supported timeframe")
+            now = self.clock()
+            signal_time = number(proposal.get("data_time"), "regime signal time")
+            if not signal_time <= now < number(proposal.get("expires_at"), "regime signal expiry"):
+                raise ValueError("Regime signal is future or expired")
+            if now - signal_time >= TIMEFRAMES[timeframe]:
+                raise ValueError("Regime signal data is stale")
+            count = max(300, config["classifier"]["min_bars"])
+            bars = self.broker.bars(proposal["symbol"], timeframe, count)
+            evidence["snapshot_sha256"] = hashlib.sha256(
+                json.dumps(bars, sort_keys=True, allow_nan=False, separators=(",", ":")).encode()).hexdigest()
+            result = regime_router.route_signal(proposal.get("strategy_id"), bars, timeframe, signal_time, config=config)
+            evidence.update({key: result.get(key) for key in (
+                "regime", "rule_version", "routing_fingerprint", "last_closed_time", "metrics")})
+            if not result["allowed"]:
+                raise ValueError("; ".join(result["reasons"]))
+            if result["last_closed_time"] != signal_time:
+                raise ValueError("Regime input does not match the proposal closed-bar time")
+            if prior is not None and any(prior.get(key) != evidence.get(key) for key in (
+                    "model_id", "symbol", "timeframe", "data_time", "routing_fingerprint", "snapshot_sha256")):
+                raise ValueError("Closed regime input snapshot changed before send")
+        except Exception as exc:
+            evidence.update(allowed=False, reasons=[str(exc)])
+            self.store.audit("REGIME_ROUTING_REJECTED", evidence)
+            raise ValueError("Regime routing refused: " + str(exc)) from exc
+        return {**evidence, "allowed": True, "reasons": []}
 
     def _connection(self):
         account, terminal = self.broker.account(), self.broker.terminal()
@@ -105,6 +167,15 @@ class Executor:
                 raise ValueError("Activation mode must be MANUAL_DEMO or AUTO_DEMO")
             self.deactivate("Activation requested")
             _account, key = self._connection()
+            self._authorized_routing_fingerprint = None
+            if self.regime_routing_enabled:
+                try:
+                    routing = regime_router.load_routing_config(self.routing_config_path)
+                    self._authorized_routing_fingerprint = routing["routing_fingerprint"]
+                except Exception as exc:
+                    self.store.audit("REGIME_ROUTING_REJECTED", {"account_key": key, "phase": "ACTIVATION",
+                                     "regime": "UNCERTAIN", "reasons": [str(exc)], "allowed": False})
+                    raise
             reconciliation = self.reconcile(key)
             if not reconciliation["ok"] or self._unresolved(key):
                 raise ValueError("Broker reconciliation is incomplete; activation refused")
@@ -129,6 +200,7 @@ class Executor:
         with self.lock:
             unchanged = self.mode == "READ_ONLY" and self.authorization is None and self.entries_paused and self.last_reason == str(reason)
             self.mode, self.entries_paused, self.authorization = "READ_ONLY", True, None
+            self._authorized_routing_fingerprint = None
             self.last_reason = str(reason)
             if not unchanged:
                 self.store.audit("AUTHORIZATION_REVOKED", {"reason": self.last_reason})
@@ -151,6 +223,9 @@ class Executor:
             key = self.risk.key
             return {"mode": self.mode, "entries_paused": self.entries_paused,
                     "authorization": dict(self.authorization) if self.authorization else None,
+                    "regime_routing": {"enabled": self.regime_routing_enabled,
+                                       "authorized_fingerprint": self._authorized_routing_fingerprint,
+                                       "authority": "FILTER_ONLY"},
                     "reason": self.last_reason,
                     "unresolved": [i["id"] for i in self._unresolved(key)] if key else []}
 
@@ -160,7 +235,11 @@ class Executor:
                 self._guard(entry=True)
                 if self.mode == "MANUAL_DEMO" and approved is not True:
                     raise ValueError("Manual approval of this proposal is required")
-                prepared = self.risk.prepare(dict(proposal), clock=self.clock)
+                candidate = dict(proposal)
+                routing = self._regime_entry_check(candidate, phase="BEFORE_RESERVATION")
+                if routing is not None:
+                    candidate["regime_routing"] = routing
+                prepared = self.risk.prepare(candidate, clock=self.clock)
                 if not prepared["approved"]:
                     # Preparation may itself discover an account/day change;
                     # revoke the in-memory authorization through the same guard.
@@ -291,6 +370,8 @@ class Executor:
                     # valid second or cross the authorization's UTC day.
                     self._guard(entry, intent_id)
                     entry_time_check(self.clock())
+                    self._regime_entry_check(intent["payload"]["proposal"], phase="BEFORE_SEND",
+                                             prior=intent["payload"]["proposal"].get("regime_routing"))
                 elif intent['payload'].get('reason') in ('FAST_CASH_TARGET','FAST_CASH_PROTECT_FALLBACK','FAST_CASH_PROTECTION','FAST_CASH_BROKER_TP'):
                     # Recheck cash and legal stop distances after broker I/O.
                     request=self._management_send_check(intent)

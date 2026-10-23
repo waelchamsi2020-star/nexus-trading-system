@@ -7,7 +7,11 @@ const assert=require('node:assert/strict');
 const uiRoot=fs.existsSync(path.join(__dirname,'../ui/index.html'))?path.join(__dirname,'../ui'):path.join(__dirname,'../outputs/NEXUS/ui');
 const html=fs.readFileSync(path.join(uiRoot,'index.html'),'utf8');
 const source=fs.readFileSync(path.join(uiRoot,'app.js'),'utf8');
+const demoPanel=fs.readFileSync(path.join(uiRoot,'demo-panel.js'),'utf8');
 const css=fs.readFileSync(path.join(uiRoot,'style.css'),'utf8');
+const neuralCss=fs.readFileSync(path.join(uiRoot,'theme-neural.css'),'utf8');
+assert(html.includes('/theme-neural.css')&&html.includes('value="neural"'), 'Neural theme must be loaded and selectable');
+assert(neuralCss.includes('[data-theme="neural"]')&&neuralCss.includes('main::before'), 'Neural theme tokens and decorative mesh must exist');
 assert(css.includes('#daily-authorization-options>.form-grid{grid-template-columns:minmax(0,1fr)'), 'daily loss and profit fields must stack without changing scalp pairs');
 const advanced=html.slice(html.indexOf('<details id="setup-advanced"'), html.indexOf('</section>',html.indexOf('<details id="setup-advanced"')));
 assert(advanced.includes('id="simulation-button"') && advanced.includes('id="service-details"'), 'simulation and diagnostics remain available in collapsed advanced settings');
@@ -17,7 +21,13 @@ for(const id of ['news-source-details','coverage-details','quant-details','rule-
   assert(new RegExp(`<details[^>]*id="${id}"[^>]*>`).test(html),`${id} must remain reachable as a disclosure`);
   assert(!new RegExp(`<details[^>]*id="${id}"[^>]*\\bopen\\b`).test(html),`${id} should start collapsed`);
 }
-assert(html.indexOf('class="overview-bottom"')<html.indexOf('class="overview-grid"'),'scan and decision must precede trading columns in reading and keyboard order');
+assert(html.indexOf('class="overview-bottom"')<html.indexOf('class="account-grid"') && html.indexOf('class="account-grid"')<html.indexOf('class="overview-grid"'),'scan and decision must precede account details and trading controls in reading and keyboard order');
+assert(html.includes('id="header-execution-mode" class="pill neutral" role="status" aria-live="polite"'),'execution state must be announced in the top bar');
+assert(!demoPanel.includes('id="demo-runtime"'),'execution state must not be repeated in the lower panel');
+assert(demoPanel.includes("setHeader(label,detail)")&&demoPanel.includes("String(data.error)"),'the concise top-bar state must retain its detailed accessible reason');
+assert(demoPanel.includes('Boolean(latest?.error)'),'unknown executor state must disable both executor controls');
+assert(source.includes('ملخص أفضل فرصة من الفرص المؤهلة')&&source.includes('افتح الأبحاث لرؤية القائمة كاملة'),'overview must disclose that it previews one result and where to see the full list');
+assert(html.includes('id="nav-more"') && html.includes('data-view="knowledge"') && html.includes('data-view="news"'),'technical references and research sources must remain available under the secondary navigation');
 for(const id of ['overview-scan','committee-summary','scan-button'])assert.equal([...html.matchAll(new RegExp(`id="${id}"`,'g'))].length,1,`${id} must remain unique after moving panels`);
 const ruleLanguage={window:{}};
 vm.runInNewContext(fs.readFileSync(path.join(uiRoot,'i18n.js'),'utf8'),ruleLanguage);
@@ -25,6 +35,7 @@ assert.equal(ruleLanguage.window.NEXUS_I18N.translate('يجب أن تكون أس
 assert.equal(ruleLanguage.window.NEXUS_I18N.translate('يجب أن تكون أسعار التنفيذ موجبة ومحدودة','ar'),'يجب أن تكون أسعار التنفيذ موجبة ومحدودة');
 const i18nSource=fs.readFileSync(path.join(uiRoot,'i18n.js'),'utf8');
 assert.equal(ruleLanguage.window.NEXUS_I18N.translate('08:47  بتوقيت دبي','en'),'08:47 UTC+4');
+assert.equal(ruleLanguage.window.NEXUS_I18N.translate('التنفيذ متوقف','en'),'Execution stopped');
 const i18nContext={window:{}};vm.createContext(i18nContext);vm.runInContext(i18nSource,i18nContext,{filename:'i18n.js'});
 const translateEnglish=(value)=>i18nContext.window.NEXUS_I18N.translate(value,'en');
 // Repeated polling must not rewrite every translated hidden-view text node.
@@ -90,6 +101,7 @@ function environment(fixture,preferences={},network={}){
     constructor(tag='div',id=''){this.tagName=tag.toUpperCase();this._id='';this.id=id;this.value='';this.textContent='';this.innerHTML='';this.className='';this.hidden=false;this.disabled=false;this.checked=false;this.style={setProperty(name,value){this[name]=value;}};this.dataset={};this.handlers={};this.clientWidth=0;this.clientHeight=0;this.children=[];this.classList={toggle(){},remove(){},contains:()=>false};}
     set id(v){this._id=v;if(v)nodes.set(v,this);}get id(){return this._id;}
     setAttribute(name,value){this.attributes??={};this.attributes[name]=String(value);}
+    removeAttribute(name){if(this.attributes)delete this.attributes[name];}
     getAttribute(name){return this.attributes?.[name]??null;}
     addEventListener(type,fn){(this.handlers[type]??=[]).push(fn);}
     appendChild(el){this.children.push(el);}insertAdjacentElement(_,el){this.children.push(el);}

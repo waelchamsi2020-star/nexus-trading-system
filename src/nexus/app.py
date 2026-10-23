@@ -12,6 +12,7 @@ import webbrowser
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+from .demo_bridge import DemoBridge
 from .engine import Engine
 from .server import LocalServer
 
@@ -120,8 +121,17 @@ def main():
     engine=server=None
     try:
         lock.acquire()
-        engine=Engine(root,data);engine.start_worker(auto_connect=not args.no_connect)
-        server=LocalServer(engine,root/"ui",args.port);url=server.start()
+        demo_directory = data / "demo-live-20261019"
+        integrated_demo = (demo_directory / "user-controls-enabled").exists()
+        engine=Engine(root,data)
+        # The legacy engine supplies read-only research even in integrated mode.
+        # _connect starts READ_ONLY; DemoBridge rejects every legacy activation.
+        # The dedicated Demo service remains the sole authorized sender.
+        engine.start_worker(auto_connect=not args.no_connect)
+        desktop_backend = (DemoBridge(engine, demo_directory)
+                           if integrated_demo else engine)
+        server=LocalServer(desktop_backend,root/"ui",args.port);url=server.start()
+        (data / "desktop-url.txt").write_text(url, encoding="utf-8")
         if args.headless:
             print("Quant Trading AI local test service: "+url,flush=True)
             while engine.running:time.sleep(.5)

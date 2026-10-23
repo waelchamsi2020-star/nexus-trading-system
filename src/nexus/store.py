@@ -67,11 +67,22 @@ class Store:
             CREATE INDEX IF NOT EXISTS intents_account ON intents(account_key,state);
             CREATE TABLE IF NOT EXISTS audit(
                 sequence INTEGER PRIMARY KEY AUTOINCREMENT, at REAL NOT NULL,
-                event TEXT NOT NULL, payload TEXT NOT NULL);
+                event TEXT NOT NULL, payload TEXT NOT NULL, account_key TEXT);
             CREATE TABLE IF NOT EXISTS day_halts(
                 account_key TEXT NOT NULL, day TEXT NOT NULL, reason TEXT NOT NULL,
                 at REAL NOT NULL, PRIMARY KEY(account_key,day));
         """)
+        audit_columns={row["name"] for row in self.db.execute("PRAGMA table_info(audit)").fetchall()}
+        if "account_key" not in audit_columns:
+            self.db.execute("ALTER TABLE audit ADD COLUMN account_key TEXT")
+        # Recover explicit ownership from legacy JSON payloads without changing
+        # their event payloads.
+        with self.transaction() as db:
+            for row in db.execute("SELECT sequence,payload FROM audit WHERE account_key IS NULL").fetchall():
+                try:owner=json.loads(row["payload"]).get("account_key")
+                except (TypeError,ValueError,AttributeError):owner=None
+                if isinstance(owner,str) and owner:
+                    db.execute("UPDATE audit SET account_key=? WHERE sequence=?",(owner,row["sequence"]))
 
     @contextmanager
     def transaction(self):
@@ -79,19 +90,23 @@ class Store:
             self.db.execute("BEGIN IMMEDIATE")
             try:
                 yield self.db
+                # COMMIT can fail (deferred constraints, disk or I/O errors).
+                # Roll back those failures too so the next operation cannot
+                # accidentally retain an uncommitted ledger/audit mutation.
+                self.db.commit()
             except BaseException:
                 self.db.rollback()
                 raise
-            else:
-                self.db.commit()
 
     def close(self):
         with self.lock:
             self.db.close()
 
-    def audit(self, event, payload):
+    def audit(self, event, payload, account_key=None):
+        owner=account_key or (payload.get("account_key") if isinstance(payload,dict) else None)
         with self.lock:
-            self.db.execute("INSERT INTO audit(at,event,payload) VALUES(?,?,?)", (time.time(), event, encode(payload)))
+            self.db.execute("INSERT INTO audit(at,event,payload,account_key) VALUES(?,?,?,?)",
+                            (time.time(), event, encode(payload), owner))
 
     def recent_audit(self, limit=100):
         with self.lock:

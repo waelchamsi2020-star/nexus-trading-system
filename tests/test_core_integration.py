@@ -504,6 +504,9 @@ class ServerTests(unittest.TestCase):
         with self.request("/session-view.js") as response:
             self.assertIn("QuantSessionView",response.read().decode())
             self.assertIn("text/javascript",response.headers["Content-Type"])
+        with self.request("/theme-neural.css") as response:
+            self.assertIn("text/css",response.headers["Content-Type"])
+            self.assertIn('--bg: #07111f',response.read().decode())
         with self.request("/api/state",{"X-Nexus-Token":self.s.token}) as response:self.assertEqual(json.load(response)["mode"],"READ_ONLY")
     def test_cross_origin_host_rebinding_and_html_cross_site_denied(self):
         for headers,path in (({"Origin":"https://evil.example","X-Nexus-Token":self.s.token},"/api/state"),

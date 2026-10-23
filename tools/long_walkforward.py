@@ -69,7 +69,8 @@ def price_trades(trades, fee, specification):
     return result
 
 
-def replay_book(cache, model, folds, *, start, end, fixed_fold=None):
+def replay_book(cache, model, folds, *, start, end, fixed_fold=None,
+                signal_gate=None, gate_audit=None):
     """Single-position book; a current position survives rolling-fold updates.
 
     After unknown intrabar history the exposure is unidentifiable, so the
@@ -95,6 +96,24 @@ def replay_book(cache, model, folds, *, start, end, fixed_fold=None):
             cursor = signal_i + 1
             continue
         fold = folds[owner]
+        routing = None
+        if signal_gate is not None:
+            decision = signal_gate(model, signal_i, card, fold)
+            if not isinstance(decision, dict) or type(decision.get('allowed')) is not bool:
+                raise ValueError('Context gate must return an explicit boolean approval')
+            if not decision['allowed']:
+                event = {'event': 'REGIME_ROUTING_REJECTED', 'model_id': model,
+                         'signal_index': signal_i, 'fold_id': fold['fold_id'],
+                         'signal_time': bar_close_time(bars[signal_i]['time'], cache['timeframe']),
+                         'reason': 'REGIME_ROUTER', 'routing': decision}
+                if gate_audit is not None:
+                    gate_audit(event)
+                rejected.append(event)
+                cursor = signal_i + 1
+                continue
+            routing = {key: decision[key] for key in
+                       ('regime', 'rule_version', 'routing_fingerprint', 'classifier_fingerprint')
+                       if key in decision}
         baseline = fold['training_atr_median']
         if baseline is None or not .25 * baseline <= cache['atr_values'][signal_i] <= 4 * baseline:
             rejected.append({'signal_index': signal_i, 'fold_id': fold['fold_id'], 'reason': 'TRAINING_ATR_ENVELOPE'})
@@ -105,6 +124,8 @@ def replay_book(cache, model, folds, *, start, end, fixed_fold=None):
                   'fold_id': fold['fold_id'], 'signal_index': signal_i,
                   'signal_time': bar_close_time(bars[signal_i]['time'], cache['timeframe']),
                   'entry_index': fill_i, 'entry_time': bars[fill_i]['time'], 'side': card['direction']}
+        if routing is not None:
+            common['routing'] = routing
         if segment[fill_i] != segment[signal_i]:
             censored.append({**common, 'state': 'UNOBSERVED_ENTRY', 'r': None,
                              'reason': 'Unexpected source gap between completed signal and next observed open'})
@@ -187,14 +208,19 @@ def replay_book(cache, model, folds, *, start, end, fixed_fold=None):
     return {'trades': closed, 'censored': censored, 'rejected': rejected}
 
 
-def run_study(cache, *, train, test, step, embargo=24, model_ids=None, lo=0, hi=None):
+def run_study(cache, *, train, test, step, embargo=24, model_ids=None, lo=0, hi=None,
+              signal_gate=None, gate_audit=None):
     hi = len(cache['bars']) if hi is None else hi
     folds = fit_baselines(cache, schedule(hi - lo, train=train, test=test, step=step, embargo=embargo, offset=lo))
     models = sorted(REGISTRY if model_ids is None else model_ids)
     primary, fold_books = {}, {}
     for model in models:
-        primary[model] = replay_book(cache, model, folds, start=folds[0]['test_start'], end=folds[-1]['test_end']) if folds else {'trades': [], 'censored': [], 'rejected': []}
-        fold_books[model] = [replay_book(cache, model, folds, start=f['test_start'], end=f['test_end'], fixed_fold=i)
+        primary_audit = (lambda event: gate_audit({'book': 'PRIMARY_UNIQUE', **event})) if gate_audit else None
+        window_audit = (lambda event: gate_audit({'book': 'OVERLAPPING_WINDOW_DIAGNOSTIC', **event})) if gate_audit else None
+        primary[model] = replay_book(cache, model, folds, start=folds[0]['test_start'], end=folds[-1]['test_end'],
+                                     signal_gate=signal_gate, gate_audit=primary_audit) if folds else {'trades': [], 'censored': [], 'rejected': []}
+        fold_books[model] = [replay_book(cache, model, folds, start=f['test_start'], end=f['test_end'], fixed_fold=i,
+                                       signal_gate=signal_gate, gate_audit=window_audit)
                              for i, f in enumerate(folds)]
         print(f"LONG_WF {cache['timeframe']} {model} closed={len(primary[model]['trades'])} censored={len(primary[model]['censored'])}", flush=True)
     scenarios = []

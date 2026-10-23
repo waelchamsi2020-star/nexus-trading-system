@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "version": "1.0.0",
+  "mode": "RESEARCH_ONLY",
+  "execution_authority": false,
+  "multi_timeframe": {
+    "timeframes": [
+      "H4",
+      "D1"
+    ],
+    "maximum_age_periods": 1
+  },
+  "cross_asset": {
+    "timeframe": "H1",
+    "minimum_aligned_bars": 60,
+    "maximum_age_bars": 1,
+    "aliases": {
+      "EURUSD": "EURUSD",
+      "GBPUSD": "GBPUSD",
+      "USDJPY": "USDJPY",
+      "DXY": "DXY"
+    },
+    "policies": {
+      "EURUSD": {
+        "GBPUSD": 1,
+        "USDJPY": -1,
+        "DXY": -1
+      },
+      "GBPUSD": {
+        "EURUSD": 1,
+        "USDJPY": -1,
+        "DXY": -1
+      },
+      "USDJPY": {
+        "EURUSD": -1,
+        "GBPUSD": -1,
+        "DXY": 1
+      }
+    }
+  },
+  "sessions": {
+    "timezone": "UTC",
+    "windows": {
+      "LONDON": {
+        "start_hour": 7,
+        "end_hour": 16
+      },
+      "NEW_YORK": {
+        "start_hour": 12,
+        "end_hour": 21
+      },
+      "ASIA": {
+        "start_hour": 22,
+        "end_hour": 7
+      }
+    },
+    "models": {
+      "adx_di_cross": [
+        "ALL"
+      ],
+      "atr_channel_break": [
+        "ALL"
+      ],
+      "band_reentry": [
+        "ALL"
+      ],
+      "base_first_return": [
+        "ALL"
+      ],
+      "breakout_retest": [
+        "ALL"
+      ],
+      "cci_reentry": [
+        "ALL"
+      ],
+      "classic_pivot_reclaim": [
+        "ALL"
+      ],
+      "classic_reversal_patterns": [
+        "ALL"
+      ],
+      "darvas_box": [
+        "ALL"
+      ],
+      "darvas_rising_boxes": [
+        "ALL"
+      ],
+      "donchian_20": [
+        "ALL"
+      ],
+      "dow_structure": [
+        "ALL"
+      ],
+      "elliott_candidate": [
+        "ALL"
+      ],
+      "elliott_impulse_reversal": [
+        "ALL"
+      ],
+      "elliott_zigzag_reversal": [
+        "ALL"
+      ],
+      "ema_cross": [
+        "ALL"
+      ],
+      "engulfing": [
+        "ALL"
+      ],
+      "failed_range_break": [
+        "ALL"
+      ],
+      "fib_retracement": [
+        "ALL"
+      ],
+      "flag_breakout": [
+        "ALL"
+      ],
+      "four_school_confluence": [
+        "ALL"
+      ],
+      "fractal_5_breakout": [
+        "ALL"
+      ],
+      "fvg_first_return": [
+        "ALL"
+      ],
+      "gann": [
+        "ALL"
+      ],
+      "geometric_triangle_breakout": [
+        "ALL"
+      ],
+      "harmonic_abcd": [
+        "ALL"
+      ],
+      "harmonic_bat": [
+        "ALL"
+      ],
+      "harmonic_butterfly": [
+        "ALL"
+      ],
+      "harmonic_gartley": [
+        "ALL"
+      ],
+      "ichimoku_cross": [
+        "ALL"
+      ],
+      "inside_bar_break": [
+        "ALL"
+      ],
+      "interasset_confirmation": [
+        "ALL"
+      ],
+      "liquidity_bos_retest": [
+        "ALL"
+      ],
+      "macd_signal_cross": [
+        "ALL"
+      ],
+      "mfi_tick_rebound": [
+        "ALL"
+      ],
+      "momentum_acceleration": [
+        "ALL"
+      ],
+      "obv_divergence_reclaim": [
+        "ALL"
+      ],
+      "order_flow": [
+        "ALL"
+      ],
+      "pin_rejection": [
+        "ALL"
+      ],
+      "rectangle_breakout": [
+        "ALL"
+      ],
+      "regression_reentry": [
+        "ALL"
+      ],
+      "rsi_rebound": [
+        "ALL"
+      ],
+      "rsi_wilder_rebound": [
+        "ALL"
+      ],
+      "seasonality": [
+        "ALL"
+      ],
+      "smc_ict_proxy": [
+        "ALL"
+      ],
+      "smt_proxy": [
+        "ALL"
+      ],
+      "stochastic_rebound": [
+        "ALL"
+      ],
+      "supply_demand_proxy": [
+        "ALL"
+      ],
+      "support_bounce": [
+        "ALL"
+      ],
+      "three_bar_reversal": [
+        "ALL"
+      ],
+      "tick_activity_rejection": [
+        "ALL"
+      ],
+      "utc_opening_range": [
+        "ALL"
+      ],
+      "volatility_breakout": [
+        "ALL"
+      ],
+      "vwap_reclaim": [
+        "ALL"
+      ],
+      "williams_reentry": [
+        "ALL"
+      ],
+      "wyckoff_range_expansion": [
+        "ALL"
+      ],
+      "wyckoff_spring": [
+        "ALL"
+      ],
+      "zscore_reversion": [
+        "ALL"
+      ]
+    }
+  },
+  "notes": [
+    "Native H4 and D1 only; no M1 resampling or synthetic prices.",
+    "Context and routing only veto existing 58 models and never grant execution authority.",
+    "All session preferences default to ALL because no independent session-selection evidence exists.",
+    "Fixed UTC windows are research definitions, not DST-adjusted local exchange hours.",
+    "ALL permits every clock hour; broker trading availability and risk permissions remain separate.",
+    "DXY is mandatory native external history; a missing index is never reconstructed from currencies.",
+    "Currency orientations are explicit USD-leg hypotheses, not measured correlation or a proven edge.",
+    "Only fresh closed candles available at signal observation time are permitted."
+  ]
+}

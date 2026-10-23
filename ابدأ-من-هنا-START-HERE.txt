@@ -1,0 +1,17 @@
+ابدأ من هنا | START HERE
+
+1) اقرأ: دليل-الملفات-Source-Map.md — يشرح أين يوجد كل جزء من الكود بالعربية والإنجليزية.
+2) اقرأ: docs\AGENT_ARCHITECTURE_PLAN_AR_EN.md — الخطة المقترحة لتقسيم المدارس إلى وكلاء، واتجاه H4 ثم M15 ثم دخول M1.
+3) الكود الأصلي داخل src\nexus\.
+4) الفحوص داخل tests\.
+5) أدوات التطوير والفحص داخل tools\.
+6) الواجهة داخل ui\.
+7) إذا أردت نقل كل المجلد دفعة واحدة، استخدم Quant-Trading-AI-Source-0.7.16.zip.
+
+مهم: “Source” تعني ملفات المصدر للمراجعة والتطوير، وليست برنامج تثبيت. النسخة المرفقة للتطوير والمراجعة، ولا تعني أن تداول DEMO يعمل. لا تحتوي مفاتيح API أو سجلات/قواعد بيانات التداول.
+
+Start here:
+- Read the bilingual source map first.
+- Read the architecture plan second.
+- Application code: src\nexus\; tests: tests\; tools: tools\; UI: ui\.
+- ZIP is the same source folder compressed for transfer.

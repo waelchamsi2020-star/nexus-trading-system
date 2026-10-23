@@ -145,9 +145,10 @@ main>.content,main>.simulation-banner,main>.service-error{position:relative;z-in
 
 /* Aligned operating columns: overview scan and decision precede trading controls. */
 #view-overview.active{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}
-#view-overview>.account-grid{grid-row:1;grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-#view-overview .scan-overview{grid-row:2;grid-column:1/span 2}
-#view-overview .committee-preview{grid-row:2;grid-column:3}
+#view-overview>.overview-bottom{grid-row:1;grid-column:1/-1;display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:12px}
+#view-overview>.account-grid{grid-row:2;grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#view-overview .scan-overview{grid-column:1}
+#view-overview .committee-preview{grid-column:2}
 #view-overview .activation-panel{grid-row:3;grid-column:1}
 #view-overview .daily-panel{grid-row:3;grid-column:2}
 #view-overview .target-panel{grid-row:3;grid-column:3}
@@ -171,8 +172,8 @@ main>.content,main>.simulation-banner,main>.service-error{position:relative;z-in
 #view-overview .target-panel .profit-breakdown>div{display:flex;align-items:center;justify-content:space-between;gap:8px;border:0;padding:4px 0}
 #view-overview .target-panel .profit-breakdown span{max-width:65%;font-size:11px;line-height:1.4}
 #view-overview .target-panel .profit-breakdown b{white-space:nowrap}
-@media(max-width:1000px){#view-overview.active{grid-template-columns:repeat(2,minmax(0,1fr))}#view-overview .scan-overview{grid-row:2;grid-column:1}#view-overview .committee-preview{grid-row:2;grid-column:2}#view-overview .activation-panel{grid-row:3;grid-column:1}#view-overview .daily-panel{grid-row:3;grid-column:2}#view-overview .target-panel{grid-row:4;grid-column:1/-1}}
-@media(max-width:760px){#view-overview.active{grid-template-columns:1fr}#view-overview>.account-grid{grid-template-columns:1fr}#view-overview article.panel{grid-row:auto;grid-column:1!important}}
+@media(max-width:1000px){#view-overview.active{grid-template-columns:repeat(2,minmax(0,1fr))}#view-overview>.overview-bottom{grid-row:1;grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr))}#view-overview>.account-grid{grid-row:2}#view-overview .activation-panel{grid-row:3;grid-column:1}#view-overview .daily-panel{grid-row:3;grid-column:2}#view-overview .target-panel{grid-row:4;grid-column:1/-1}}
+@media(max-width:760px){#view-overview.active{grid-template-columns:1fr}#view-overview>.overview-bottom{grid-template-columns:1fr}#view-overview>.account-grid{grid-template-columns:1fr}#view-overview article.panel{grid-row:auto;grid-column:1!important}}
 
 
 /* Daily limits stack independently of the paired per-trade scalp settings. */
@@ -199,6 +200,7 @@ main>.content,main>.simulation-banner,main>.service-error{position:relative;z-in
 .section-disclosure>summary{cursor:pointer;display:list-item;font-size:13px;font-weight:600;line-height:1.7;color:var(--text)}
 .section-disclosure>.disclosure-content{padding-top:12px;min-width:0}
 .section-disclosure>.disclosure-content>.panel-heading{display:none}
+#llm-research-details>.disclosure-content>.panel-heading{display:flex}
 .section-disclosure .research-grid,.section-disclosure .coverage-grid{margin-top:0}
 .reference-policy{font-size:12px;color:var(--muted)}
 .panel-heading{gap:10px;flex-wrap:wrap}
@@ -210,6 +212,8 @@ main>.content,main>.simulation-banner,main>.service-error{position:relative;z-in
 #performance-table{max-height:440px;overflow:auto}
 .knowledge-grid,.coverage-grid,.research-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))}
 #view-news>.notice{margin-bottom:12px}
+#llm-research-results .panel{min-width:0;overflow-wrap:anywhere}
+#llm-research-results ul{padding-inline-start:22px}
 #view-setup>.setup-grid,#view-setup>.setup-advanced{max-width:760px;margin-inline-start:0;margin-inline-end:auto}
 #view-setup #connect-form{display:grid;gap:10px}
 #view-setup #connect-form label{margin:0}
@@ -218,3 +222,37 @@ main>.content,main>.simulation-banner,main>.service-error{position:relative;z-in
 /* The compact header can wrap after translation or text zoom. */
 main{padding-top:var(--header-height,58px)}.sidebar{top:var(--header-height,58px)}
 @media(max-width:720px){main{padding-top:var(--header-height,92px)}.sidebar{top:var(--header-height,92px)}}
+:root .demo-integrated #view-overview > .overview-grid {display:none!important}
+/* In the integrated Demo view keep scan and decision inside their full-width row.
+   display:contents made these cards shrink-wrap as unrelated grid items. */
+#demo-execution-panel {margin-block:14px}
+#demo-execution-panel .demo-facts {display:flex;flex-wrap:wrap;gap:20px;padding-block:12px}
+#demo-execution-panel form {margin-block:16px}
+#demo-execution-panel form>.button {margin-top:14px}
+#demo-execution-panel details {font-size:13px;line-height:1.8}
+#demo-execution-panel #demo-decision {line-height:1.8}
+
+/* Single cash control panel, following the restored scan and decision cards. */
+#view-overview #demo-execution-panel{grid-column:1/-1;grid-row:3;align-self:stretch;width:100%;min-width:0;padding:14px}
+#demo-execution-panel .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#demo-execution-panel label{min-width:0}
+#demo-execution-panel input{width:100%;min-width:0}
+#demo-execution-panel .demo-facts{gap:12px;padding-block:6px}
+#demo-execution-panel form{margin-block:10px}
+@media(max-width:760px){#view-overview #demo-execution-panel{grid-row:auto}}
+
+/* Keep the daily workflow prominent; technical references live in an optional menu. */
+.nav-more{margin-top:3px;border-top:1px solid var(--border);padding-top:8px}
+.nav-more>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:10px;color:var(--muted);font-size:12px}
+.nav-more>summary::-webkit-details-marker{display:none}
+.nav-more>summary:hover,.nav-more[open]>summary{background:var(--surface2);color:var(--text)}
+.nav-more-chevron{margin-inline-start:auto;transition:transform .15s ease}
+.nav-more[open] .nav-more-chevron{transform:rotate(180deg)}
+.nav-secondary{padding-inline-start:10px;padding-top:4px}
+.nav-secondary .nav-item{font-size:11px;padding-block:9px;margin-bottom:2px}
+.nav-more:has(.nav-item.active)>summary{color:var(--green)}
+#view-overview>.overview-bottom .scan-overview,#view-overview>.overview-bottom .committee-preview{min-height:128px;border-color:color-mix(in srgb,var(--border) 70%,var(--green) 30%)}
+#view-overview>.overview-bottom .panel-heading h2{font-size:16px}
+#view-overview .committee-preview .section-index{display:none}
+#view-overview .committee-preview .opportunity-head{align-items:center}
+#view-overview .committee-preview .opportunity-reason{max-width:52ch}

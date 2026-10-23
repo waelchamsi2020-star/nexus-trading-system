@@ -14,6 +14,7 @@ sys.path.insert(0,str(ROOT/"src"))
 from build_knowledge import build as build_knowledge
 from build_school_catalog import build as build_school_catalog
 from export_agent_rules import export as export_agent_rules
+from release_files import distribution_safe, source_files
 
 from nexus import __version__
 
@@ -98,10 +99,19 @@ def main():
     collect_notices()
     portable=ROOT/"Windows"/"Quant Trading AI"
     if not (portable/"Quant Trading AI.exe").exists():raise RuntimeError("Build Windows package first")
+    ca_bundle=portable/"_internal"/"certifi"/"cacert.pem"
+    if not ca_bundle.is_file() or ca_bundle.stat().st_size < 100_000:
+        raise RuntimeError("Bundled HTTPS root CA file is missing or unexpectedly small: _internal/certifi/cacert.pem")
+    ssl_source=Path(sys.base_prefix)/"Lib"/"ssl.py"
+    runtime_denylist=ssl_source.with_name("codex-rejected-cas.pem")
+    if ssl_source.is_file() and "codex-rejected-cas.pem" in ssl_source.read_text(encoding="utf-8"):
+        bundled_denylist=portable/"_internal"/runtime_denylist.name
+        if not runtime_denylist.is_file() or not bundled_denylist.is_file() or runtime_denylist.read_bytes()!=bundled_denylist.read_bytes():
+            raise RuntimeError("The active Python SSL runtime references an unbundled CA denylist")
     for file in ("README.md","THIRD-PARTY-NOTICES.md"):shutil.copy2(ROOT/file,portable/file)
-    for folder in ("docs","reports","licenses"):
+    for folder in ("docs","licenses"):
         for file in (ROOT/folder).rglob("*"):
-            if file.is_file() and file.suffix not in (".sqlite3",".pyc"):
+            if file.is_file() and distribution_safe(file.relative_to(ROOT)):
                 target=portable/folder/file.relative_to(ROOT/folder);target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(file,target)
                 if folder=="docs":
                     internal=portable/"_internal"/"docs"/file.relative_to(ROOT/folder)
@@ -112,12 +122,12 @@ def main():
     binaries=destination/f"Quant-Trading-AI-v{__version__}-Windows-x64.zip";sources=destination/f"Quant-Trading-AI-v{__version__}-Source.zip"
     with zipfile.ZipFile(binaries,"w",zipfile.ZIP_DEFLATED,compresslevel=6) as zipped:
         for file in sorted(portable.rglob("*")):
-            if file.is_file():zipped.write(file,(Path(delivery_folder)/file.relative_to(portable)).as_posix())
+            if file.is_file() and distribution_safe(file.relative_to(portable)):
+                zipped.write(file,(Path(delivery_folder)/file.relative_to(portable)).as_posix())
     with zipfile.ZipFile(sources,"w",zipfile.ZIP_DEFLATED,compresslevel=6) as zipped:
-        for file in sorted(ROOT.rglob("*")):
+        for file in source_files(ROOT):
             rel=file.relative_to(ROOT)
-            if file.is_file() and not any(part in ("Windows","__pycache__",".venv","build-work") for part in rel.parts) and file.suffix not in (".pyc",".sqlite3"):
-                zipped.write(file,(Path(delivery_folder)/rel).as_posix())
+            zipped.write(file,(Path(delivery_folder)/rel).as_posix())
     manifest={"product":"Quant Trading AI","version":__version__,"created_at_utc":datetime.now(UTC).isoformat(),"final_acceptance_passed":False,"archives":[]}
     for file in (binaries,sources):
         with zipfile.ZipFile(file) as zipped:

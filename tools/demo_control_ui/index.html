@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="nexus-token" content="">
+<title>حدود التداول التجريبي — NEXUS</title>
+<link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body><main><header><strong>NEXUS</strong><span>حدود التداول التجريبي</span></header>
+<p id="status" role="status">قراءة الحالة…</p>
+<form id="limits">
+<label>هدف الربح اليومي ($)<input name="daily_profit_amount" type="number" min="0.01" step="any" required></label>
+<label>حد الخسارة اليومي ($)<input name="daily_loss_amount" type="number" min="0.01" step="any" required></label>
+<label>هدف ربح الصفقة بعد احتياطي التكاليف ($)<input name="per_trade_profit_amount" type="number" min="0" step="any" required></label>
+<label>حد خسارة الصفقة مع احتياطي التكاليف ($)<input name="per_trade_loss_amount" type="number" min="0" step="any" required></label>
+<button type="submit" disabled>حفظ وتطبيق الحدود</button>
+<button type="button" id="reload-limits">تحميل الحدود الحالية</button></form>
+<p id="result" role="status" aria-live="polite"></p>
+<p class="note">التعديل يخص الدخول الجديد؛ لا يغير وقف أو هدف المراكز المفتوحة، ولا يمحو نتائج اليوم. بلوغ حد يومي يوقف الدخول، ولا يغلق المراكز. التنفيذ التجريبي فقط؛ الحجم الأقصى 0.01 لوت. الانزلاق الفعلي قد يجعل الخسارة تتجاوز الوقف.</p>
+</main></body></html>
