@@ -17,15 +17,20 @@ from .strategies import analyze_all, arabic, atr, ema, validate_bars
 from .timeframes import bar_close_time
 
 PROTOCOL_ID='multi_school_v1'
-DEFINITION={'id':PROTOCOL_ID,'version':'1.4.0','agents':'all_implemented_registry_models',
+TREND_FRAMES=('H1','H4','D1')
+CONTEXT_FRAMES=('M15',)+TREND_FRAMES
+FRAME_SECONDS={'M15':900,'H1':3600,'H4':14400,'D1':86400}
+MAX_CONTEXT_AGE={'M15':2700,'H1':21600,'H4':259200,'D1':432000}
+DEFINITION={'id':PROTOCOL_ID,'version':'1.5.0','agents':'all_implemented_registry_models',
  'cash_protection':{'currency':'USD','trigger':1,'attempt_target':2,'fallback':'close_if_legal_floor_unavailable',
    'scope':'explicit_current_authorization_owned_fast_positions','net':'paid_cashflows_swap_exit_commission_and_adverse_slippage',
-   'entry_trend':'completed_M15_and_H1_close_above_EMA20_above_EMA50_and_rising_EMA20_or_inverse_for_sell'},
- 'frames':['M1','M5','M15'],'fast_entry_frames':['M1'],'normal_entry_frames':['M1','M5'],
- 'corroboration':'fast_M1_two_dependency_families_strict_net_advantage_no_fixed_vote_percentage_other_modes_two_timeframes',
+   'entry_trend':'M1 entry; completed M15 confirms; majority of completed H1/H4/D1 EMA20/50 trends sets direction'},
+ 'frames':['M1','M15'],'context_frames':['M15','H1','H4','D1'],'fast_entry_frames':['M1'],'normal_entry_frames':['M1'],
+ 'corroboration':'M1 trigger and dependency-family evidence; M15 direction confirmation; at least two of H1/H4/D1 agree',
  'conflict':'fast_directional_family_vote_not_individual_school_veto_other_modes_triggered_veto',
  'default_target':'3R_from_original_completed_close_and_original_stop_when_model_has_default_2R',
  'fast_prefilter':'fresh_quote_and_completed_M1_only',
+ 'timeframe_policy':'M1_executes; M15_confirms; H1_H4_D1_context; M5_not_used_for_entry_or_confirmation',
  'fast_entry_zone':'original_completed_close_plus_minus_half_original_structural_risk_then_independent_net_RR',
  'fast_spread_gate':'actual_broker_net_RR_no_fixed_ATR_or_stop_spread_cutoff_on_authorized_Demo',
  'fast_exit':'SL_TP_invalidation_and_shared_daily_risk_no_fixed_bar_timer',
@@ -63,16 +68,17 @@ def decision(cards,news,now,market,autonomous_fast=False):
 class MultiSchoolMixin:
     def _cash_trend_context(self,symbol):
         now=self.clock();frames={};cache=getattr(self,'_cash_trend_cache',{})
-        for tf,seconds in (('M15',900),('H1',3600)):
+        for tf in CONTEXT_FRAMES:
+            seconds=FRAME_SECONDS[tf]
             key=(self.risk.key,symbol,tf,int(now//seconds))
             cached=cache.get(key)
-            if cached and not 0<=self.clock()-cached['data_time']<seconds:
+            if cached and not 0<=self.clock()-cached['data_time']<MAX_CONTEXT_AGE[tf]:
                 cache.pop(key,None)
             if key not in cache:
                 bars=validate_bars(self.broker.bars(symbol,tf,100),tf,self.clock())
                 if len(bars)<60:raise ValueError('Higher timeframe trend history missing')
                 data_time=bar_close_time(bars[-1]['time'],tf)
-                if not 0<=self.clock()-data_time<seconds:
+                if not 0<=self.clock()-data_time<MAX_CONTEXT_AGE[tf]:
                     raise ValueError('Higher timeframe trend data stale')
                 close=[b['close'] for b in bars];fast=ema(close,20);slow=ema(close,50)
                 direction=('BUY' if close[-1]>fast[-1]>slow[-1] and fast[-1]>fast[-2] else
@@ -80,12 +86,21 @@ class MultiSchoolMixin:
                 cache[key]={'timeframe':tf,'data_time':data_time,
                     'close':close[-1],'ema20':fast[-1],'ema50':slow[-1],'previous_ema20':fast[-2],'direction':direction}
             value=cache[key]
-            if not 0<=self.clock()-value['data_time']<seconds:
+            if not 0<=self.clock()-value['data_time']<MAX_CONTEXT_AGE[tf]:
                 raise ValueError('Higher timeframe trend data stale')
             frames[tf]=copy.deepcopy(value)
         # Keep only current and preceding buckets; cache is an optimization.
-        self._cash_trend_cache={k:v for k,v in cache.items() if k[0]==self.risk.key and k[3]>=int(now//(900 if k[2]=='M15' else 3600))-1}
+        self._cash_trend_cache={k:v for k,v in cache.items() if k[0]==self.risk.key and
+            k[3]>=int(now//FRAME_SECONDS[k[2]])-1}
         return frames
+
+    @staticmethod
+    def _trend_bias(context):
+        """M15 must confirm a 2-of-3 closed-bar H1/H4/D1 majority."""
+        if set(context)!=set(CONTEXT_FRAMES):return None
+        votes=[context[tf].get('direction') for tf in TREND_FRAMES]
+        bias='BUY' if votes.count('BUY')>=2 else 'SELL' if votes.count('SELL')>=2 else None
+        return bias if bias and context['M15'].get('direction')==bias else None
 
     def _autonomous_fast_enabled(self):
         return bool(self.settings.get('scalp_only') and self._scalp_variant('M1')=='fast'
@@ -137,7 +152,7 @@ class MultiSchoolMixin:
         autonomous=self._autonomous_fast_enabled()
         cards,books=self._multi_cards(symbol,fast_only=autonomous)
         trend={};trend_error=None
-        if autonomous and self.settings.get('fast_profit_protection'):
+        if autonomous:
             try:trend=self._cash_trend_context(symbol)
             except (ValueError,KeyError,TypeError) as exc:trend_error=str(exc)
         info=self.broker.symbol(symbol);session=self.broker.session(symbol);calendar=self.broker.calendar()
@@ -156,10 +171,10 @@ class MultiSchoolMixin:
                    reasons=['هذا الفريم للتأكيد فقط؛ الدخول محصور بفريم السكالب المحدد.'])
                 continue
             try:
-                if autonomous and self.settings.get('fast_profit_protection'):
+                if autonomous:
                     if trend_error:raise ValueError(trend_error)
-                    if any(value['direction']!=p['side'] for value in trend.values()):
-                        raise ValueError('Completed M15 and H1 trend do not confirm the M1 direction')
+                    if self._trend_bias(trend)!=p['side']:
+                        raise ValueError('M1 entry needs M15 confirmation and a matching H1/H4/D1 majority')
                 rule=self.rule_library[p['strategy_id']];profile=self.settings['scalping'][variant]
                 if not self.scalping_state[variant]['progress']['entries_allowed']:raise ValueError('Scalp goal blocks new entries')
                 formation={'symbol':symbol,'timeframe':tf,'strategy_id':p['strategy_id'],'version':p['strategy_version'],
@@ -229,7 +244,7 @@ class MultiSchoolMixin:
         Execution still reruns the full model and risk path. News is read on
         every visit, and the existing causal trend cache checks its expiry.
         """
-        if not self._autonomous_fast_enabled() or not self.settings.get('fast_profit_protection'):
+        if not self._autonomous_fast_enabled():
             return None
         metrics=self._fast_metrics
         metrics['hard_gate_checks']=metrics.get('hard_gate_checks',0)+1
@@ -243,9 +258,8 @@ class MultiSchoolMixin:
         else:
             try:
                 trend=self._cash_trend_context(symbol)
-                directions={value['direction'] for value in trend.values()}
-                if set(trend)!={'M15','H1'} or len(directions)!=1 or not directions<={'BUY','SELL'}:
-                    reason='Completed M15 and H1 trend do not confirm the M1 direction'
+                if self._trend_bias(trend) is None:
+                    reason='M15 confirmation and H1/H4/D1 majority direction are not aligned'
             except (ValueError,KeyError,TypeError) as exc:
                 reason=str(exc)
         if reason is None:return None

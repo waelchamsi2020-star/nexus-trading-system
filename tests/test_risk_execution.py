@@ -111,6 +111,33 @@ class RiskExecutionTests(unittest.TestCase):
         self.assertTrue(self.executor.execute(self.proposal(), approved=True)["approved"])
         self.assertEqual(1, len(self.broker.sent))
 
+    def test_position_cap_rejects_at_limit_and_allows_below_it(self):
+        self.activate(max_open_positions=1)
+        first = self.executor.execute(self.proposal("cap-first"))
+        self.assertTrue(first["approved"], first)
+        self.assertEqual(1, len(self.broker.positions()))
+        second = self.executor.execute(self.proposal("cap-second"))
+        self.assertFalse(second["approved"])
+        self.assertIn("MAX_OPEN_POSITIONS_REACHED", str(second))
+        self.assertEqual(1, len(self.broker.sent))
+
+    def test_position_cap_three_allows_second_entry(self):
+        self.activate(max_open_positions=3)
+        first = self.executor.execute(self.proposal("cap-three-first"))
+        second = self.executor.execute(self.proposal("cap-three-second"))
+        self.assertTrue(first["approved"], first)
+        self.assertTrue(second["approved"], second)
+        self.assertEqual(2, len(self.broker.positions()))
+
+    def test_pending_order_occupies_a_position_slot(self):
+        self.activate(max_open_positions=1)
+        self.broker._orders.append({"ticket": 7777, "symbol": "EURUSD.demo",
+                                    "magic": 123, "comment": "external"})
+        result = self.executor.execute(self.proposal("pending-slot"))
+        self.assertFalse(result["approved"])
+        self.assertIn("MAX_OPEN_POSITIONS_REACHED", str(result))
+        self.assertEqual([], self.broker.sent)
+
     def test_activation_rejects_real_contest_unknown_and_boolean(self):
         for mode in (1, 2, None, False):
             with self.subTest(mode=mode):

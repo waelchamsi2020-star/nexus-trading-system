@@ -28,15 +28,17 @@ class MultiSchoolTests(unittest.TestCase):
 
     def start(self):
         self.fixture.start(decision_protocol='multi_school_v1',scalping=self.profiles,scalp_only=True)
+        self.engine._cash_trend_context=lambda symbol:{tf:{'direction':'BUY'} for tf in multischool.CONTEXT_FRAMES}
         # Activation changes the spread policy and invalidates the old scan.
         # Drive the coordinator's fresh scan before evaluating fixture entries.
         self.engine.scanner.step(99)
 
-    def test_fast_authorization_rescans_under_waived_spread_policy(self):
+    def test_fast_authorization_keeps_completed_scan_without_spread_rejection(self):
         self.fixture.start(decision_protocol='multi_school_v1',scalping=self.profiles,scalp_only=True)
         self.assertFalse(self.engine.scanner.spread_filter)
-        self.assertFalse(self.engine.scanner.snapshot()['complete'])
-        self.assertTrue(self.engine.scanner.queue)
+        self.assertTrue(self.engine.scanner.snapshot()['complete'])
+        self.assertFalse(self.engine.scanner.queue)
+        self.assertTrue(self.engine.scanner.rows[self.fixture.symbol]['eligible'])
         self.assertEqual(self.engine.broker.sent,[])
 
     def test_default_target_is_independent_of_display_language(self):
@@ -67,7 +69,7 @@ class MultiSchoolTests(unittest.TestCase):
 
     def test_news_hard_gate_skips_heavy_models_and_recovers_on_next_visit(self):
         self.start();self.engine.settings['fast_profit_protection']=True
-        trend={tf:{'direction':'BUY'} for tf in ('M15','H1')}
+        trend={tf:{'direction':'BUY'} for tf in multischool.CONTEXT_FRAMES}
         result={'proposals':[],'ranked':[],'as_of':self.now,'expires_at':self.now,'decision':'WAIT','reasons':[]}
         with patch.object(self.engine,'_multi_fast_preflight',return_value=None), \
              patch.object(self.engine.news,'gate',side_effect=[{'ok':False,'blackout':True},{'ok':True,'blackout':False}]), \
@@ -81,10 +83,15 @@ class MultiSchoolTests(unittest.TestCase):
 
     def test_disagreeing_or_neutral_trends_cannot_use_heavy_fast_lane(self):
         self.start();self.engine.settings['fast_profit_protection']=True
-        for directions in (('BUY','SELL'),('NEUTRAL','NEUTRAL'),('BUY','NEUTRAL')):
+        cases=(
+            {'M15':'BUY','H1':'SELL','H4':'SELL','D1':'BUY'},
+            {'M15':'NEUTRAL','H1':'NEUTRAL','H4':'NEUTRAL','D1':'NEUTRAL'},
+            {'M15':'BUY','H1':'BUY','H4':'NEUTRAL','D1':'SELL'},
+        )
+        for directions in cases:
             with self.subTest(directions=directions), \
                  patch.object(self.engine.news,'gate',return_value={'ok':True,'blackout':False}), \
-                 patch.object(self.engine,'_cash_trend_context',return_value={tf:{'direction':side} for tf,side in zip(('M15','H1'),directions)}):
+                 patch.object(self.engine,'_cash_trend_context',return_value={tf:{'direction':side} for tf,side in directions.items()}):
                 result=self.engine._multi_fast_hard_gate(self.fixture.symbol)
                 self.assertEqual(result['proposals'],[])
                 self.assertEqual(result['analysis_deferred']['stage'],'existing_mandatory_entry_gates')
@@ -92,11 +99,26 @@ class MultiSchoolTests(unittest.TestCase):
 
     def test_hard_gate_does_not_change_non_cash_or_non_fast_policy(self):
         self.start()
+        self.engine.settings['scalp_only']=False
         with patch.object(self.engine.news,'gate',side_effect=AssertionError('Unexpected policy shortcut')):
             self.assertIsNone(self.engine._multi_fast_hard_gate(self.fixture.symbol))
             self.engine.settings['fast_profit_protection']=True
             self.engine.settings['scalp_only']=False
             self.assertIsNone(self.engine._multi_fast_hard_gate(self.fixture.symbol))
+
+    def test_fast_scalp_timeframe_contract_is_m1_entry_m15_confirmation_and_higher_trend(self):
+        self.start()
+        self.assertEqual(multischool.DEFINITION['fast_entry_frames'],['M1'])
+        self.assertEqual(multischool.DEFINITION['context_frames'],['M15','H1','H4','D1'])
+        self.assertIsNotNone(self.engine._scalp_variant('M1'))
+        self.assertIsNone(self.engine._scalp_variant('M5'))
+        self.assertIsNone(self.engine._scalp_variant('M15'))
+        self.assertEqual(multischool.MultiSchoolMixin._trend_bias({
+            'M15':{'direction':'BUY'},'H1':{'direction':'BUY'},
+            'H4':{'direction':'NEUTRAL'},'D1':{'direction':'BUY'}}),'BUY')
+        self.assertIsNone(multischool.MultiSchoolMixin._trend_bias({
+            'M15':{'direction':'SELL'},'H1':{'direction':'BUY'},
+            'H4':{'direction':'BUY'},'D1':{'direction':'SELL'}}))
 
     def test_fast_preflight_leaves_zone_choice_to_agent(self):
         self.start()
@@ -142,7 +164,7 @@ class MultiSchoolTests(unittest.TestCase):
 
     def test_all_agents_and_small_timeframes_are_observed_without_broker_send(self):
         self.start();cards,books=self.engine._multi_cards(self.fixture.symbol)
-        self.assertEqual(set(books),{'M1','M5','M15'})
+        self.assertEqual(set(books),{'M1','M15'})
         self.assertEqual(len(cards),len(books)*len(self.engine.rule_library))
         self.assertEqual({c['strategy_id'] for c in cards},set(self.engine.rule_library))
         self.assertEqual(self.engine.broker.sent,[])
@@ -166,7 +188,7 @@ class MultiSchoolTests(unittest.TestCase):
         with patch('nexus.multischool.analyze_all',wraps=multischool.analyze_all) as analyze:
             self.engine._multi_cards(self.fixture.symbol)
             first=analyze.call_count
-            self.assertEqual(first,3)
+            self.assertEqual(first,2)
             original=self.engine.broker.symbol
             def changed(symbol):return {**original(symbol),'bid':1.081,'ask':1.082}
             with patch.object(self.engine.broker,'symbol',side_effect=changed):
@@ -243,7 +265,9 @@ class MultiSchoolTests(unittest.TestCase):
                   'direction':'SELL','score':100,'entry':{'price':1.08,'zone':[1.079,1.081],'triggered':True},
                   'stop':{'price':1.085},'targets':[{'price':1.065}]}])
             return result
-        with patch('nexus.multischool.analyze_all',side_effect=cards):
+        sell_context={tf:{'direction':'SELL'} for tf in multischool.CONTEXT_FRAMES}
+        with patch('nexus.multischool.analyze_all',side_effect=cards), \
+             patch.object(self.engine,'_cash_trend_context',return_value=sell_context):
             result=self.engine._multi_result(self.fixture.symbol)
         self.assertEqual(len(result['proposals']),1)
         self.assertEqual(result['proposals'][0]['side'],'SELL')

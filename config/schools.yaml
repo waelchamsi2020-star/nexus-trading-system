@@ -1,0 +1,1499 @@
+{
+  "schema_version": 1,
+  "source_catalog_version": "1.2.0",
+  "phase": "A_CLASSIFICATION_CORRECTED_NO_SCHOOL_CODE",
+  "activation_policy": "NO_ACTIVATION_BEFORE_DATA_PROBE_AND_30_DAY_BACKTEST",
+  "execution_data_source": "MT5_ONLY",
+  "llm_signal_generation": false,
+  "schools": [
+    {
+      "catalog_id": "ta_classical",
+      "name": "Classical Technical Analysis",
+      "requested_name": "technical_classic",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PENDING_IMPLEMENTATION_AND_BACKTEST",
+      "catalog_runtime_model_count": 7,
+      "required_data": [
+        "completed_ohlc",
+        "long_history"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "long_history"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_dow",
+      "name": "Dow Theory",
+      "requested_name": "dow",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 2,
+      "required_data": [
+        "completed_ohlc",
+        "paired_history",
+        "real_volume"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "paired_history",
+          "real_volume"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_indicators",
+      "name": "Technical Indicators",
+      "requested_name": "indicators",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 12,
+      "required_data": [
+        "completed_ohlc",
+        "long_history",
+        "tick_volume"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "long_history",
+          "tick_volume"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_quantitative",
+      "name": "Quantitative / Statistical Technical Analysis",
+      "requested_name": "quant_technical",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 4,
+      "required_data": [
+        "completed_ohlc",
+        "long_history"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "long_history"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_elliott",
+      "name": "Elliott Wave Theory",
+      "requested_name": "elliott",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 3,
+      "required_data": [
+        "completed_ohlc",
+        "long_history"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "long_history"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_harmonic",
+      "name": "Harmonic Analysis",
+      "requested_name": "harmonic",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PENDING_IMPLEMENTATION_AND_BACKTEST",
+      "catalog_runtime_model_count": 4,
+      "required_data": [
+        "completed_ohlc"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_price_action",
+      "name": "Price Action",
+      "requested_name": "price_action",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PILOT_FAILED_RESEARCH_ONLY",
+      "catalog_runtime_model_count": 5,
+      "required_data": [
+        "completed_ohlc"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_time",
+      "name": "Time Analysis",
+      "requested_name": "time_analysis",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 2,
+      "required_data": [
+        "completed_ohlc",
+        "session_clock",
+        "long_history"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "session_clock",
+          "long_history"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_sentiment",
+      "name": "Sentiment / Positioning Analysis",
+      "requested_name": "sentiment",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFUSED_NO_DATA",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "positioning",
+        "completed_ohlc"
+      ],
+      "data_gap": "0/3 positioning feeds verified in MT5 contract: COT, open interest, funding",
+      "data_requirement": {
+        "required_keys": [
+          "positioning",
+          "completed_ohlc"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_ict",
+      "name": "Inner Circle Trader (ICT)",
+      "requested_name": "ict",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PENDING_IMPLEMENTATION_AND_BACKTEST",
+      "catalog_runtime_model_count": 5,
+      "required_data": [
+        "completed_ohlc",
+        "session_clock"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "session_clock"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_wyckoff",
+      "name": "Wyckoff Method",
+      "requested_name": "wyckoff_partial",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 2,
+      "required_data": [
+        "completed_ohlc",
+        "real_volume",
+        "tick_volume"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "depth_history",
+          "real_volume",
+          "signed_trades",
+          "tick_volume"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": true,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_gann",
+      "name": "Gann Analysis",
+      "requested_name": "gann",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 1,
+      "required_data": [
+        "completed_ohlc",
+        "session_clock",
+        "long_history"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "session_clock",
+          "long_history"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_fibonacci",
+      "name": "Fibonacci Analysis",
+      "requested_name": "fibonacci",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PENDING_IMPLEMENTATION_AND_BACKTEST",
+      "catalog_runtime_model_count": 5,
+      "required_data": [
+        "completed_ohlc"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_market_structure",
+      "name": "Market Structure",
+      "requested_name": "market_structure",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PILOT_FAILED_RESEARCH_ONLY",
+      "catalog_runtime_model_count": 3,
+      "required_data": [
+        "completed_ohlc"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_supply_demand",
+      "name": "Supply & Demand Zones",
+      "requested_name": "supply_demand",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PENDING_IMPLEMENTATION_AND_BACKTEST",
+      "catalog_runtime_model_count": 2,
+      "required_data": [
+        "completed_ohlc"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_liquidity",
+      "name": "Liquidity Analysis",
+      "requested_name": "liquidity_approx",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 4,
+      "required_data": [
+        "completed_ohlc",
+        "depth_history"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "depth_history",
+          "signed_trades"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": true,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_smart_money",
+      "name": "Smart Money Concepts",
+      "requested_name": "smart_money_approx",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 5,
+      "required_data": [
+        "completed_ohlc",
+        "depth_history"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "depth_history",
+          "signed_trades"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": true,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_volume",
+      "name": "Volume Analysis",
+      "requested_name": "volume_analysis",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 6,
+      "required_data": [
+        "completed_ohlc",
+        "real_volume",
+        "tick_volume"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "real_volume",
+          "tick_volume"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_candlesticks",
+      "name": "Japanese Candlestick Patterns",
+      "requested_name": "candlesticks",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PENDING_IMPLEMENTATION_AND_BACKTEST",
+      "catalog_runtime_model_count": 4,
+      "required_data": [
+        "completed_ohlc"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_chart_patterns",
+      "name": "Chart / Geometric Patterns",
+      "requested_name": "chart_patterns",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PENDING_IMPLEMENTATION_AND_BACKTEST",
+      "catalog_runtime_model_count": 6,
+      "required_data": [
+        "completed_ohlc",
+        "long_history"
+      ],
+      "data_gap": null,
+      "patterns": [
+        "HEAD_SHOULDERS"
+      ],
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "long_history"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_false_breakout",
+      "name": "False Breakout",
+      "requested_name": "false_breakout",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PENDING_IMPLEMENTATION_AND_BACKTEST",
+      "catalog_runtime_model_count": 3,
+      "required_data": [
+        "completed_ohlc"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_neowave",
+      "name": "NEoWave",
+      "requested_name": "neowave",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFUSED_NO_DATA",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "completed_ohlc",
+        "long_history",
+        "session_clock"
+      ],
+      "data_gap": "0 independently specified NEoWave executable models; catalog has zero runtime models",
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "long_history",
+          "session_clock"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_order_flow",
+      "name": "Order Flow",
+      "requested_name": "order_flow_approx",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 2,
+      "required_data": [
+        "signed_trades",
+        "depth_history",
+        "tick_volume"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "depth_history",
+          "signed_trades",
+          "tick_volume"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": true,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_chaos_fractal",
+      "name": "Chaos & Fractal Analysis",
+      "requested_name": "chaos_fractal",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 1,
+      "required_data": [
+        "completed_ohlc",
+        "long_history"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "long_history"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_cycles",
+      "name": "Cycle Theory",
+      "requested_name": "cycles",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 2,
+      "required_data": [
+        "completed_ohlc",
+        "long_history",
+        "session_clock"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "long_history",
+          "session_clock"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_intermarket",
+      "name": "Intermarket Analysis",
+      "requested_name": "correlation",
+      "tier": "TIER_2_CONDITIONAL",
+      "status": "PENDING_DATA_PROBE",
+      "catalog_runtime_model_count": 2,
+      "required_data": [
+        "completed_ohlc",
+        "paired_history",
+        "long_history"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "paired_history",
+          "long_history"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": true,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_volume_theories",
+      "name": "Volume Theories",
+      "requested_name": "volume_theories",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFUSED_NO_DATA",
+      "catalog_runtime_model_count": 6,
+      "required_data": [
+        "completed_ohlc",
+        "real_volume",
+        "tick_volume"
+      ],
+      "data_gap": "0 verified real-volume feeds across the selected symbols; tick count is not real traded volume",
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "real_volume",
+          "tick_volume"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_harmonic_patterns",
+      "name": "Harmonic Patterns",
+      "requested_name": "harmonic_patterns",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PENDING_IMPLEMENTATION_AND_BACKTEST",
+      "catalog_runtime_model_count": 4,
+      "required_data": [
+        "completed_ohlc"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_gaps",
+      "name": "Gap Analysis",
+      "requested_name": "gaps",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFUSED_NO_DATA",
+      "catalog_runtime_model_count": 2,
+      "required_data": [
+        "completed_ohlc",
+        "session_clock",
+        "corporate_actions"
+      ],
+      "data_gap": "0 verified corporate-action feeds for gap cause/adjustment in MT5 contract",
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "session_clock",
+          "corporate_actions"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ta_pivots",
+      "name": "Pivot Points",
+      "requested_name": "pivots",
+      "tier": "TIER_1_EXECUTABLE",
+      "status": "PENDING_IMPLEMENTATION_AND_BACKTEST",
+      "catalog_runtime_model_count": 1,
+      "required_data": [
+        "completed_ohlc",
+        "session_clock"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "completed_ohlc",
+          "session_clock"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_quantitative",
+      "name": "Quantitative Fundamental Analysis",
+      "requested_name": "fa_quantitative",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "financial_statements",
+        "issuer_identity",
+        "corporate_actions"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "financial_statements",
+          "issuer_identity",
+          "corporate_actions"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_qualitative",
+      "name": "Qualitative Fundamental Analysis",
+      "requested_name": "fa_qualitative",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "filings",
+        "issuer_identity",
+        "behavior_log"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "filings",
+          "issuer_identity",
+          "behavior_log"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_macro",
+      "name": "Macroeconomic Analysis",
+      "requested_name": "macro_context",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFUSED_NO_DATA",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "macro_series",
+        "calendar",
+        "session_clock"
+      ],
+      "data_gap": "0/2 required macro feeds verified in MT5 contract: dependable economic calendar, policy interest-rate series",
+      "data_requirement": {
+        "required_keys": [
+          "macro_series",
+          "calendar",
+          "session_clock"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_industry",
+      "name": "Industry Analysis",
+      "requested_name": "fa_industry",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "peer_data",
+        "filings",
+        "macro_series"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "peer_data",
+          "filings",
+          "macro_series"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_company",
+      "name": "Company Analysis",
+      "requested_name": "fa_company",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "financial_statements",
+        "issuer_identity",
+        "filings",
+        "corporate_actions"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "financial_statements",
+          "issuer_identity",
+          "filings",
+          "corporate_actions"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_graham_dodd",
+      "name": "Graham & Dodd / Security Analysis",
+      "requested_name": "fa_graham_dodd",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "financial_statements",
+        "issuer_identity",
+        "asset_appraisals"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "financial_statements",
+          "issuer_identity",
+          "asset_appraisals"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_behavioral",
+      "name": "Behavioral Finance",
+      "requested_name": "fa_behavioral",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "behavior_log",
+        "positioning"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "behavior_log",
+          "positioning"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_value",
+      "name": "Value Investing",
+      "requested_name": "fa_value",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "financial_statements",
+        "cash_forecasts",
+        "discount_rates",
+        "asset_appraisals"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "financial_statements",
+          "cash_forecasts",
+          "discount_rates",
+          "asset_appraisals"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_growth",
+      "name": "Growth Investing",
+      "requested_name": "fa_growth",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "financial_statements",
+        "cash_forecasts",
+        "discount_rates",
+        "corporate_actions"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "financial_statements",
+          "cash_forecasts",
+          "discount_rates",
+          "corporate_actions"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_income",
+      "name": "Income Investing",
+      "requested_name": "fa_income",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "dividends",
+        "financial_statements",
+        "security_terms",
+        "fund_holdings"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "dividends",
+          "financial_statements",
+          "security_terms",
+          "fund_holdings"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_garp",
+      "name": "Growth at a Reasonable Price (GARP)",
+      "requested_name": "fa_garp",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "financial_statements",
+        "cash_forecasts",
+        "peer_data"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "financial_statements",
+          "cash_forecasts",
+          "peer_data"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_index",
+      "name": "Index Investing",
+      "requested_name": "fa_index",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "index_membership",
+        "fund_holdings",
+        "corporate_actions"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "index_membership",
+          "fund_holdings",
+          "corporate_actions"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_fund",
+      "name": "Fund Investing",
+      "requested_name": "fa_fund",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "fund_holdings",
+        "filings",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "fund_holdings",
+          "filings",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_commodity",
+      "name": "Commodity Fundamental Analysis",
+      "requested_name": "fa_commodity",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "commodity_balance",
+        "futures_curve",
+        "issuer_identity",
+        "macro_series"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "commodity_balance",
+          "futures_curve",
+          "issuer_identity",
+          "macro_series"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_currency",
+      "name": "Currency Fundamental Analysis",
+      "requested_name": "fa_currency",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "macro_series",
+        "calendar",
+        "issuer_identity",
+        "yield_curves"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "macro_series",
+          "calendar",
+          "issuer_identity",
+          "yield_curves"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_bond",
+      "name": "Bond Analysis",
+      "requested_name": "fa_bond",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "security_terms",
+        "yield_curves",
+        "financial_statements",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "security_terms",
+          "yield_curves",
+          "financial_statements",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_equity",
+      "name": "Equity Analysis",
+      "requested_name": "fa_equity",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "financial_statements",
+        "issuer_identity",
+        "corporate_actions",
+        "cash_forecasts"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "financial_statements",
+          "issuer_identity",
+          "corporate_actions",
+          "cash_forecasts"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_absolute",
+      "name": "Absolute / Intrinsic Valuation",
+      "requested_name": "fa_absolute",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "cash_forecasts",
+        "discount_rates",
+        "financial_statements",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "cash_forecasts",
+          "discount_rates",
+          "financial_statements",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_relative",
+      "name": "Relative Valuation",
+      "requested_name": "fa_relative",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "peer_data",
+        "financial_statements",
+        "issuer_identity",
+        "corporate_actions"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "peer_data",
+          "financial_statements",
+          "issuer_identity",
+          "corporate_actions"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "fa_asset_based",
+      "name": "Asset-Based Valuation",
+      "requested_name": "fa_asset_based",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "asset_appraisals",
+        "financial_statements",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "asset_appraisals",
+          "financial_statements",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ap_top_down",
+      "name": "Top-Down Approach",
+      "requested_name": "ap_top_down",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "macro_series",
+        "peer_data",
+        "financial_statements",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "macro_series",
+          "peer_data",
+          "financial_statements",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ap_bottom_up",
+      "name": "Bottom-Up Approach",
+      "requested_name": "ap_bottom_up",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "financial_statements",
+        "issuer_identity",
+        "cash_forecasts",
+        "discount_rates"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "financial_statements",
+          "issuer_identity",
+          "cash_forecasts",
+          "discount_rates"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ap_ddm",
+      "name": "Dividend Discount Model (DDM)",
+      "requested_name": "ap_ddm",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "dividends",
+        "cash_forecasts",
+        "discount_rates",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "dividends",
+          "cash_forecasts",
+          "discount_rates",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ap_dcf",
+      "name": "Discounted Cash Flow (DCF)",
+      "requested_name": "ap_dcf",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "cash_forecasts",
+        "discount_rates",
+        "financial_statements",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "cash_forecasts",
+          "discount_rates",
+          "financial_statements",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ap_relative",
+      "name": "Relative Valuation / Comparables Approach",
+      "requested_name": "ap_relative",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "peer_data",
+        "financial_statements",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "peer_data",
+          "financial_statements",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ap_asset_based",
+      "name": "Asset-Based Valuation Approach",
+      "requested_name": "ap_asset_based",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "asset_appraisals",
+        "financial_statements",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "asset_appraisals",
+          "financial_statements",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ap_present_value",
+      "name": "Present Value Models",
+      "requested_name": "ap_present_value",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "cash_forecasts",
+        "discount_rates",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "cash_forecasts",
+          "discount_rates",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    },
+    {
+      "catalog_id": "ap_multiples",
+      "name": "Multiplier / Multiples Models",
+      "requested_name": "ap_multiples",
+      "tier": "TIER_3_REFERENCE",
+      "status": "REFERENCE_ONLY",
+      "catalog_runtime_model_count": 0,
+      "required_data": [
+        "peer_data",
+        "financial_statements",
+        "issuer_identity"
+      ],
+      "data_gap": null,
+      "data_requirement": {
+        "required_keys": [
+          "peer_data",
+          "financial_statements",
+          "issuer_identity"
+        ],
+        "evidence_source": "MT5 per-symbol observed data only",
+        "probe_before_build": false,
+        "strict_depth_and_signed_flow": false,
+        "on_missing": "REFUSED_NO_DATA",
+        "no_proxy_or_estimate": true
+      }
+    }
+  ]
+}

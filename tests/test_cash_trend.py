@@ -9,9 +9,12 @@ class CashTrendTests(unittest.TestCase):
     def setUp(self):
         self.fixture=fixtures.MultiSchoolTests();self.fixture.setUp();self.addCleanup(self.fixture.doCleanups)
         self.fixture.start();self.engine=self.fixture.engine;self.now=self.fixture.now
+        # MultiSchoolTests.start installs a convenient default context stub;
+        # these tests exercise the real causal MT5 context reader.
+        del self.engine._cash_trend_context
 
     def bars(self,tf,up=True):
-        seconds={'M15':900,'H1':3600}[tf];end=int(self.now//seconds)*seconds
+        seconds={'M15':900,'H1':3600,'H4':14400,'D1':86400}[tf];end=int(self.now//seconds)*seconds
         rows=[]
         for i in range(100):
             close=1.+(i if up else 100-i)*.0001
@@ -22,16 +25,16 @@ class CashTrendTests(unittest.TestCase):
         with patch.object(self.engine.broker,'bars',side_effect=lambda symbol,tf,count:self.bars(tf)) as read:
             trend=self.engine._cash_trend_context(self.fixture.fixture.symbol)
             self.assertEqual({v['direction'] for v in trend.values()},{'BUY'})
-            self.engine._cash_trend_context(self.fixture.fixture.symbol);self.assertEqual(read.call_count,2)
-            self.engine.risk.key='other-demo-scope'
             self.engine._cash_trend_context(self.fixture.fixture.symbol);self.assertEqual(read.call_count,4)
+            self.engine.risk.key='other-demo-scope'
+            self.engine._cash_trend_context(self.fixture.fixture.symbol);self.assertEqual(read.call_count,8)
 
     def test_stale_cached_history_is_retried_when_broker_recovers_within_bucket(self):
         symbol=self.fixture.fixture.symbol;key=(self.engine.risk.key,symbol,'M15',int(self.now//900))
-        self.engine._cash_trend_cache={key:{'data_time':self.now-1800,'direction':'NEUTRAL'}}
+        self.engine._cash_trend_cache={key:{'data_time':self.now-4000,'direction':'NEUTRAL'}}
         with patch.object(self.engine.broker,'bars',side_effect=lambda symbol,tf,count:self.bars(tf)) as read:
             trend=self.engine._cash_trend_context(symbol)
-        self.assertEqual(read.call_count,2)
+        self.assertEqual(read.call_count,4)
         self.assertEqual({v['direction'] for v in trend.values()},{'BUY'})
         self.assertGreater(self.engine._cash_trend_cache[key]['data_time'],self.now-900)
 
@@ -52,19 +55,21 @@ class CashTrendTests(unittest.TestCase):
 
     def test_opposing_larger_trend_blocks_ready_m1_proposal(self):
         self.engine.settings['fast_profit_protection']=True
+        opposed={'M15':'BUY','H1':'SELL','H4':'SELL','D1':'BUY'}
         with patch('nexus.multischool.analyze_all',side_effect=self.fixture.fixture_cards), \
-             patch.object(self.engine,'_cash_trend_context',return_value={'M15':{'direction':'BUY'},'H1':{'direction':'SELL'}}):
+             patch.object(self.engine,'_cash_trend_context',return_value={tf:{'direction':side} for tf,side in opposed.items()}):
             result=self.engine._multi_result(self.fixture.fixture.symbol)
         self.assertFalse(result['proposals'])
-        self.assertTrue(any('trend do not confirm' in str(r.get('reasons')) for r in result['ranked']))
+        self.assertTrue(any('majority' in str(r.get('reasons')) for r in result['ranked']))
         self.assertEqual(self.engine.broker.sent,[])
 
     def test_aligned_trend_is_bound_into_proposal_certificate(self):
         self.engine.settings['fast_profit_protection']=True
+        aligned={tf:{'direction':'BUY'} for tf in fixtures.multischool.CONTEXT_FRAMES}
         with patch('nexus.multischool.analyze_all',side_effect=self.fixture.fixture_cards), \
-             patch.object(self.engine,'_cash_trend_context',return_value={'M15':{'direction':'BUY'},'H1':{'direction':'BUY'}}):
+             patch.object(self.engine,'_cash_trend_context',return_value=aligned):
             result=self.engine._multi_result(self.fixture.fixture.symbol)
         self.assertTrue(result['proposals'],result)
-        self.assertEqual(set(result['proposals'][0]['decision_matrix']['higher_timeframe_trend']),{'M15','H1'})
+        self.assertEqual(set(result['proposals'][0]['decision_matrix']['higher_timeframe_trend']),set(fixtures.multischool.CONTEXT_FRAMES))
 
 if __name__=='__main__':unittest.main()

@@ -1,0 +1,1642 @@
+{
+  "schema_version": 1,
+  "version": "1.0.0",
+  "mode": "RESEARCH_ONLY",
+  "execution_authority": false,
+  "classifier": {
+    "min_bars": 60,
+    "ema_fast": 20,
+    "ema_slow": 50,
+    "slope_bars": 5,
+    "atr_period": 14,
+    "efficiency_bars": 20,
+    "trend_min_ema_gap_atr": 0.5,
+    "trend_min_slope_atr": 0.25,
+    "trend_min_efficiency": 0.45,
+    "range_max_ema_gap_atr": 0.5,
+    "range_max_abs_slope_atr": 0.25,
+    "range_max_efficiency": 0.25
+  },
+  "source": {
+    "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+    "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3",
+    "report_path": "reports/regime-diagnostics.json",
+    "selection_rule": "Prior USD7 net_r > 0 and prior regime trades >= 5; never UNKNOWN.",
+    "minimum_prior_trades": 5,
+    "minimum_evidence_trades": 30,
+    "native_span": {
+      "first_open_utc": "2025-02-24T14:00:00+00:00",
+      "last_close_utc": "2026-10-16T20:00:00+00:00",
+      "elapsed_calendar_days": 599.25,
+      "approximate_calendar_months": 19.688289287254356,
+      "bars": 10000,
+      "calendar_segments": 76,
+      "segments_with_archived_trades": [
+        42,
+        44
+      ]
+    },
+    "archived_trade_span": {
+      "first_entry_utc": "2025-12-17T00:00:00+00:00",
+      "last_exit_utc": "2026-03-11T07:00:00+00:00",
+      "elapsed_calendar_days": 84.29166666666667
+    },
+    "limitations": [
+      "Frozen from the older retrospective diagnostic only; no five-year outcome is read by this builder.",
+      "The older diagnostic overlaps the five-year study; this experiment is post-selection, not unseen holdout.",
+      "Fewer than 30 prior trades in every enabled regime; all enabled routes remain exploratory.",
+      "Older diagnostic RANGE is residual non-directional, not the new strict efficiency-based RANGE.",
+      "No route is inferred for absent or nonpositive evidence; an empty list disables the model.",
+      "ALL means all known regimes only; UNCERTAIN is always blocked. No side override is introduced.",
+      "No live execution authority, model parameters, prices, costs or risk limits are changed."
+    ]
+  },
+  "models": {
+    "adx_di_cross": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "atr_channel_break": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 2,
+          "net_r": 0.7873587911989497
+        },
+        "DOWN": {
+          "trades": 7,
+          "net_r": -0.5890105355933674
+        },
+        "RANGE": {
+          "trades": 3,
+          "net_r": -0.4569545436062316
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "band_reentry": {
+      "regimes": [
+        "TREND_UP",
+        "RANGE"
+      ],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 6,
+          "net_r": 1.6107817617473157
+        },
+        "DOWN": {
+          "trades": 4,
+          "net_r": -2.480268864026932
+        },
+        "RANGE": {
+          "trades": 13,
+          "net_r": 1.384799421078603
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "EXPLORATORY_POSITIVE_NET_R_AND_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "base_first_return": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "breakout_retest": {
+      "regimes": [
+        "TREND_UP"
+      ],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 7,
+          "net_r": 3.2957627901741606
+        },
+        "DOWN": {
+          "trades": 12,
+          "net_r": -2.292908685406839
+        },
+        "RANGE": {
+          "trades": 10,
+          "net_r": -3.419925451961819
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "EXPLORATORY_POSITIVE_NET_R_AND_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "cci_reentry": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 11,
+          "net_r": -2.5130518580429704
+        },
+        "DOWN": {
+          "trades": 15,
+          "net_r": -5.198742053348358
+        },
+        "RANGE": {
+          "trades": 27,
+          "net_r": -8.525258033387821
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "classic_pivot_reclaim": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "classic_reversal_patterns": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": -0.40248226950353616
+        },
+        "DOWN": {
+          "trades": 1,
+          "net_r": -1.0291095890410948
+        },
+        "RANGE": {
+          "trades": 5,
+          "net_r": -2.1604882543248713
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "darvas_box": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 3,
+          "net_r": -0.4480348172637007
+        },
+        "DOWN": {
+          "trades": 13,
+          "net_r": -2.179851517555697
+        },
+        "RANGE": {
+          "trades": 13,
+          "net_r": -1.1398896225242072
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "darvas_rising_boxes": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 2,
+          "net_r": 0.6059334367045499
+        },
+        "DOWN": {
+          "trades": 8,
+          "net_r": -0.35059166658844465
+        },
+        "RANGE": {
+          "trades": 2,
+          "net_r": 1.0779293519020283
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "donchian_20": {
+      "regimes": [
+        "RANGE"
+      ],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 4,
+          "net_r": 0.7149162526914623
+        },
+        "DOWN": {
+          "trades": 8,
+          "net_r": -1.5531876513542138
+        },
+        "RANGE": {
+          "trades": 8,
+          "net_r": 0.24089804992801644
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "EXPLORATORY_POSITIVE_NET_R_AND_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "dow_structure": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 2,
+          "net_r": -0.2561217320175241
+        },
+        "DOWN": {
+          "trades": 7,
+          "net_r": -2.5080427179939506
+        },
+        "RANGE": {
+          "trades": 12,
+          "net_r": -2.9457382167697097
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "elliott_candidate": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 4,
+          "net_r": 0.564636942399679
+        },
+        "DOWN": {
+          "trades": 2,
+          "net_r": 0.5770993781493635
+        },
+        "RANGE": {
+          "trades": 2,
+          "net_r": -0.5451127819548944
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "elliott_impulse_reversal": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": -1.0636704119850158
+        },
+        "DOWN": {
+          "trades": 1,
+          "net_r": -1.0389908256880696
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "elliott_zigzag_reversal": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": -1.0636704119850158
+        },
+        "DOWN": {
+          "trades": 2,
+          "net_r": -2.075238160442866
+        },
+        "RANGE": {
+          "trades": 3,
+          "net_r": -0.8018439688429644
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "ema_cross": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": -0.32842415316641954
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 26,
+          "net_r": -9.128278160321425
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "engulfing": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 11,
+          "net_r": -1.5525893534865842
+        },
+        "DOWN": {
+          "trades": 12,
+          "net_r": -9.409806259140353
+        },
+        "RANGE": {
+          "trades": 19,
+          "net_r": -3.09619711585887
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "failed_range_break": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 8,
+          "net_r": -0.4522258799372239
+        },
+        "DOWN": {
+          "trades": 7,
+          "net_r": -2.774433608117481
+        },
+        "RANGE": {
+          "trades": 22,
+          "net_r": -2.3276574948539746
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "fib_retracement": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 4,
+          "net_r": -0.21294549666590026
+        },
+        "DOWN": {
+          "trades": 6,
+          "net_r": -2.6982579566336375
+        },
+        "RANGE": {
+          "trades": 14,
+          "net_r": -4.263794566484815
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "flag_breakout": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "four_school_confluence": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "fractal_5_breakout": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 8,
+          "net_r": -1.833279299196313
+        },
+        "DOWN": {
+          "trades": 13,
+          "net_r": -4.527637769730358
+        },
+        "RANGE": {
+          "trades": 24,
+          "net_r": -0.22662510921002782
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "fvg_first_return": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 2,
+          "net_r": -1.0270023926171
+        },
+        "DOWN": {
+          "trades": 3,
+          "net_r": -3.3530570356784093
+        },
+        "RANGE": {
+          "trades": 5,
+          "net_r": -3.6954223165337075
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "gann": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": -0.18998167379352063
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "geometric_triangle_breakout": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": -1.0627306273062693
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 3,
+          "net_r": -3.3346827868609754
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "harmonic_abcd": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "harmonic_bat": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "harmonic_butterfly": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "harmonic_gartley": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "ichimoku_cross": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": 0.20970266040691005
+        },
+        "DOWN": {
+          "trades": 5,
+          "net_r": -1.8264781215235575
+        },
+        "RANGE": {
+          "trades": 10,
+          "net_r": -2.7729189053722525
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "inside_bar_break": {
+      "regimes": [
+        "TREND_UP"
+      ],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 5,
+          "net_r": 0.04131815375688175
+        },
+        "DOWN": {
+          "trades": 5,
+          "net_r": -0.7154859105564377
+        },
+        "RANGE": {
+          "trades": 7,
+          "net_r": -3.393190824935939
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "EXPLORATORY_POSITIVE_NET_R_AND_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "interasset_confirmation": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "liquidity_bos_retest": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "macd_signal_cross": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 3,
+          "net_r": 2.092014185477282
+        },
+        "RANGE": {
+          "trades": 2,
+          "net_r": -1.5125483109973556
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "mfi_tick_rebound": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 2,
+          "net_r": -1.475356180207802
+        },
+        "DOWN": {
+          "trades": 1,
+          "net_r": -0.6590909090909028
+        },
+        "RANGE": {
+          "trades": 1,
+          "net_r": 1.6574585635361039
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "momentum_acceleration": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": -1.081339712918658
+        },
+        "DOWN": {
+          "trades": 1,
+          "net_r": 1.6349206349210328
+        },
+        "RANGE": {
+          "trades": 2,
+          "net_r": -2.175526067839189
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "obv_divergence_reclaim": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 4,
+          "net_r": -1.2358883358851998
+        },
+        "RANGE": {
+          "trades": 4,
+          "net_r": -2.088739017916848
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "order_flow": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 3,
+          "net_r": 0.7688968751887948
+        },
+        "DOWN": {
+          "trades": 11,
+          "net_r": -3.8162782489227176
+        },
+        "RANGE": {
+          "trades": 10,
+          "net_r": -2.6284142543183013
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "pin_rejection": {
+      "regimes": [
+        "RANGE"
+      ],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 3,
+          "net_r": -0.7021433480608497
+        },
+        "DOWN": {
+          "trades": 2,
+          "net_r": -2.1728664694001947
+        },
+        "RANGE": {
+          "trades": 8,
+          "net_r": 2.438441171144964
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "EXPLORATORY_POSITIVE_NET_R_AND_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "rectangle_breakout": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": -0.32842415316641954
+        },
+        "DOWN": {
+          "trades": 2,
+          "net_r": 0.8428325052355103
+        },
+        "RANGE": {
+          "trades": 1,
+          "net_r": 0.6222222222222478
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "regression_reentry": {
+      "regimes": [
+        "RANGE"
+      ],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 2,
+          "net_r": 0.6345689559113095
+        },
+        "DOWN": {
+          "trades": 5,
+          "net_r": -1.7023430489537221
+        },
+        "RANGE": {
+          "trades": 20,
+          "net_r": 0.8887058959619093
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "EXPLORATORY_POSITIVE_NET_R_AND_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "rsi_rebound": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 16,
+          "net_r": -2.1710427172600597
+        },
+        "DOWN": {
+          "trades": 12,
+          "net_r": -4.268611756818129
+        },
+        "RANGE": {
+          "trades": 16,
+          "net_r": -5.281304720894138
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "rsi_wilder_rebound": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 7,
+          "net_r": -4.175518904696082
+        },
+        "DOWN": {
+          "trades": 11,
+          "net_r": -4.896758362471243
+        },
+        "RANGE": {
+          "trades": 2,
+          "net_r": 1.2005297245847877
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "seasonality": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "smc_ict_proxy": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": -0.7061068702290335
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 1,
+          "net_r": -0.6065573770491426
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "smt_proxy": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "stochastic_rebound": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 11,
+          "net_r": -4.821815654887215
+        },
+        "DOWN": {
+          "trades": 9,
+          "net_r": -2.4523439107271217
+        },
+        "RANGE": {
+          "trades": 17,
+          "net_r": -2.4592563736060633
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "supply_demand_proxy": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "support_bounce": {
+      "regimes": [
+        "TREND_DOWN",
+        "RANGE"
+      ],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 13,
+          "net_r": -3.688248865821364
+        },
+        "DOWN": {
+          "trades": 9,
+          "net_r": 3.917301709121693
+        },
+        "RANGE": {
+          "trades": 25,
+          "net_r": 1.9476731221992705
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "EXPLORATORY_POSITIVE_NET_R_AND_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "three_bar_reversal": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": 0.22485207100595764
+        },
+        "DOWN": {
+          "trades": 2,
+          "net_r": -1.2176822178918174
+        },
+        "RANGE": {
+          "trades": 3,
+          "net_r": -2.5854100388830146
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "tick_activity_rejection": {
+      "regimes": [
+        "RANGE"
+      ],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 2,
+          "net_r": -1.9795771756977678
+        },
+        "DOWN": {
+          "trades": 2,
+          "net_r": -2.118502866025445
+        },
+        "RANGE": {
+          "trades": 6,
+          "net_r": 1.3567488137666768
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "EXPLORATORY_POSITIVE_NET_R_AND_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "utc_opening_range": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "volatility_breakout": {
+      "regimes": [
+        "TREND_UP"
+      ],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 5,
+          "net_r": 1.6479823855065667
+        },
+        "DOWN": {
+          "trades": 4,
+          "net_r": -1.552792587967751
+        },
+        "RANGE": {
+          "trades": 16,
+          "net_r": -8.628086836465945
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "EXPLORATORY_POSITIVE_NET_R_AND_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "vwap_reclaim": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 19,
+          "net_r": -6.820245569979222
+        },
+        "DOWN": {
+          "trades": 19,
+          "net_r": -8.714259244907337
+        },
+        "RANGE": {
+          "trades": 40,
+          "net_r": -7.295940496690704
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "williams_reentry": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 16,
+          "net_r": -0.9488672446755432
+        },
+        "DOWN": {
+          "trades": 14,
+          "net_r": -7.528925430222385
+        },
+        "RANGE": {
+          "trades": 34,
+          "net_r": -3.383573395946387
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "wyckoff_range_expansion": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 1,
+          "net_r": 1.0308261405672128
+        },
+        "DOWN": {
+          "trades": 2,
+          "net_r": 0.7954926145880502
+        },
+        "RANGE": {
+          "trades": 1,
+          "net_r": 0.5187969924811946
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "wyckoff_spring": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "RANGE": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    },
+    "zscore_reversion": {
+      "regimes": [],
+      "source": {
+        "diagnostic_report_sha256": "1c6c356f19a497a61350c7a7ea41303035e96504299bc36b1d11d2b534beb246",
+        "native_csv_sha256": "59e9577af8216b1a138911a69fd051288c62c0750abd77cce365d73aea372fa3"
+      },
+      "diagnostic": {
+        "UP": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "DOWN": {
+          "trades": 1,
+          "net_r": -1.0501474926253687
+        },
+        "RANGE": {
+          "trades": 5,
+          "net_r": -3.702785138383158
+        },
+        "UNKNOWN": {
+          "trades": 0,
+          "net_r": 0
+        },
+        "selection_reason": "DISABLED_NO_POSITIVE_NET_R_REGIME_WITH_N_GE_5",
+        "prior_sample_adequate": false
+      }
+    }
+  }
+}

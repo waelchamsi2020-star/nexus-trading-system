@@ -109,6 +109,51 @@ class MT5Broker:
     def tick(self, name):
         return self._call("symbol_info_tick", name)
 
+    def tick_history(self, name, start, end, *, max_range_seconds=86400):
+        """Read broker ticks in a bounded UTC range; never derives trade side.
+
+        MT5's returned flags/last/volume fields are passed through as reported.
+        OTC FX quote updates are not mislabeled as executed or aggressor-signed
+        trades by this adapter.
+        """
+        if not isinstance(start, datetime) or not isinstance(end, datetime):
+            raise BrokerError("يجب تمرير وقتي UTC كتاريخين مع منطقة زمنية")
+        if start.tzinfo is None or end.tzinfo is None:
+            raise BrokerError("أوقات سجل التكات يجب أن تحتوي منطقة زمنية")
+        try:
+            max_range_seconds = float(max_range_seconds)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise BrokerError("حد نطاق سجل التكات غير صالح") from exc
+        if not math.isfinite(max_range_seconds) or max_range_seconds <= 0:
+            raise BrokerError("حد نطاق سجل التكات غير صالح")
+        start_utc, end_utc = start.astimezone(UTC), end.astimezone(UTC)
+        duration = (end_utc - start_utc).total_seconds()
+        if duration <= 0 or duration > max_range_seconds:
+            raise BrokerError("نطاق سجل التكات غير صالح أو يتجاوز الحد")
+        with self.lock:
+            rates = self.mt5.copy_ticks_range(name, start_utc, end_utc, self.mt5.COPY_TICKS_ALL)
+            if rates is None:
+                raise BrokerError(f"تاريخ التكات غير متاح: {name}: {self.mt5.last_error()}")
+            fields = rates.dtype.names or ()
+            return [{key: plain(row[key]) for key in fields} for row in rates]
+
+    def market_depth_snapshot(self, name):
+        """Return one broker-provided DOM snapshot when the symbol supports it.
+
+        The temporary subscription is always released. This is a current
+        broker-specific book, not consolidated exchange depth or history.
+        """
+        with self.lock:
+            if not self.mt5.market_book_add(name):
+                raise BrokerError(f"عمق السوق غير متاح للرمز {name}: {self.mt5.last_error()}")
+            try:
+                result = self.mt5.market_book_get(name)
+                if result is None:
+                    raise BrokerError(f"تعذر قراءة عمق السوق للرمز {name}: {self.mt5.last_error()}")
+                return plain(result)
+            finally:
+                self.mt5.market_book_release(name)
+
     def bars(self, name, timeframe, count):
         if timeframe not in TIMEFRAMES:
             raise BrokerError("فريم غير معتمد")
@@ -197,6 +242,8 @@ class MT5Broker:
             if self.bridge_path.stat().st_size > 16_000_000:
                 raise ValueError("bridge size")
             data = json.loads(self.bridge_path.read_text(encoding="utf-8-sig"))
+            if not isinstance(data, dict):
+                raise TypeError("bridge root must be an object")
             account = self.account()
             if str(data.get("login")) != str(account["login"]) or data.get("server") != account["server"]:
                 raise ValueError("الجسر صادر من حساب مختلف")

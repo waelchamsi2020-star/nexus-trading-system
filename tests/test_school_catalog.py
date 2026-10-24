@@ -5,7 +5,7 @@ from pathlib import Path
 from shutil import copytree
 
 from nexus.school_catalog import catalog
-from nexus.strategies import REGISTRY
+from nexus.strategies import REGISTRY, registry_manifest
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -13,6 +13,7 @@ ROOT=Path(__file__).resolve().parents[1]
 class SchoolReferenceTests(unittest.TestCase):
     def test_exact_user_categories_have_bilingual_specific_rules_and_valid_models(self):
         document=catalog(ROOT);entries=document['schools'];ids={s['id'] for s in entries}
+        manifest={row['id']:row for row in registry_manifest()}
         self.assertEqual(document['counts'],{'technical':30,'fundamental':20,'approach':8,'total':58})
         self.assertFalse(document['model_api_required']);self.assertFalse(document['runtime_external_fetch'])
         all_rules=[]
@@ -29,7 +30,7 @@ class SchoolReferenceTests(unittest.TestCase):
                 self.assertEqual(model['version'],REGISTRY[model['id']]['version'])
                 self.assertEqual(model['inputs'],REGISTRY[model['id']]['data_requirements'])
                 self.assertEqual(model['minimum_bars'],REGISTRY[model['id']]['min_bars'])
-                self.assertEqual(model['definition'],REGISTRY[model['id']]['contract']['definition'])
+                self.assertEqual(model['definition'],manifest[model['id']]['contract']['definition'])
             self.assertLessEqual(set(school['related_ids']),ids)
             if school['alias_of']:self.assertIn(school['alias_of'],ids)
             for record in school['rule_records']:

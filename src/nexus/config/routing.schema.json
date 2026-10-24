@@ -1,0 +1,543 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Versioned research-only regime routing for 58 unchanged models",
+  "$defs": {
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "regimes",
+        "source",
+        "diagnostic"
+      ],
+      "properties": {
+        "regimes": {
+          "type": "array",
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "TREND_UP",
+              "TREND_DOWN",
+              "RANGE",
+              "ALL"
+            ]
+          },
+          "oneOf": [
+            {
+              "maxItems": 0
+            },
+            {
+              "minItems": 1,
+              "items": {
+                "enum": [
+                  "TREND_UP",
+                  "TREND_DOWN",
+                  "RANGE"
+                ]
+              }
+            },
+            {
+              "const": [
+                "ALL"
+              ]
+            }
+          ]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "diagnostic_report_sha256",
+            "native_csv_sha256"
+          ],
+          "properties": {
+            "diagnostic_report_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "native_csv_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "diagnostic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "UP",
+            "DOWN",
+            "RANGE",
+            "UNKNOWN",
+            "selection_reason",
+            "prior_sample_adequate"
+          ],
+          "properties": {
+            "UP": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "trades",
+                "net_r"
+              ],
+              "properties": {
+                "trades": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "net_r": {
+                  "type": "number"
+                }
+              }
+            },
+            "DOWN": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "trades",
+                "net_r"
+              ],
+              "properties": {
+                "trades": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "net_r": {
+                  "type": "number"
+                }
+              }
+            },
+            "RANGE": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "trades",
+                "net_r"
+              ],
+              "properties": {
+                "trades": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "net_r": {
+                  "type": "number"
+                }
+              }
+            },
+            "UNKNOWN": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "trades",
+                "net_r"
+              ],
+              "properties": {
+                "trades": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "net_r": {
+                  "type": "number"
+                }
+              }
+            },
+            "selection_reason": {
+              "type": "string"
+            },
+            "prior_sample_adequate": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "version",
+    "mode",
+    "execution_authority",
+    "classifier",
+    "source",
+    "models"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "mode": {
+      "const": "RESEARCH_ONLY"
+    },
+    "execution_authority": {
+      "const": false
+    },
+    "classifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min_bars",
+        "ema_fast",
+        "ema_slow",
+        "slope_bars",
+        "atr_period",
+        "efficiency_bars",
+        "trend_min_ema_gap_atr",
+        "trend_min_slope_atr",
+        "trend_min_efficiency",
+        "range_max_ema_gap_atr",
+        "range_max_abs_slope_atr",
+        "range_max_efficiency"
+      ],
+      "properties": {
+        "min_bars": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 2000,
+          "default": 60
+        },
+        "ema_fast": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 200,
+          "default": 20
+        },
+        "ema_slow": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 500,
+          "default": 50
+        },
+        "slope_bars": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 5
+        },
+        "atr_period": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 200,
+          "default": 14
+        },
+        "efficiency_bars": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 200,
+          "default": 20
+        },
+        "trend_min_ema_gap_atr": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "default": 0.5,
+          "exclusiveMinimum": 0
+        },
+        "trend_min_slope_atr": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "default": 0.25,
+          "exclusiveMinimum": 0
+        },
+        "trend_min_efficiency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.45
+        },
+        "range_max_ema_gap_atr": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "default": 0.5
+        },
+        "range_max_abs_slope_atr": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "default": 0.25
+        },
+        "range_max_efficiency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.25
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "diagnostic_report_sha256",
+        "native_csv_sha256",
+        "selection_rule",
+        "minimum_prior_trades",
+        "limitations"
+      ],
+      "properties": {
+        "diagnostic_report_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "native_csv_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "minimum_prior_trades": {
+          "const": 5
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 7
+        }
+      }
+    },
+    "models": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adx_di_cross",
+        "atr_channel_break",
+        "band_reentry",
+        "base_first_return",
+        "breakout_retest",
+        "cci_reentry",
+        "classic_pivot_reclaim",
+        "classic_reversal_patterns",
+        "darvas_box",
+        "darvas_rising_boxes",
+        "donchian_20",
+        "dow_structure",
+        "elliott_candidate",
+        "elliott_impulse_reversal",
+        "elliott_zigzag_reversal",
+        "ema_cross",
+        "engulfing",
+        "failed_range_break",
+        "fib_retracement",
+        "flag_breakout",
+        "four_school_confluence",
+        "fractal_5_breakout",
+        "fvg_first_return",
+        "gann",
+        "geometric_triangle_breakout",
+        "harmonic_abcd",
+        "harmonic_bat",
+        "harmonic_butterfly",
+        "harmonic_gartley",
+        "ichimoku_cross",
+        "inside_bar_break",
+        "interasset_confirmation",
+        "liquidity_bos_retest",
+        "macd_signal_cross",
+        "mfi_tick_rebound",
+        "momentum_acceleration",
+        "obv_divergence_reclaim",
+        "order_flow",
+        "pin_rejection",
+        "rectangle_breakout",
+        "regression_reentry",
+        "rsi_rebound",
+        "rsi_wilder_rebound",
+        "seasonality",
+        "smc_ict_proxy",
+        "smt_proxy",
+        "stochastic_rebound",
+        "supply_demand_proxy",
+        "support_bounce",
+        "three_bar_reversal",
+        "tick_activity_rejection",
+        "utc_opening_range",
+        "volatility_breakout",
+        "vwap_reclaim",
+        "williams_reentry",
+        "wyckoff_range_expansion",
+        "wyckoff_spring",
+        "zscore_reversion"
+      ],
+      "properties": {
+        "adx_di_cross": {
+          "$ref": "#/$defs/model"
+        },
+        "atr_channel_break": {
+          "$ref": "#/$defs/model"
+        },
+        "band_reentry": {
+          "$ref": "#/$defs/model"
+        },
+        "base_first_return": {
+          "$ref": "#/$defs/model"
+        },
+        "breakout_retest": {
+          "$ref": "#/$defs/model"
+        },
+        "cci_reentry": {
+          "$ref": "#/$defs/model"
+        },
+        "classic_pivot_reclaim": {
+          "$ref": "#/$defs/model"
+        },
+        "classic_reversal_patterns": {
+          "$ref": "#/$defs/model"
+        },
+        "darvas_box": {
+          "$ref": "#/$defs/model"
+        },
+        "darvas_rising_boxes": {
+          "$ref": "#/$defs/model"
+        },
+        "donchian_20": {
+          "$ref": "#/$defs/model"
+        },
+        "dow_structure": {
+          "$ref": "#/$defs/model"
+        },
+        "elliott_candidate": {
+          "$ref": "#/$defs/model"
+        },
+        "elliott_impulse_reversal": {
+          "$ref": "#/$defs/model"
+        },
+        "elliott_zigzag_reversal": {
+          "$ref": "#/$defs/model"
+        },
+        "ema_cross": {
+          "$ref": "#/$defs/model"
+        },
+        "engulfing": {
+          "$ref": "#/$defs/model"
+        },
+        "failed_range_break": {
+          "$ref": "#/$defs/model"
+        },
+        "fib_retracement": {
+          "$ref": "#/$defs/model"
+        },
+        "flag_breakout": {
+          "$ref": "#/$defs/model"
+        },
+        "four_school_confluence": {
+          "$ref": "#/$defs/model"
+        },
+        "fractal_5_breakout": {
+          "$ref": "#/$defs/model"
+        },
+        "fvg_first_return": {
+          "$ref": "#/$defs/model"
+        },
+        "gann": {
+          "$ref": "#/$defs/model"
+        },
+        "geometric_triangle_breakout": {
+          "$ref": "#/$defs/model"
+        },
+        "harmonic_abcd": {
+          "$ref": "#/$defs/model"
+        },
+        "harmonic_bat": {
+          "$ref": "#/$defs/model"
+        },
+        "harmonic_butterfly": {
+          "$ref": "#/$defs/model"
+        },
+        "harmonic_gartley": {
+          "$ref": "#/$defs/model"
+        },
+        "ichimoku_cross": {
+          "$ref": "#/$defs/model"
+        },
+        "inside_bar_break": {
+          "$ref": "#/$defs/model"
+        },
+        "interasset_confirmation": {
+          "$ref": "#/$defs/model"
+        },
+        "liquidity_bos_retest": {
+          "$ref": "#/$defs/model"
+        },
+        "macd_signal_cross": {
+          "$ref": "#/$defs/model"
+        },
+        "mfi_tick_rebound": {
+          "$ref": "#/$defs/model"
+        },
+        "momentum_acceleration": {
+          "$ref": "#/$defs/model"
+        },
+        "obv_divergence_reclaim": {
+          "$ref": "#/$defs/model"
+        },
+        "order_flow": {
+          "$ref": "#/$defs/model"
+        },
+        "pin_rejection": {
+          "$ref": "#/$defs/model"
+        },
+        "rectangle_breakout": {
+          "$ref": "#/$defs/model"
+        },
+        "regression_reentry": {
+          "$ref": "#/$defs/model"
+        },
+        "rsi_rebound": {
+          "$ref": "#/$defs/model"
+        },
+        "rsi_wilder_rebound": {
+          "$ref": "#/$defs/model"
+        },
+        "seasonality": {
+          "$ref": "#/$defs/model"
+        },
+        "smc_ict_proxy": {
+          "$ref": "#/$defs/model"
+        },
+        "smt_proxy": {
+          "$ref": "#/$defs/model"
+        },
+        "stochastic_rebound": {
+          "$ref": "#/$defs/model"
+        },
+        "supply_demand_proxy": {
+          "$ref": "#/$defs/model"
+        },
+        "support_bounce": {
+          "$ref": "#/$defs/model"
+        },
+        "three_bar_reversal": {
+          "$ref": "#/$defs/model"
+        },
+        "tick_activity_rejection": {
+          "$ref": "#/$defs/model"
+        },
+        "utc_opening_range": {
+          "$ref": "#/$defs/model"
+        },
+        "volatility_breakout": {
+          "$ref": "#/$defs/model"
+        },
+        "vwap_reclaim": {
+          "$ref": "#/$defs/model"
+        },
+        "williams_reentry": {
+          "$ref": "#/$defs/model"
+        },
+        "wyckoff_range_expansion": {
+          "$ref": "#/$defs/model"
+        },
+        "wyckoff_spring": {
+          "$ref": "#/$defs/model"
+        },
+        "zscore_reversion": {
+          "$ref": "#/$defs/model"
+        }
+      }
+    }
+  }
+}

@@ -64,6 +64,10 @@ def main():
         with urllib.request.urlopen(url+"/i18n.js",timeout=5) as response:
             assert "NEXUS_I18N" in response.read().decode("utf-8")
         report["bilingual_asset_served"]=True
+        with urllib.request.urlopen(url+"/theme-neural.css",timeout=5) as response:
+            assert "text/css" in response.headers.get("Content-Type","")
+            assert '--bg: #07111f' in response.read().decode("utf-8")
+        report["neural_theme_asset_served"]=True
         state=request(url,token);assert state["mode"]=="READ_ONLY" and state["account"] is None
         report["initial_read_only"]=True
         request(url,token,{"action":"simulation"})

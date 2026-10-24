@@ -10,7 +10,9 @@ def main():
     source=ROOT/'reports/coverage.json'
     data=json.loads(source.read_text(encoding='utf-8'))
     rows=[]
-    for name in ('risk.py','execution.py','store.py','learning/__init__.py','learning/proposals.py','learning/sandbox.py','learning/drift_monitor.py'):
+    for name in ('risk.py','execution.py','store.py','learning/__init__.py','learning/proposals.py',
+                 'learning/sandbox.py','learning/drift_monitor.py','regime_router.py',
+                 'timeframe_filter.py','cross_asset_filter.py','session_filter.py'):
         matches=[value for path,value in data['files'].items() if path.replace('\\','/').endswith('/nexus/'+name)]
         summary=matches[0]['summary'] if len(matches)==1 else {}
         total=summary.get('num_branches',0);covered=summary.get('covered_branches',0)

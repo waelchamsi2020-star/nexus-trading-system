@@ -57,7 +57,15 @@ class ProposalStore:
             if row['status']!='PENDING':raise ValueError('Research decision is terminal')
             if hashlib.sha256(Path(row['evidence_path']).read_bytes()).hexdigest()!=row['evidence_sha256']:
                 raise ValueError('Research evidence changed')
-            self.db.execute('UPDATE proposals SET status=?,reason=? WHERE id=? AND account_key=?',(status,reason,identity,self.account))
+            # A separate reviewer may decide after the PENDING read above.
+            # Claim that state atomically; never overwrite a terminal decision
+            # or append a contradictory audit record from a stale snapshot.
+            changed=self.db.execute("UPDATE proposals SET status=?,reason=? WHERE id=? AND account_key=? AND status='PENDING'",
+                                    (status,reason,identity,self.account)).rowcount
+            if not changed:
+                latest=self.db.execute('SELECT status,reason FROM proposals WHERE id=? AND account_key=?',(identity,self.account)).fetchone()
+                if latest and latest['status']==status and latest['reason']==reason:return
+                raise ValueError('Research decision is terminal or changed concurrently')
             self.db.execute('INSERT INTO proposal_audit(proposal_id,account_key,at,status,reason) VALUES(?,?,?,?,?)',
                             (identity,self.account,time.time(),status,reason))
 

@@ -1,0 +1,10 @@
+:root{color-scheme:dark;font-family:Tahoma,Arial,sans-serif;background:#0c1424;color:#eef4ff}
+body{margin:0;padding:24px}main{max-width:850px;margin:auto;background:#152237;padding:24px;border-radius:16px}
+header{display:flex;gap:24px;align-items:center;font-size:20px}header strong{color:#76e5df}
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+label{display:flex;flex-direction:column;gap:9px;font-size:14px}
+input,button{font:inherit;padding:12px;border:1px solid #8899b4;border-radius:8px;background:#0c1424;color:#fff}
+button{background:#11756c;cursor:pointer;align-self:end;font-weight:bold}
+input:focus,button:focus{outline:3px solid #87e8ff;outline-offset:3px}
+.note{color:#c5d3e7;font-size:13px;line-height:1.8}#status,#result{min-height:24px;line-height:1.8}
+@media(max-width:600px){body{padding:8px}main{padding:16px}form{grid-template-columns:1fr}}

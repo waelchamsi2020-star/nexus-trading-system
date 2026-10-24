@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "format": "JSON-compatible YAML (parsed by Python standard library)",
+  "classification_source": "broker contract metadata and Market Watch path; no symbol-name allowlist",
+  "defaults": {
+    "enabled": false,
+    "max_positions_per_symbol": 1,
+    "max_positions_per_class": 2,
+    "risk_per_trade_fraction": 0.01,
+    "max_daily_loss_class_fraction": 0.015,
+    "spread_independent_rejection": false,
+    "spread_in_execution_costs": true,
+    "require_fresh_quote": true,
+    "require_closed_signal_bar": true
+  },
+  "portfolio": {
+    "max_total_positions": 5,
+    "max_daily_loss_fraction": 0.03,
+    "max_pairwise_correlation_for_same_direction": 0.7,
+    "kill_switch_blocks_new_entries_only": true,
+    "risk_veto_authority": "absolute"
+  },
+  "classes": {
+    "fx_major": {"enabled": false, "strategy": null},
+    "fx_minor": {"enabled": false, "strategy": null},
+    "metal": {"enabled": false, "strategy": null},
+    "commodity": {"enabled": false, "strategy": null},
+    "energy": {"enabled": false, "strategy": null},
+    "index": {"enabled": false, "strategy": null},
+    "equity": {"enabled": false, "strategy": null},
+    "crypto": {
+      "enabled": false,
+      "strategy": null,
+      "disabled_timeframes": ["M1", "M5"],
+      "disabled_reason": "Previously measured execution cost exceeds the approved M1/M5 policy; requires new explicit authorization before reassessment."
+    },
+    "other": {"enabled": false, "strategy": null}
+  },
+  "session_hours": {
+    "source": "MT5 broker session API",
+    "status": "UNKNOWN_FOR_CURRENT_PYTHON_ADAPTER",
+    "fallback": "fail-closed per symbol until session data is available"
+  }
+}

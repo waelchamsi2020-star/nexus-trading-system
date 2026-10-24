@@ -51,14 +51,14 @@ def validate_bars(bars, timeframe, now):
 
 
 def spread_filter_required(settings, account, simulation=False):
-    """Waive the ATR spread cutoff only for authorized autonomous fast Demo."""
-    profiles=settings.get('scalping',{})
-    autonomous=(settings.get('decision_protocol')=='multi_school_v1'
-        and settings.get('validation_policy')=='forward_demo' and settings.get('scalp_only') is True
-        and profiles.get('fast',{}).get('enabled') is True
-        and not profiles.get('normal',{}).get('enabled',False))
-    demo=type(account.get('trade_mode')) is int and account['trade_mode']==0
-    return not (autonomous and demo and not simulation)
+    """Legacy compatibility hook: spread is never an independent exclusion.
+
+    Spread remains part of the executable quote and monetary cost/risk
+    calculations. This hook controls only the old scanner's warning label; it
+    must not reintroduce an ATR-, session-, or account-dependent spread veto.
+    """
+    del settings, account, simulation
+    return False
 
 
 class UniverseScanner:
@@ -67,16 +67,25 @@ class UniverseScanner:
         self.spread_filter=True
         self.rows={}; self.queue=[]; self.started=0; self.finished=0; self.cycle=0
 
+    def configure_spread_warning(self, enabled):
+        """Change the display warning without invalidating measured eligibility."""
+        self.spread_filter=bool(enabled)
+        if not self.spread_filter:
+            for row in self.rows.values():
+                row["warnings"] = []
+                row["spread_filter_enforced"] = False
+                row["spread_rejection_enabled"] = False
+
     def begin(self):
         symbols=self.broker.symbols()
         self.started=self.clock(); self.finished=0; self.cycle+=1
         self.queue=list(symbols)
         self.rows={s["name"]:{"symbol":s["name"],"name":s["name"],"category":classify(s),"checked":False,
-            "eligible":False,"status":"PENDING","reasons":["لم يُفحص في هذه الدورة"],"last_scan":None,"spec":s} for s in symbols}
+            "eligible":False,"status":"PENDING","reasons":["لم يُفحص في هذه الدورة"],"warnings":[],"last_scan":None,"spec":s} for s in symbols}
 
     def step(self, limit=12):
         for _ in range(min(limit,len(self.queue))):
-            info=self.queue.pop(0); name=info["name"]; row=self.rows[name]; reasons=[]; now=self.clock()
+            info=self.queue.pop(0); name=info["name"]; row=self.rows[name]; reasons=[]; warnings=[]; now=self.clock()
             try:
                 if info.get("custom"):
                     reasons.append("رمز اصطناعي في MT5؛ غير معتمد للتنفيذ")
@@ -107,11 +116,13 @@ class UniverseScanner:
                         ranges=[b["high"]-b["low"] for b in bars[-14:]]
                         atr=sum(ranges)/len(ranges)
                         if self.spread_filter and (atr<=0 or row["spread"]>atr*.20):
-                            reasons.append("السبريد مرتفع مقارنة بالنطاق الأخير")
+                            warnings.append("السبريد مقاس للعرض؛ لا يُرفض منفردًا وتدخل تكلفته الفعلية في حساب المخاطرة")
                         row["liquidity_score"]=max(0.,1-row["spread"]/atr) if atr>0 else 0.
             except (BrokerError,ValueError,KeyError,TypeError) as exc:
                 reasons.append(str(exc))
-            row["spread_filter_enforced"]=self.spread_filter
+            row["spread_filter_enforced"]=False
+            row["spread_rejection_enabled"]=False
+            row["warnings"]=warnings
             row.update(checked=True,eligible=not reasons,status="ELIGIBLE" if not reasons else "EXCLUDED",
                        reasons=reasons,last_scan=now)
         if not self.queue and not self.finished:

@@ -233,6 +233,10 @@ class RiskManager:
         cash_target=number(settings.get('fast_cash_target_usd',1.),'cash profit target',True)
         if not 1 <= cash_target <= 2:raise ValueError('Cash target must be between one and two USD')
         settings['fast_cash_target_usd']=cash_target
+        max_open = settings.get("max_open_positions", 3)
+        if type(max_open) is not int or not 1 <= max_open <= 3:
+            raise ValueError("Demo maximum open positions must be an integer from one to three")
+        settings["max_open_positions"] = max_open
         key = account_key(account)
         equity = number(account.get("equity"), "equity", True)
         risk = number(settings.get("risk_amount", settings.get("daily_risk")), "daily risk", True)
@@ -639,6 +643,11 @@ class RiskManager:
         if side == "SELL" and not (sl > ask and sl - ask >= distance and tp < bid and bid - tp >= distance):
             raise ValueError("SELL stop/target violates direction or broker distance")
         book = self.snapshot(now)
+        active_entries = [i for i in self.store.intents(self.key)
+                          if i["kind"] == "ENTRY" and i["state"] in ACTIVE_STATES]
+        if (len(book["positions"]) + len(book["orders"]) + len(active_entries)
+                >= settings["max_open_positions"]):
+            raise ValueError("MAX_OPEN_POSITIONS_REACHED")
         if book["cost_uncertainty"]:
             raise ValueError("Broker cost attribution is uncertain; new entries are blocked")
         if book["unbounded"]:

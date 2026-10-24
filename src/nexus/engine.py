@@ -23,8 +23,11 @@ from . import __version__, confluence, scalping
 from .broker import TIMEFRAMES, BrokerError, MT5Broker, SimBroker
 from .committee import decide
 from .execution import Executor
+from .external_research import ExternalResearchManager
 from .learning import LEARNING_SOURCE_MODULES, LearningMemory, digest, load_library
+from .llm_research import LLMResearchManager
 from .market import UniverseScanner, spread_filter_required
+from .mt5_discovery import discover_mt5_terminals
 from .multischool import MultiSchoolMixin
 from .news import NewsManager
 from .quant import walk_forward
@@ -34,6 +37,7 @@ from .risk import (
     cost_uncertainties,
     protocol_certificate_hash,
 )
+from .schools.trendline import analyze as analyze_trendline_school
 from .store import Store, account_key, utc_day
 from .strategies import (
     REGISTRY,
@@ -113,7 +117,10 @@ class Engine(MultiSchoolMixin):
     def __init__(self,app_root,data_dir,clock=time.time):
         self.root=Path(app_root);self.data=Path(data_dir);self.data.mkdir(parents=True,exist_ok=True)
         self.clock=clock; self.broker=None;self.store=None;self.risk=None;self.executor=None;self.scanner=None
+        self._connected_source=None;self._connected_account_key=None
         self.news=NewsManager(self.data/"news.sqlite3",clock,external_feeds=False)
+        self.external_research=ExternalResearchManager(self.data/"external-research.json",clock)
+        self.llm_research=LLMResearchManager(self.data/"llm-research.json",clock=clock)
         self.cache=ResearchCache(self.data/"research.sqlite3")
         self.commands=queue.Queue();self.running=False;self.thread=None;self.view_lock=threading.Lock()
         self._json_view_lock=threading.Lock();self._json_view_ref=None;self._json_view_bytes=None
@@ -124,13 +131,13 @@ class Engine(MultiSchoolMixin):
         self.pending_quant={};self.quant_results={};self.cards_by_symbol={};self.decisions={};self.opportunities=[];self.manual={}
         self.deep_queue=[];self.last_deep=0;self.last_scan=0;self.generation=0;self.attempted={}
         self.last_reconnect_attempt=0
-        self.chart={"symbol":"","timeframe":"H1","bars":[],"cards":[]}
+        self.chart={"symbol":"","timeframe":"H1","bars":[],"cards":[],"school_analyses":[]}
         self.settings={};self.research_costs={};self.status="DISCONNECTED";self.error="";self.last_update=0
         self.context_cache={};self.partner_catalog=None
         self.valuation={};self.learning_account=None
         self.learner=None;self.last_learning=0;self.learning_state={"mode":"UNAVAILABLE","error":"","models":[]};self.library_error=""
         try:self.rule_library=load_library(self.root)
-        except Exception as exc:
+        except (BrokerError, AttributeError, RuntimeError, ValueError, TypeError) as exc:
             logging.getLogger(__name__).exception("Handled boundary failure")
             self.rule_library={};self.library_error=str(exc);self.learning_state["error"]=str(exc)
         try:
@@ -152,15 +159,135 @@ class Engine(MultiSchoolMixin):
     def _empty_state(self):
         return {"app_name":"Quant Trading AI","version":__version__,"simulation":False,"mode":"READ_ONLY","status":self.status,"error":self.error,
                 "account":None,"terminal":None,"settings":{},"risk":{},"scan":{"rows":[],"discovered":0,"checked":0,"eligible":0,"excluded":0,"complete":False},
-                "opportunities":[],"cards":[],"news":{"sources":[],"items":[],"calendar":{},"coverage":{}},
+                "opportunities":[],"cards":[],"cards_total":0,"cards_truncated":False,"card_activity_by_strategy":{},"news":{"sources":[],"items":[],"calendar":{},"coverage":{},
+                    "external_research":self.external_research.snapshot()},
                 "positions":[],"orders":[],"intents":[],"events":[],"performance":{"rows":[]},"coverage":registry_manifest(),
+                "intents_total":0,"intents_omitted":0,
                 "chart":self.chart,"resources":resources(),"quant_results":[],"last_update":0,
                 "knowledge":self.knowledge,"learning":self.learning_state,
+                "llm_research":self.llm_research.status(),
                 "valuation":self.valuation,"scalping":self.scalping_state,
                 "execution_reference":self._execution_reference_summary(),
                 "fast_scheduler":self._fast_scheduler_snapshot(),
                 "day_boundary":"00:00 UTC / 04:00 Asia/Dubai","setup":self.config,
                 "acceptance":"القبول النهائي لم يجتز بعد؛ راجع تقرير التحقق المرفق."}
+
+    @staticmethod
+    def _public_card_view(cards_by_symbol, limit=100):
+        """Bound the UI payload without changing full in-memory decision evidence."""
+        all_cards=[];activity={}
+        for symbol,rows in sorted(cards_by_symbol.items()):
+            if not isinstance(rows,list):continue
+            for card in rows:
+                if not isinstance(card,dict):continue
+                all_cards.append(card)
+                strategy=str(card.get("strategy_id") or card.get("strategy") or card.get("id") or "unknown")[:100]
+                status=str(card.get("status") or "UNKNOWN")[:40]
+                by_status=activity.setdefault(strategy,{})
+                by_status[status]=by_status.get(status,0)+1
+        def rank(card):
+            timestamp=card.get("analyzed_at",card.get("data_time",0))
+            if isinstance(timestamp,bool) or not isinstance(timestamp,(int,float)) or not math.isfinite(timestamp):timestamp=0
+            actionable=card.get("actionable") is True and card.get("status")=="READY"
+            return (actionable,timestamp,str(card.get("symbol", "")),str(card.get("strategy_id", "")))
+        display=sorted(all_cards,key=rank,reverse=True)[:max(1,int(limit))]
+        return display,len(all_cards),len(display)<len(all_cards),activity
+
+    @staticmethod
+    def _chart_snapshot(symbol, timeframe, bars, cards, as_of, **extra):
+        """Publish chart-scoped school research outside the execution registry."""
+        return {"symbol":symbol,"timeframe":timeframe,"bars":bars,"cards":cards,"as_of":as_of,
+                "school_analyses":[analyze_trendline_school(bars,timeframe,as_of)],**extra}
+
+    def _research_microstructure(self, symbol, as_of):
+        """Small, read-only MT5 diagnostics for the selected chart only.
+
+        Quote updates and broker-specific DOM are reported as availability and
+        counts; they are never converted into signed trade flow or a trade vote.
+        """
+        result={"mode":"READ_ONLY_RESEARCH","symbol":symbol,"as_of":as_of,
+                "tick_window_seconds":60,"tick_observations":None,
+                "ticks_status":"UNAVAILABLE","depth_levels":None,
+                "depth_status":"UNAVAILABLE",
+                "interpretation":"تحديثات السعر ليست دليلاً على صفقات منفذة أو اتجاه تدفقها."}
+        if not self.broker or getattr(self.broker,"is_simulation",False):
+            result["ticks_status"]="NOT_SUPPORTED_BY_SOURCE"
+            result["depth_status"]="NOT_SUPPORTED_BY_SOURCE"
+            return result
+        start=datetime.fromtimestamp(as_of-60,UTC)
+        end=datetime.fromtimestamp(as_of,UTC)
+        try:
+            rows=self.broker.tick_history(symbol,start,end,max_range_seconds=60)
+            result.update(tick_observations=len(rows),ticks_status="OK")
+        except (BrokerError, AttributeError, RuntimeError, ValueError, TypeError) as exc:
+            result.update(ticks_status="UNAVAILABLE",ticks_reason=type(exc).__name__)
+        try:
+            book=self.broker.market_depth_snapshot(symbol)
+            result.update(depth_levels=len(book) if isinstance(book,(list,tuple)) else None,
+                          depth_status="OK" if book is not None else "EMPTY")
+        except (BrokerError, AttributeError, RuntimeError, ValueError, TypeError) as exc:
+            result.update(depth_status="UNAVAILABLE",depth_reason=type(exc).__name__)
+        return result
+
+    @staticmethod
+    def _public_quant_view(results):
+        """Expose only fields rendered by the UI; retain full research in engine/cache."""
+        metric_fields=("trades","profit_factor","expectancy_r","max_drawdown_r")
+        output=[]
+        for row in results:
+            if not isinstance(row,dict):continue
+            metrics=row.get("metrics") if isinstance(row.get("metrics"),dict) else {}
+            reasons=row.get("reasons") if isinstance(row.get("reasons"),list) else []
+            output.append({"strategy_id":row.get("strategy_id"),"school":row.get("school"),
+                "symbol":row.get("symbol"),"timeframe":row.get("timeframe"),
+                "data_kind":row.get("data_kind"),"qualified":row.get("qualified") is True,
+                "status":row.get("status"),"reasons":[str(reason)[:300] for reason in reasons[:5]],
+                "metrics":{field:metrics.get(field) for field in metric_fields}})
+        return output
+
+    @staticmethod
+    def _public_intent_view(intents, limit=150):
+        """Return a small UI projection; the complete account ledger stays in Store."""
+        terminal={"CLOSED","REJECTED","EXPIRED","CANCELLED","SETTLED","INVALIDATED","COMPLETE","FAILED"}
+        active=[];settled=[]
+        for row in intents:
+            if not isinstance(row,dict):continue
+            payload=row.get("payload") if isinstance(row.get("payload"),dict) else {}
+            proposal=payload.get("proposal") if isinstance(payload.get("proposal"),dict) else {}
+            request=payload.get("request") if isinstance(payload.get("request"),dict) else {}
+            state=str(row.get("state") or "UNKNOWN")[:40]
+            compact_proposal={key:proposal[key] for key in (
+                "id","symbol","side","direction","volume","risk_amount","risk","expires_at",
+                "reason","explanation","scalp_session_id") if key in proposal}
+            compact_request={key:request[key] for key in (
+                "symbol","side","direction","volume","risk_amount","risk","order_type","type") if key in request}
+            reason=next((payload.get(key) for key in ("reason","error","message","action_reason")
+                         if isinstance(payload.get(key),str)),"")
+            item={"id":str(row.get("id") or "")[:160],"day":row.get("day"),
+                  "kind":str(row.get("kind") or "")[:40],"state":state,"status":state,
+                  "reserved":row.get("reserved"),"created":row.get("created"),"updated":row.get("updated"),
+                  "payload":{"proposal":compact_proposal,"request":compact_request,"reason":reason[:500]}}
+            if state in terminal:settled.append(item)
+            else:active.append(item)
+        settled.sort(key=lambda item:float(item.get("updated") or item.get("created") or 0),reverse=True)
+        selected=active+settled[:max(0,int(limit))]
+        total=len(active)+len(settled)
+        return selected,total,max(0,total-len(selected))
+
+    @staticmethod
+    def _public_audit_view(events, account_key_value=None, limit=150):
+        """Keep account-scoped audit rows with the verified account only."""
+        output=[]
+        for row in events:
+            if not isinstance(row,dict):continue
+            payload=row.get("payload") if isinstance(row.get("payload"),dict) else {}
+            owner=row.get("account_key")
+            if account_key_value is None or owner!=account_key_value:continue
+            safe={key:row.get(key) for key in ("sequence","at","event") if key in row}
+            safe["payload"]={key:value for key,value in payload.items()
+                              if key not in ("account_key","buckets","evidence","trace")}
+            output.append(safe)
+        return output[-max(1,int(limit)):]
 
     def start_worker(self,auto_connect=True):
         with self._action_result_lock:self.running=True;self.ever_started=True
@@ -204,6 +331,46 @@ class Engine(MultiSchoolMixin):
                     self._json_view_ref=view;self._json_view_bytes=raw
             return raw
 
+    def _llm_research_context(self):
+        """Build a privacy-minimized observation; never send account or order data."""
+        decisions=[]
+        for symbol,decision in sorted(self.decisions.items())[:12]:
+            if not isinstance(decision,dict):
+                continue
+            proposals=decision.get("proposals",[])
+            decisions.append({"symbol":str(symbol)[:24],
+                "decision":str(decision.get("decision","WAIT"))[:24],
+                "proposal_count":len(proposals) if isinstance(proposals,list) else 0,
+                "supporting_count":len(decision.get("supporting",[])) if isinstance(decision.get("supporting"),list) else 0,
+                "opposing_count":len(decision.get("opposing",[])) if isinstance(decision.get("opposing"),list) else 0,
+                "as_of":decision.get("as_of") if isinstance(decision.get("as_of"),(int,float)) else None})
+        signals=[]
+        for symbol,cards in sorted(self.cards_by_symbol.items()):
+            for card in cards if isinstance(cards,list) else []:
+                if len(signals)>=24:
+                    break
+                if not isinstance(card,dict):
+                    continue
+                direction=card.get("direction",card.get("side",card.get("signal")))
+                if isinstance(direction,(str,int,float,bool)) or direction is None:
+                    signals.append({"model":str(card.get("strategy_id",card.get("id_strategy",card.get("id","unknown"))))[:80],
+                        "symbol":str(card.get("symbol",symbol))[:24],
+                        "timeframe":str(card.get("timeframe","unknown"))[:12],
+                        "direction":str(direction)[:20] if direction is not None else "unknown",
+                        "triggered":bool(card.get("triggered",card.get("ready",False)))})
+        facts=[]
+        for item in self.external_research.items:
+            if not isinstance(item,dict) or len(facts)>=12:
+                continue
+            fact={"provider":str(item.get("provider",""))[:32],"kind":str(item.get("kind",""))[:32]}
+            for field in ("base","quote","rate","series_id","value","year","period","observation_date","vintage_date"):
+                value=item.get(field)
+                if isinstance(value,(str,int,float)) and (not isinstance(value,float) or math.isfinite(value)):
+                    fact[field]=value
+            facts.append(fact)
+        return {"as_of":self.clock(),"market_decisions":decisions,
+                "school_signals":signals,"external_facts":facts}
+
     def _invalidate_research(self):
         self._multi_card_cache={}
         # Old account/cost generations must not occupy the only research worker.
@@ -215,7 +382,7 @@ class Engine(MultiSchoolMixin):
         if hasattr(self,"_fast_metrics"):self._reset_fast_scheduler()
 
     def action(self,payload,timeout=12):
-        if not isinstance(payload,dict) or payload.get("action") not in {"connect","simulation","scan","start","stop","cancel","flatten","approve","chart","diagnostics","knowledge_export","fundamental_analyze","backtest","install_bridge","refresh","reconcile","shutdown"}:
+        if not isinstance(payload,dict) or payload.get("action") not in {"connect","simulation","scan","start","stop","cancel","flatten","approve","chart","diagnostics","knowledge_export","fundamental_analyze","backtest","install_bridge","refresh","refresh_external_research","run_llm_research","reconcile","shutdown"}:
             raise ValueError("إجراء غير معروف")
         with self._action_result_lock:
             if not self.running:
@@ -305,8 +472,10 @@ class Engine(MultiSchoolMixin):
             self._settle_action(future,error=ValueError("الخدمة توقفت قبل تنفيذ الإجراء؛ لم يُنفذ"))
 
     def _audit(self,event,payload):
-        if self.store:self.store.audit(event,payload)
-        LOG.info("%s %s",event,json.dumps(payload,ensure_ascii=False,default=str))
+        audited=dict(payload) if isinstance(payload,dict) else {"detail":str(payload)}
+        connected_key=getattr(self,"_connected_account_key",None)
+        if self.store:self.store.audit(event,audited,account_key=connected_key)
+        LOG.info("%s %s",event,json.dumps(audited,ensure_ascii=False,default=str))
 
     def _execution_tables(self):
         if not self.store:return
@@ -396,6 +565,13 @@ class Engine(MultiSchoolMixin):
             with self.store.lock:
                 row=self.store.db.execute("SELECT * FROM scalp_sessions WHERE account_key=? AND day=? AND variant=?",(key,day,variant)).fetchone()
             session_id=row["session_id"] if row else None;latched=bool(row and row["latched"])
+            if settings["enabled"] and session_id is None:
+                # A saved preference is not a current day's authorization.
+                state[variant]={"settings":settings,"session_id":None,"latched":False,
+                    "progress":{"status":"NOT_AUTHORIZED","progress_net":None,
+                                "progress_valid":False,"entries_allowed":False,
+                                "should_latch":False,"latched":False,"cost_uncertainty":[]}}
+                continue
             entries=[i for i in intents if i["kind"]=="ENTRY" and
                 i.get("payload",{}).get("proposal",{}).get("scalp_session_id")==session_id and session_id]
             since=max(0,min((i["created"] for i in entries),default=int(now//86400)*86400)-60) if entries else int(now//86400)*86400
@@ -430,6 +606,7 @@ class Engine(MultiSchoolMixin):
         return state
 
     def _scalp_variant(self,tf):
+        if self.settings.get("decision_protocol")=="multi_school_v1" and tf!="M1":return None
         for variant,settings in self.settings.get("scalping",{}).items():
             if settings.get("enabled") and tf in scalping.policy_definition(variant)["timeframes"]:return variant
         return None
@@ -609,7 +786,7 @@ class Engine(MultiSchoolMixin):
         self._fast_metrics["background_steps"]+=1
         self._fast_metrics["last_background_step_seconds"]=self._fast_monotonic()-started
         if self.chart.get("symbol")==symbol and self.chart.get("timeframe")==tf:
-            self.chart={"symbol":symbol,"timeframe":tf,"bars":bars,"cards":cards,"as_of":now}
+            self.chart=self._chart_snapshot(symbol,tf,bars,cards,now)
         if job["index"]==len(DECISION_TIMEFRAMES):
             self.cards_by_symbol[symbol]=job["cards"]
             self.cache.put("cards:"+account_key(self.broker.account())+":"+symbol,job["cards"])
@@ -650,7 +827,82 @@ class Engine(MultiSchoolMixin):
                 "execution":{**self._view.get("execution",{}),**execution},"settings":copy.deepcopy(self.settings),
                 "execution_updated_at":self.clock(),"fast_scheduler":self._fast_scheduler_snapshot()}
 
+    @staticmethod
+    def _connection_source(simulation,terminal_path,bridge_path):
+        # An omitted auto-discovery path is intentionally distinct from an
+        # explicit terminal path: uncertain endpoint equivalence is not enough
+        # to retain a send authorization.
+        def normalized(path):
+            return os.path.normcase(os.path.abspath(path)) if path else ""
+        return (simulation is True,normalized(terminal_path),normalized(bridge_path))
+
+    def _verify_unchanged_connection(self,source):
+        """Idempotent health check, never a reconnect or a new authorization."""
+        if (not self.broker or not self.executor or not self.store or not self.risk or
+                source!=self._connected_source or
+                self.status not in ("READ_ONLY","AUTO_DEMO","MANUAL_DEMO","ENTRIES_STOPPED")):
+            return None
+        with self.executor.lock:
+            account=self.broker.account();terminal=self.broker.terminal()
+            key=account_key(account)
+            if key!=self._connected_account_key:
+                raise ValueError("Connection verification found a changed account identity")
+            if (type(account.get("trade_mode")) is not int or account.get("trade_mode")!=0 or
+                    type(account.get("margin_mode")) is not int or account.get("margin_mode") not in (0,2) or
+                    terminal.get("connected") is not True or terminal.get("trade_allowed") is not True or
+                    terminal.get("tradeapi_disabled") is not False or account.get("trade_allowed") is not True or
+                    account.get("trade_expert") is not True):
+                raise ValueError("Connection verification requires confirmed Demo trading permissions")
+            authorization=self.executor.authorization
+            preserved=authorization is not None
+            if preserved:
+                # This verifies the original account/day/settings and rejects
+                # unresolved sends. It neither renews the authorization nor
+                # clears a stopped-entry state or a daily halt.
+                if self.executor.mode not in ("AUTO_DEMO","MANUAL_DEMO"):
+                    raise ValueError("Connection verification found inconsistent authorization")
+                self.executor._guard()
+            elif self.executor.mode!="READ_ONLY":
+                raise ValueError("Connection verification found missing authorization")
+            # Check the identity/permissions again after the authorization
+            # reads. A partial broker read or a switch during verification
+            # cannot certify the earlier snapshot.
+            fresh_account=self.broker.account();fresh_terminal=self.broker.terminal()
+            if (account_key(fresh_account)!=key or fresh_account.get("trade_mode")!=0 or
+                    type(fresh_account.get("trade_mode")) is not int or
+                    type(fresh_account.get("margin_mode")) is not int or
+                    fresh_account.get("margin_mode")!=account.get("margin_mode") or
+                    fresh_terminal.get("connected") is not True or fresh_terminal.get("trade_allowed") is not True or
+                    fresh_terminal.get("tradeapi_disabled") is not False or
+                    fresh_account.get("trade_allowed") is not True or fresh_account.get("trade_expert") is not True):
+                raise ValueError("Connection identity or permissions changed during verification")
+            if preserved:
+                final_account,_final_key=self.executor._guard()
+                final_terminal=self.broker.terminal()
+                if (type(final_account.get("trade_mode")) is not int or final_account.get("trade_mode")!=0 or
+                        type(final_account.get("margin_mode")) is not int or
+                        final_account.get("margin_mode")!=account.get("margin_mode") or
+                        final_account.get("trade_allowed") is not True or final_account.get("trade_expert") is not True or
+                        final_terminal.get("connected") is not True or final_terminal.get("trade_allowed") is not True or
+                        final_terminal.get("tradeapi_disabled") is not False or
+                        self.executor.authorization is not authorization or utc_day(self.clock())!=authorization["day"] or
+                        self.executor._settings_digest()!=authorization["settings_digest"]):
+                    raise ValueError("Final connection verification no longer confirms the original authorization")
+            self._audit("CONNECTION_VERIFIED_UNCHANGED",{"account_key":key,"mode":self.executor.mode,
+                        "authorization_preserved":preserved,"entries_paused":self.executor.entries_paused})
+            return {"ok":True,"connection_reused":True,"authorization_preserved":preserved,
+                    "message":("الاتصال الحالي سليم؛ بقي التفويض وحدود اليوم وحالة الإيقاف كما هي."
+                               if preserved else "الاتصال الحالي سليم للقراءة؛ لم يُفعّل التداول.")}
+
     def _connect(self,simulation=False,terminal_path="",bridge_path=""):
+        source=self._connection_source(simulation,terminal_path,bridge_path)
+        try:
+            unchanged=self._verify_unchanged_connection(source)
+            if unchanged is not None:return unchanged
+        except Exception:
+            # The original fail-closed reconnect path revokes first. Failed
+            # health checks must never preserve a formerly valid permission.
+            LOG.exception("Unchanged connection verification failed; authorization will be revoked")
         if self.executor:
             self.executor.deactivate("تغيير مصدر البيانات")
         if self.broker and (self.broker.positions() or self.broker.orders()):
@@ -660,33 +912,57 @@ class Engine(MultiSchoolMixin):
         if self.broker:self.broker.close()
         if self.store:self.store.close()
         self.broker=self.store=self.risk=self.executor=self.scanner=None
+        self._connected_source=None;self._connected_account_key=None
+        self.learner=None;self.learning_account=None;self.last_learning=0
+        self.learning_state={"mode":"UNAVAILABLE","error":"","models":[]}
+        new=None
         try:
             new=SimBroker(self.clock) if simulation else MT5Broker(terminal_path,bridge_path)
-        except Exception:
-            self.status="DISCONNECTED";self.settings={}
+            self._invalidate_research()
+            self.context_cache={};self.partner_catalog=None
+            self.broker=new;self.store=Store(self.data/("simulation.sqlite3" if simulation else "live.sqlite3"))
+            self.learner=LearningMemory(self.store,self.rule_library);self.last_learning=0
+            with self.store.lock:
+                self.store.db.execute("CREATE TABLE IF NOT EXISTS financial_scenarios(id TEXT PRIMARY KEY,account TEXT NOT NULL,created REAL NOT NULL,payload TEXT NOT NULL)")
+                self.store.db.execute("CREATE TABLE IF NOT EXISTS school_reference_versions(revision TEXT PRIMARY KEY,payload TEXT NOT NULL)")
+                self.store.db.execute("INSERT OR IGNORE INTO school_reference_versions VALUES(?,?)",(self.knowledge["catalog_revision"],json.dumps(self.knowledge,ensure_ascii=False,allow_nan=False)))
+            self._execution_tables()
+            self._load_execution_reference()
+            self.learning_account=None
+            self._sync_learning_scope(account_key(new.account()))
+            self.risk=RiskManager(new,self.store)
+            self.executor=Executor(new,self.store,self.risk,self.clock,
+                                   regime_routing_enabled=self.config.get("regime_routing_enabled",False))
+            self.scanner=UniverseScanner(new,self.clock)
+            self.quant_results={};self.cards_by_symbol={};self.decisions={};self.opportunities=[];self.manual={};self.deep_queue=[];self.attempted={}
+            self.settings={};self.status="READ_ONLY";self.error="";self.chart={"symbol":"","timeframe":"H1","bars":[],"cards":[],"school_analyses":[]}
+            if not simulation:
+                self.config={**self.config,"terminal_path":terminal_path,"bridge_path":bridge_path}
+                self.config_path.write_text(json.dumps(self.config,ensure_ascii=False),encoding="utf-8")
+            connected_account=new.account()
+            self._connected_source=source;self._connected_account_key=account_key(connected_account)
+            self._audit("CONNECTED_READ_ONLY",{"simulation":simulation,"account_key":account_key(connected_account),"trade_mode":connected_account.get("trade_mode")})
+            self.scanner.begin();self.last_scan=self.clock()
+            return {"ok":True,"message":"متصل للقراءة. التفويض يبدأ فقط بعد إدخال حدود اليوم والضغط على ابدأ."}
+        except Exception as exc:
+            # A broker can initialize successfully before the journal, learning
+            # schema or scanner fails. Release every partial resource so the
+            # worker cannot repeatedly reconcile a missing executor/store.
+            if new is not None:
+                try:new.close()
+                except Exception:LOG.exception("Failed to close partially initialized broker")
+            if self.store is not None:
+                try:self.store.close()
+                except Exception:LOG.exception("Failed to close partially initialized ledger")
+            self.broker=self.store=self.risk=self.executor=self.scanner=self.learner=None
+            self._connected_source=None;self._connected_account_key=None;self.learning_account=None
+            self.settings={};self.status="DISCONNECTED";self.error=str(exc)
+            self.learning_state={"mode":"UNAVAILABLE","error":str(exc),"models":[]}
+            self.valuation={};self.scalping_state={}
+            self.quant_results={};self.cards_by_symbol={};self.decisions={};self.opportunities=[]
+            self.manual={};self.deep_queue=[];self.attempted={}
+            self.chart={"symbol":"","timeframe":"H1","bars":[],"cards":[],"school_analyses":[]}
             raise
-        self._invalidate_research()
-        self.context_cache={};self.partner_catalog=None
-        self.broker=new;self.store=Store(self.data/("simulation.sqlite3" if simulation else "live.sqlite3"))
-        self.learner=LearningMemory(self.store,self.rule_library);self.last_learning=0
-        with self.store.lock:
-            self.store.db.execute("CREATE TABLE IF NOT EXISTS financial_scenarios(id TEXT PRIMARY KEY,account TEXT NOT NULL,created REAL NOT NULL,payload TEXT NOT NULL)")
-            self.store.db.execute("CREATE TABLE IF NOT EXISTS school_reference_versions(revision TEXT PRIMARY KEY,payload TEXT NOT NULL)")
-            self.store.db.execute("INSERT OR IGNORE INTO school_reference_versions VALUES(?,?)",(self.knowledge["catalog_revision"],json.dumps(self.knowledge,ensure_ascii=False,allow_nan=False)))
-        self._execution_tables()
-        self._load_execution_reference()
-        self.learning_account=None
-        self._sync_learning_scope(account_key(new.account()))
-        self.risk=RiskManager(new,self.store);self.executor=Executor(new,self.store,self.risk,self.clock)
-        self.scanner=UniverseScanner(new,self.clock)
-        self.quant_results={};self.cards_by_symbol={};self.decisions={};self.opportunities=[];self.manual={};self.deep_queue=[];self.attempted={}
-        self.settings={};self.status="READ_ONLY";self.error="";self.chart={"symbol":"","timeframe":"H1","bars":[],"cards":[]}
-        if not simulation:
-            self.config={**self.config,"terminal_path":terminal_path,"bridge_path":bridge_path}
-            self.config_path.write_text(json.dumps(self.config,ensure_ascii=False),encoding="utf-8")
-        self._audit("CONNECTED_READ_ONLY",{"simulation":simulation,"account_key":account_key(new.account()),"trade_mode":new.account().get("trade_mode")})
-        self.scanner.begin();self.last_scan=self.clock()
-        return {"ok":True,"message":"متصل للقراءة. التفويض يبدأ فقط بعد إدخال حدود اليوم والضغط على ابدأ."}
 
     def _recover_mt5_connection(self, cause):
         """Recover a stale Python IPC binding without restoring authorization."""
@@ -707,14 +983,15 @@ class Engine(MultiSchoolMixin):
             # Build fresh guards around the recovered broker.  In particular,
             # no authorization object or reserved in-memory budget survives.
             self.risk=RiskManager(self.broker,self.store)
-            self.executor=Executor(self.broker,self.store,self.risk,self.clock)
+            self.executor=Executor(self.broker,self.store,self.risk,self.clock,
+                                   regime_routing_enabled=self.config.get("regime_routing_enabled",False))
             self.scanner=UniverseScanner(self.broker,self.clock)
             reconciliation=self.executor.reconcile(key)
             if not reconciliation.get("ok"):
                 raise BrokerError("تعذرت مطابقة سجل الوسيط بعد إعادة الاتصال: "+str(reconciliation.get("reason") or reconciliation.get("unresolved")))
             self._invalidate_research()
             self.settings={};self.quant_results={};self.cards_by_symbol={};self.decisions={};self.opportunities=[];self.manual={};self.deep_queue=[];self.attempted={}
-            self.chart={"symbol":"","timeframe":"H1","bars":[],"cards":[]}
+            self.chart={"symbol":"","timeframe":"H1","bars":[],"cards":[],"school_analyses":[]}
             self.scanner.begin();self.last_scan=now
             self.status="READ_ONLY";self.error=""
             self._audit("CONNECTION_RESTORED_READ_ONLY",{"mode":"READ_ONLY","account_key":key,"terminal_connected":bool(terminal.get("connected"))})
@@ -726,10 +1003,16 @@ class Engine(MultiSchoolMixin):
 
     def _action(self,p):
         action=p["action"]
+        if action=="discover_mt5_terminals":
+            terminals=discover_mt5_terminals()
+            return {"ok":True,"terminals":terminals,"count":len(terminals),
+                    "message":"اكتمل اكتشاف ملفات تشغيل MT5 دون الاتصال بأي حساب"}
         if action=="connect":return self._connect(False,str(p.get("terminal_path","")).strip(),str(p.get("bridge_path","")).strip())
         if action=="simulation":return self._connect(True)
         if action=="diagnostics":return self._diagnostics()
         if action=="knowledge_export":return self._export_knowledge()
+        if action=="refresh_external_research":return self.external_research.refresh()
+        if action=="run_llm_research":return self.llm_research.run(self._llm_research_context())
         if action=="fundamental_analyze":
             if not self.store or not self.broker:raise ValueError("اتصل بمصدر البيانات لحفظ التقييم المحلي")
             result=evaluate_valuation(p.get("data"))
@@ -779,6 +1062,7 @@ class Engine(MultiSchoolMixin):
                 "allow_daily_risk_increase":p.get("allow_daily_risk_increase") is True,
                 "commission_per_lot":p.get("commission_per_lot"),"slippage_points":p.get("slippage_points"),
                 "max_trade_fraction":.2,"correlation_cap_fraction":.5,"max_proposal_age":14400,
+                "max_open_positions":3,
                 "max_session_age":120,"max_calendar_age":120,"max_tick_age":15}
             result=self.executor.activate(p.get("mode","AUTO_DEMO"),settings)
             self._invalidate_research()
@@ -792,12 +1076,15 @@ class Engine(MultiSchoolMixin):
             except Exception:
                 self.executor.deactivate("Activation persistence failed");self.status="READ_ONLY"
                 raise
-            # Waive only the heuristic cutoff; actual bid/ask costs still bind
-            # sizing and independent net reward/risk validation.
+            # Spread is measured and shown, but never independently excludes an
+            # instrument. Actual bid/ask costs still bind monetary risk and the
+            # independent net reward/risk validation.
             spread_filter=spread_filter_required(self.settings,self.broker.account(),self.broker.is_simulation)
             if self.scanner.spread_filter!=spread_filter:
-                self.scanner.spread_filter=spread_filter
-                self.scanner.begin();self.last_scan=self.clock()
+                # This flag controls a warning label only. Restarting discovery
+                # here erased fresh ELIGIBLE rows and temporarily blocked the
+                # very first post-activation signal.
+                self.scanner.configure_spread_warning(spread_filter)
             # Previous READ_ONLY analysis used unknown costs; invalidate those certificates.
             self.quant_results={};self.decisions={};self.opportunities=[];self.manual={};self.deep_queue=[]
             if self.scanner.snapshot()["complete"]:
@@ -825,7 +1112,8 @@ class Engine(MultiSchoolMixin):
             bars = validate_bars(self.broker.bars(symbol,tf,_analysis_bar_count(tf)), tf, as_of)
             cards=analyze_all(symbol,tf,bars,as_of,self._context(symbol,tf))
             self._observe_rules(cards)
-            self.chart={"symbol":symbol,"timeframe":tf,"bars":bars,"cards":cards,"as_of":as_of,"committee":self.decisions.get(symbol)}
+            self.chart=self._chart_snapshot(symbol,tf,bars,cards,as_of,committee=self.decisions.get(symbol))
+            self.chart["microstructure"]=self._research_microstructure(symbol,as_of)
             self.cache.put("chart:"+account_key(self.broker.account())+":"+symbol+":"+tf,self.chart)
             return {"ok":True,"message":"حدّث الشارت وبطاقات المدارس من الشموع المكتملة."}
         if action=="backtest":
@@ -1082,7 +1370,7 @@ class Engine(MultiSchoolMixin):
             now=self.clock()
             cards=analyze_all(symbol,tf,bars,now,context);self._observe_rules(cards);all_cards.extend(cards)
             if self.chart.get("symbol")==symbol and self.chart.get("timeframe")==tf:
-                self.chart={"symbol":symbol,"timeframe":tf,"bars":bars,"cards":cards,"as_of":now}
+                self.chart=self._chart_snapshot(symbol,tf,bars,cards,now)
         self.cards_by_symbol[symbol]=all_cards
         self.cache.put("cards:"+account_key(self.broker.account())+":"+symbol,all_cards)
         row=self.scanner.rows[symbol];session=self.broker.session(symbol);calendar=self.broker.calendar()
@@ -1099,7 +1387,8 @@ class Engine(MultiSchoolMixin):
             self.decisions[symbol]=result
             self._audit("COMMITTEE_DECISION",{"symbol":symbol,"decision":result["decision"],"reasons":result["reasons"],"protocol_revision":confluence.PROTOCOL_REVISION,"ranked":result["ranked"]})
             if not self.chart["symbol"]:
-                self.chart={"symbol":symbol,"timeframe":"H1","bars":bars_by_tf["H1"],"cards":[c for c in all_cards if c["timeframe"]=="H1"],"as_of":now}
+                self.chart=self._chart_snapshot(symbol,"H1",bars_by_tf["H1"],
+                    [c for c in all_cards if c["timeframe"]=="H1"],now)
             if self.chart.get("symbol")==symbol:self.chart["committee"]=result
             self._rank();return
         config=self._quant_config(symbol)
@@ -1142,7 +1431,8 @@ class Engine(MultiSchoolMixin):
         self._audit("COMMITTEE_DECISION",{"symbol":symbol,"decision":result["decision"],"reasons":result["reasons"],"ranked":result.get("ranked",[])})
         if not self.chart["symbol"]:
             tf="H1";bars=self.broker.bars(symbol,tf,_analysis_bar_count(tf))
-            self.chart={"symbol":symbol,"timeframe":tf,"bars":bars,"cards":[c for c in all_cards if c["timeframe"]==tf],"as_of":now,"committee":result}
+            self.chart=self._chart_snapshot(symbol,tf,bars,
+                [c for c in all_cards if c["timeframe"]==tf],now,committee=result)
         self._rank()
 
     def _rank(self):
@@ -1335,9 +1625,10 @@ class Engine(MultiSchoolMixin):
             self._invalidate_research()
             self.context_cache={};self.partner_catalog=None
             self.settings={};self.quant_results={};self.cards_by_symbol={};self.decisions={};self.opportunities=[];self.manual={};self.deep_queue=[];self.attempted={}
-            self.chart={"symbol":"","timeframe":"H1","bars":[],"cards":[]}
+            self.chart={"symbol":"","timeframe":"H1","bars":[],"cards":[],"school_analyses":[]}
             self.risk=RiskManager(self.broker,self.store)
-            self.executor=Executor(self.broker,self.store,self.risk,self.clock)
+            self.executor=Executor(self.broker,self.store,self.risk,self.clock,
+                                   regime_routing_enabled=self.config.get("regime_routing_enabled",False))
             self.scanner=UniverseScanner(self.broker,self.clock)
             self.scanner.begin();self.last_scan=self.clock();self.status="READ_ONLY"
         self.learning_account=key;self.last_learning=0
@@ -1444,29 +1735,38 @@ class Engine(MultiSchoolMixin):
         with self.view_lock:
             previous=self._view
         view=self._empty_state();view.update(status=self.status,error=self.error,last_update=self.last_update,chart=self.chart,
-            settings=self.settings,opportunities=self.opportunities,cards=[c for cards in self.cards_by_symbol.values() for c in cards],
-            quant_results=list(self.quant_results.values()))
+            llm_research=self.llm_research.status(),
+            settings=self.settings,opportunities=self.opportunities)
+        public_cards,cards_total,cards_truncated,card_activity=self._public_card_view(self.cards_by_symbol)
+        public_quant=self._public_quant_view(self.quant_results.values())
+        view.update(cards=public_cards,cards_total=cards_total,cards_truncated=cards_truncated,
+                    card_activity_by_strategy=card_activity,quant_results=public_quant)
         if self.broker:
             execution=self.executor.status() if self.executor else {}
             view.update(simulation=self.broker.is_simulation,mode=execution.get("mode","READ_ONLY"),execution=execution,
                         scan=self.scanner.snapshot() if self.scanner else view["scan"])
             if self.store:
-                # These reads do not depend on a healthy terminal connection.
-                view["events"]=self.store.recent_audit(150)
-                view["intents"]=self.store.intents()
+                # Account-owned ledger data is withheld until broker identity is
+                # verified below. This also prevents stale cross-account data
+                # from appearing during a terminal disconnect.
+                view["events"]=[];view["intents"]=[]
             try:
                 account=self.broker.account();terminal=self.broker.terminal();key=account_key(account)
                 if self.learner:
                     self._sync_learning_scope(key)
                     view.update(learning=self.learning_state,valuation=self.valuation,chart=self.chart,settings=self.settings,
-                                opportunities=self.opportunities,cards=[c for cards in self.cards_by_symbol.values() for c in cards],quant_results=list(self.quant_results.values()))
+                                opportunities=self.opportunities)
                 account["type"]={0:"Demo",1:"Contest",2:"Real"}.get(account.get("trade_mode"),"UNKNOWN") if type(account.get("trade_mode")) is int else "UNKNOWN"
-                intents=self.store.intents(key)
+                ledger_intents=self.store.intents(key)
+                public_intents,intents_total,intents_omitted=self._public_intent_view(ledger_intents)
                 view.update(simulation=self.broker.is_simulation,account=account,terminal=terminal,
                     mode=self.executor.status().get("mode","READ_ONLY"),execution=self.executor.status(),scan=self.scanner.snapshot(),
-                    positions=self.broker.positions(),orders=self.broker.orders(),intents=intents,
-                    events=self.store.recent_audit(150),performance=self._performance(intents),
-                    news=self.news.snapshot(self.broker.calendar(),self.broker.is_simulation))
+                    positions=self.broker.positions(),orders=self.broker.orders(),intents=public_intents,
+                    intents_total=intents_total,intents_omitted=intents_omitted,
+                    events=self._public_audit_view(self.store.recent_audit(300),key),
+                    performance=self._performance(ledger_intents),
+                    news={**self.news.snapshot(self.broker.calendar(),self.broker.is_simulation),
+                          "external_research":self.external_research.snapshot()})
                 if self.risk.settings:
                     view["risk"]=self.risk.snapshot(self.clock())
                 else:
@@ -1478,7 +1778,8 @@ class Engine(MultiSchoolMixin):
                 # Preserve the last successfully observed broker values for
                 # incident review.  DATA_ERROR/data_stale make their age clear;
                 # current cards, quant results, scan and journal stay current.
-                for field in ("account","terminal","positions","orders","performance","news","risk"):
+                for field in ("account","terminal","positions","orders","performance","news","risk",
+                              "events","intents","intents_total","intents_omitted"):
                     if previous.get(field) is not None:
                         view[field]=previous[field]
                 view["error"]=str(exc);view["status"]="DATA_ERROR";view["data_stale"]=True
@@ -1628,7 +1929,10 @@ class Engine(MultiSchoolMixin):
             active_errors.append({"event":"CURRENT_KNOWLEDGE_ERROR","at":state.get("last_update"),"payload":{"reason":str(state["knowledge"]["error"])}})
         errors=active_errors+error_history
         decisions=[e for e in events if e.get("event")=="COMMITTEE_DECISION"]
-        cards=state.get("cards") or []
+        # Diagnostics retain the complete in-memory card inventory even though
+        # the interactive public snapshot is deliberately capped for UI speed.
+        cards=([card for rows in self.cards_by_symbol.values() for card in rows if isinstance(card,dict)]
+               if getattr(self,"cards_by_symbol",None) else state.get("cards") or [])
         card_status_counts={}
         diagnostic_cards=[]
         for card in cards:

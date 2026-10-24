@@ -1,9 +1,49 @@
-# Quant Trading AI — 0.7.0
+# Quant Trading AI — 0.7.17 candidate
 
-Research release 0.7.0. Check reports/release-0.7.0.json for the verified packaging/deployment state.
+Candidate 0.7.16 makes the execution state visible once in the top bar, keeps the lower account panel focused on trading facts and controls, and labels the overview decision card as a preview of the best qualified opportunity with a route to the full list. It does not change school logic, risk limits, or trading authority. The separate Demo sender is not started by this release.
 It is a local, rule-based MT5 Demo research/execution application. It is not a
 profit guarantee, a complete implementation of every analytical school, or an
 exchange order-flow terminal.
+
+## 0.7.16 candidate changes
+
+The executor state appears in the top bar with the technical stop reason available to assistive technology and as a tooltip. The lower execution panel no longer repeats the stopped state. The dashboard explicitly reports that its decision card previews the best opportunity, while the Research view remains the place to inspect model cards. Browser regression checks exercise stopped and unavailable states. No order is sent and no strategy is reclassified as complete or profitable.
+
+## 0.7.15 candidate changes
+
+The default interface is a dark navy AI control room with a subtle connected-node background, compact scan and decision cards, clearer account and trading panels, and a right-side mobile drawer. Six selectable themes remain available. Static and browser checks validate the stylesheet route and MIME type, keyboard use, axe, and ordinary plus Demo-integrated scan, decision, account, and execution-panel geometry at 375/768/1024/1440/1920 px in Arabic and English. Trading remains read-only in the desktop app.
+
+## 0.7.11 candidate changes
+
+The API now returns a compact, account-scoped intent history while keeping the
+full ledger and evidence in SQLite. Unresolved intents remain visible; older
+settled intents are counted as archived. Audit ownership is a separate
+database field, and ambiguous legacy audit rows are not exposed as belonging
+to a connected account. This patch did not change model logic, costs, risk
+limits, or trading permissions.
+
+The 0.7.6–0.7.10 release line adds optional multi-provider shadow research,
+native context/routing studies, and the compact dashboard. See
+[Multi-API research bridge](docs/MULTI_API_RESEARCH_BRIDGE.md). Both layers are
+advisory only; MT5 remains the sole source for executable quotes, account state
+and orders. Research connectors and routing studies do not have order authority.
+
+## Release 0.7.10 changes
+
+The release documents causal market-state, native H4/D1, currency-oriented native
+DXY/FX and UTC-session vetoes without adding a model. See
+[context protocol](docs/CONTEXT_STUDY_PROTOCOL.md) and
+[precise rules](docs/STAGE1_CONTEXT_RULES.md). The routing flag defaults off;
+these filters never authorize an order. The user's eight-stage program retains
+READ_ONLY until acceptance and six real Demo months. Current research does not
+meet stage1's positive economic acceptance criterion; a passing software suite
+does not qualify the routing policy or replace the desktop installation.
+
+A maintenance fix makes a verified unchanged connection idempotent.
+It preserves an existing unexpired authorization, settings and stopped-entry
+state; it cannot activate READ_ONLY, renew a permit or bypass a changed account,
+uncertain permissions, daily limits or unresolved sends. Data and financial
+results under reports/ remain private and are not published with the source.
 
 ## Architecture and authority
 
@@ -136,6 +176,17 @@ Python3.12+ is required for source and development tooling.
 then `python tools/quality_gate.py --coverage` and browser_e2e with a local axe
 file. GitHub Actions is configured in .github/workflows/ci.yml; a hosted run
 requires this folder to be committed to a repository with Actions enabled.
+
+## Discovery and spread policy — 2026-10-24
+The 2026-10-24 read-only Market Watch snapshot is documented in
+`reports/PHASE0_DISCOVERY_2026-10-24.md`. A standalone spread threshold no longer
+rejects an instrument; median/p90 spread remain observable and actual execution
+costs still enter monetary risk and net-reward checks. The generated
+`config/instruments.yaml` keeps every route disabled pending a strategy-specific
+review. Crypto M1/M5 stay disabled under the prior explicit policy. The mapping
+of current system modules and the factual limits of school coverage are in
+`ARCHITECTURE.md`; the existing school coverage report remains authoritative for
+what is and is not implemented.
 
 
 ## CI Setup

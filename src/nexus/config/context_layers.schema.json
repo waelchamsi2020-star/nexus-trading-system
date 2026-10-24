@@ -1,0 +1,2187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Versioned fail-closed context layers for 58 unchanged models",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "version",
+    "mode",
+    "execution_authority",
+    "multi_timeframe",
+    "cross_asset",
+    "sessions",
+    "notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "mode": {
+      "const": "RESEARCH_ONLY"
+    },
+    "execution_authority": {
+      "const": false
+    },
+    "context_fingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "multi_timeframe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timeframes",
+        "maximum_age_periods"
+      ],
+      "properties": {
+        "timeframes": {
+          "const": [
+            "H4",
+            "D1"
+          ]
+        },
+        "maximum_age_periods": {
+          "const": 1
+        }
+      }
+    },
+    "cross_asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timeframe",
+        "minimum_aligned_bars",
+        "maximum_age_bars",
+        "aliases",
+        "policies"
+      ],
+      "properties": {
+        "timeframe": {
+          "const": "H1"
+        },
+        "minimum_aligned_bars": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 2000
+        },
+        "maximum_age_bars": {
+          "const": 1
+        },
+        "aliases": {
+          "type": "object",
+          "required": [
+            "EURUSD",
+            "GBPUSD",
+            "USDJPY",
+            "DXY"
+          ],
+          "additionalProperties": {
+            "enum": [
+              "EURUSD",
+              "GBPUSD",
+              "USDJPY",
+              "DXY"
+            ]
+          }
+        },
+        "policies": {
+          "const": {
+            "EURUSD": {
+              "GBPUSD": 1,
+              "USDJPY": -1,
+              "DXY": -1
+            },
+            "GBPUSD": {
+              "EURUSD": 1,
+              "USDJPY": -1,
+              "DXY": -1
+            },
+            "USDJPY": {
+              "EURUSD": -1,
+              "GBPUSD": -1,
+              "DXY": 1
+            }
+          }
+        }
+      }
+    },
+    "sessions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timezone",
+        "windows",
+        "models"
+      ],
+      "properties": {
+        "timezone": {
+          "const": "UTC"
+        },
+        "windows": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "LONDON",
+            "NEW_YORK",
+            "ASIA"
+          ],
+          "properties": {
+            "LONDON": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "start_hour",
+                "end_hour"
+              ],
+              "properties": {
+                "start_hour": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23
+                },
+                "end_hour": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23
+                }
+              }
+            },
+            "NEW_YORK": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "start_hour",
+                "end_hour"
+              ],
+              "properties": {
+                "start_hour": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23
+                },
+                "end_hour": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23
+                }
+              }
+            },
+            "ASIA": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "start_hour",
+                "end_hour"
+              ],
+              "properties": {
+                "start_hour": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23
+                },
+                "end_hour": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23
+                }
+              }
+            }
+          }
+        },
+        "models": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "adx_di_cross",
+            "atr_channel_break",
+            "band_reentry",
+            "base_first_return",
+            "breakout_retest",
+            "cci_reentry",
+            "classic_pivot_reclaim",
+            "classic_reversal_patterns",
+            "darvas_box",
+            "darvas_rising_boxes",
+            "donchian_20",
+            "dow_structure",
+            "elliott_candidate",
+            "elliott_impulse_reversal",
+            "elliott_zigzag_reversal",
+            "ema_cross",
+            "engulfing",
+            "failed_range_break",
+            "fib_retracement",
+            "flag_breakout",
+            "four_school_confluence",
+            "fractal_5_breakout",
+            "fvg_first_return",
+            "gann",
+            "geometric_triangle_breakout",
+            "harmonic_abcd",
+            "harmonic_bat",
+            "harmonic_butterfly",
+            "harmonic_gartley",
+            "ichimoku_cross",
+            "inside_bar_break",
+            "interasset_confirmation",
+            "liquidity_bos_retest",
+            "macd_signal_cross",
+            "mfi_tick_rebound",
+            "momentum_acceleration",
+            "obv_divergence_reclaim",
+            "order_flow",
+            "pin_rejection",
+            "rectangle_breakout",
+            "regression_reentry",
+            "rsi_rebound",
+            "rsi_wilder_rebound",
+            "seasonality",
+            "smc_ict_proxy",
+            "smt_proxy",
+            "stochastic_rebound",
+            "supply_demand_proxy",
+            "support_bounce",
+            "three_bar_reversal",
+            "tick_activity_rejection",
+            "utc_opening_range",
+            "volatility_breakout",
+            "vwap_reclaim",
+            "williams_reentry",
+            "wyckoff_range_expansion",
+            "wyckoff_spring",
+            "zscore_reversion"
+          ],
+          "properties": {
+            "adx_di_cross": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "atr_channel_break": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "band_reentry": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "base_first_return": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "breakout_retest": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "cci_reentry": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "classic_pivot_reclaim": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "classic_reversal_patterns": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "darvas_box": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "darvas_rising_boxes": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "donchian_20": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "dow_structure": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "elliott_candidate": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "elliott_impulse_reversal": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "elliott_zigzag_reversal": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "ema_cross": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "engulfing": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "failed_range_break": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "fib_retracement": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "flag_breakout": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "four_school_confluence": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "fractal_5_breakout": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "fvg_first_return": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "gann": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "geometric_triangle_breakout": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "harmonic_abcd": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "harmonic_bat": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "harmonic_butterfly": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "harmonic_gartley": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "ichimoku_cross": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "inside_bar_break": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "interasset_confirmation": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "liquidity_bos_retest": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "macd_signal_cross": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "mfi_tick_rebound": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "momentum_acceleration": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "obv_divergence_reclaim": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "order_flow": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "pin_rejection": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "rectangle_breakout": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "regression_reentry": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "rsi_rebound": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "rsi_wilder_rebound": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "seasonality": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "smc_ict_proxy": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "smt_proxy": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "stochastic_rebound": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "supply_demand_proxy": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "support_bounce": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "three_bar_reversal": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "tick_activity_rejection": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "utc_opening_range": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "volatility_breakout": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "vwap_reclaim": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "williams_reentry": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "wyckoff_range_expansion": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "wyckoff_spring": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            },
+            "zscore_reversion": {
+              "type": "array",
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "LONDON",
+                  "NEW_YORK",
+                  "ASIA",
+                  "ALL"
+                ]
+              },
+              "oneOf": [
+                {
+                  "maxItems": 0
+                },
+                {
+                  "const": [
+                    "ALL"
+                  ]
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "LONDON",
+                      "NEW_YORK",
+                      "ASIA"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

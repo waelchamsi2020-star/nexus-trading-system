@@ -46,8 +46,8 @@ def _encoded(value):
 
 def load_csv(path, timeframe, as_of=None):
     """Parse an actual native MT5 export; no commission metadata is invented."""
-    if timeframe not in ('M5', 'H1'):
-        raise ValueError('This 300-bar cache supports native M5/H1 only')
+    if timeframe not in ('M5', 'H1', 'H4', 'D1'):
+        raise ValueError('This 300-bar cache supports native M5/H1/H4/D1 only')
     observation_time = time.time() if as_of is None else as_of
     if (isinstance(observation_time, bool) or not isinstance(observation_time, (int, float)) or
             not math.isfinite(observation_time)):
@@ -268,7 +268,7 @@ def build_cache(csv_path, *, symbol, timeframe, point, profile, cache_dir,
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--csv', type=Path, required=True)
-    parser.add_argument('--timeframe', choices=('M5', 'H1'), required=True)
+    parser.add_argument('--timeframe', choices=('M5', 'H1', 'H4', 'D1'), required=True)
     parser.add_argument('--symbol', required=True)
     parser.add_argument('--point', type=float, required=True)
     parser.add_argument('--profile', default='CONTINUOUS')

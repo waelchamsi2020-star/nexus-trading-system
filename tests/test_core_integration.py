@@ -39,17 +39,20 @@ class MarketTests(unittest.TestCase):
         closed=next(r for r in done["rows"] if r["symbol"]=="CLOSED.asset")
         self.assertFalse(closed["eligible"]);self.assertIn("السوق مغلق",closed["reasons"][0])
         self.assertTrue(self.b.symbol("GOLD#")["visible"])
-    def test_spread_cutoff_waiver_keeps_costs_and_stale_quote_gate(self):
+    def test_high_spread_warns_without_hiding_symbol_and_stale_quote_still_blocks(self):
         scanner=UniverseScanner(self.b,lambda:self.now)
         tick=self.b.tick
         def wide(name):
             t=tick(name);t['ask']=t['bid']*1.05;return t
         self.b.tick=wide
         scanner.begin();scanner.step(99)
-        self.assertFalse(scanner.rows['EURUSD.demo']['eligible'])
-        self.assertIn('السبريد مرتفع مقارنة بالنطاق الأخير',scanner.rows['EURUSD.demo']['reasons'])
+        self.assertTrue(scanner.rows['EURUSD.demo']['eligible'])
+        self.assertIn('السبريد مقاس للعرض؛ لا يُرفض منفردًا وتدخل تكلفته الفعلية في حساب المخاطرة',scanner.rows['EURUSD.demo']['warnings'])
+        self.assertFalse(scanner.rows['EURUSD.demo']['spread_filter_enforced'])
+        self.assertFalse(scanner.rows['EURUSD.demo']['spread_rejection_enabled'])
         scanner.spread_filter=False;scanner.begin();scanner.step(99)
         self.assertTrue(scanner.rows['EURUSD.demo']['eligible'])
+        self.assertEqual([],scanner.rows['EURUSD.demo']['warnings'])
         self.assertGreater(scanner.rows['EURUSD.demo']['spread'],0)
         def stale(name):
             t=wide(name);t['time']=self.now-300;return t
@@ -57,16 +60,34 @@ class MarketTests(unittest.TestCase):
         self.assertFalse(scanner.rows['EURUSD.demo']['eligible'])
         self.assertFalse(scanner.rows['CLOSED.asset']['eligible'])
 
-    def test_spread_waiver_requires_authorized_actual_fast_demo(self):
+    def test_disabling_spread_warning_does_not_reset_discovery_or_hide_eligible_symbol(self):
+        scanner=UniverseScanner(self.b,lambda:self.now)
+        original=self.b.tick
+        def wide(name):
+            t=original(name);t['ask']=t['bid']*1.05;return t
+        self.b.tick=wide;scanner.begin();scanner.step(99)
+        row=scanner.rows['EURUSD.demo']
+        self.assertTrue(row['eligible'])
+        self.assertTrue(row['warnings'])
+        cycle=scanner.cycle
+        scanner.configure_spread_warning(False)
+        self.assertEqual(scanner.cycle,cycle)
+        self.assertTrue(scanner.snapshot()['complete'])
+        self.assertTrue(row['eligible'])
+        self.assertEqual(row['warnings'],[])
+        self.assertFalse(row['spread_rejection_enabled'])
+
+    def test_spread_never_has_independent_rejection_gate(self):
         settings={'decision_protocol':'multi_school_v1','validation_policy':'forward_demo',
             'scalp_only':True,'scalping':{'fast':{'enabled':True},'normal':{'enabled':False}}}
-        self.assertFalse(spread_filter_required(settings,{'trade_mode':0}))
-        for mode in (1,2,None,False):
-            self.assertTrue(spread_filter_required(settings,{'trade_mode':mode}))
-        self.assertTrue(spread_filter_required(settings,{'trade_mode':0},simulation=True))
-        for key,value in (('decision_protocol','general'),('validation_policy','historical'),('scalp_only',False),
-                ('scalping',{'normal':{'enabled':True},'fast':{'enabled':True}})):
-            self.assertTrue(spread_filter_required({**settings,key:value},{'trade_mode':0}))
+        cases=((settings,{'trade_mode':0},False),
+               (settings,{'trade_mode':1},False),
+               (settings,{'trade_mode':None},False),
+               (settings,{'trade_mode':0},True),
+               ({'decision_protocol':'general'},{'trade_mode':1},False))
+        for config,account,simulation in cases:
+            with self.subTest(config=config,account=account,simulation=simulation):
+                self.assertFalse(spread_filter_required(config,account,simulation))
 
     def test_classification_uses_contract_not_fixed_symbol_name(self):
         i=self.b.symbol("EURUSD.demo");i["name"]="broker-weird-123"
@@ -504,6 +525,9 @@ class ServerTests(unittest.TestCase):
         with self.request("/session-view.js") as response:
             self.assertIn("QuantSessionView",response.read().decode())
             self.assertIn("text/javascript",response.headers["Content-Type"])
+        with self.request("/theme-neural.css") as response:
+            self.assertIn("text/css",response.headers["Content-Type"])
+            self.assertIn('--bg: #07111f',response.read().decode())
         with self.request("/api/state",{"X-Nexus-Token":self.s.token}) as response:self.assertEqual(json.load(response)["mode"],"READ_ONLY")
     def test_cross_origin_host_rebinding_and_html_cross_site_denied(self):
         for headers,path in (({"Origin":"https://evil.example","X-Nexus-Token":self.s.token},"/api/state"),

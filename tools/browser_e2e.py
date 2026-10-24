@@ -21,9 +21,23 @@ from nexus.learning import feature_drift_review
 from nexus.server import LocalServer
 
 
+def navigate(page, view):
+    """Open the secondary disclosure before clicking a low-frequency view."""
+    if view in ('news','knowledge','audit') and not page.locator('#nav-more').evaluate('(element) => element.open'):
+        page.locator('#nav-more > summary').click()
+    page.locator(f'.nav-item[data-view="{view}"]').click()
+
+
 def keyboard_screens(page, checks, screenshots):
     """Real keyboard events in Chromium; not a human screen-reader audit."""
     for view in ('overview','markets','research','news','positions','performance','knowledge','audit','setup'):
+        if view in ('news','knowledge','audit'):
+            more=page.locator('#nav-more')
+            if not more.evaluate('(element) => element.open'):
+                summary=more.locator(':scope > summary')
+                summary.focus();page.keyboard.press('Enter')
+            checks.append({'name':'keyboard_open_more_navigation','group':'keyboard',
+                           'passed':more.evaluate('(element) => element.open')})
         nav=page.locator(f'.nav-item[data-view="{view}"]')
         nav.focus();page.keyboard.press('Enter')
         page.locator('#view-'+view).wait_for(state='visible')
@@ -66,7 +80,7 @@ def drift_dashboard_scenario(page, engine, checks, screenshots):
              'status':'EVALUATED_SHADOW','samples':52,'train_samples':40,'holdout_samples':12,'drift_review':drift}]}}
         engine._publish()
         page.locator('#refresh-button').click()
-        page.locator('.nav-item[data-view="knowledge"]').click()
+        navigate(page,'knowledge')
         page.locator('#chart-learning-details > summary').click()
         page.locator('#school-drift-details > summary').click()
         dashboard=page.locator('#school-drift-dashboard')
@@ -174,7 +188,7 @@ def execution_scenarios(checks):
                 checks.append({'name':'run_reconciliation','group':'ui_reconciliation',
                                'passed':response.get('ok') is True and response.get('result',{}).get('ok') is True
                                         and len(engine.broker.sent)==sent_before,'receipt':response})
-                page.locator('.nav-item[data-view="audit"]').click()
+                navigate(page,'audit')
                 page.locator('#refresh-button').click()
                 page.locator('#events-list').get_by_text('مطابقة العمليات مع الوسيط',exact=True).first.wait_for()
                 checks.append({'name':'reconciliation_audit_visible','group':'ui_reconciliation',
@@ -196,6 +210,8 @@ def main():
     screenshots.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='quant-browser-isolated-') as data:
         engine = Engine(ROOT, Path(data))
+        # Browser QA must never spend a user's external provider quota.
+        engine.llm_research.environ = {}
         engine.start_worker(auto_connect=False)
         server = LocalServer(engine, ROOT/'ui')
         url = server.start()
@@ -209,6 +225,19 @@ def main():
                 page.on('console', lambda message: browser_console.append({'text':message.text,'location':message.location}) if message.type=='error' else None)
                 page.goto(url)
                 page.wait_for_function("document.querySelector('#last-update').textContent !== 'لم تُستلم بيانات بعد'")
+                primary_nav=page.locator('nav > .nav-item[data-view]')
+                technical_nav=page.locator('#nav-more .nav-item[data-view="knowledge"], #nav-more .nav-item[data-view="news"], #nav-more .nav-item[data-view="audit"]')
+                checks.append({'name':'primary_navigation_is_compact','group':'ui_layout',
+                               'passed':primary_nav.count()==5 and all(primary_nav.nth(i).is_visible() for i in range(primary_nav.count()))})
+                checks.append({'name':'technical_sources_are_secondary','group':'ui_layout',
+                               'passed':not page.locator('#nav-more').evaluate('(element) => element.open')
+                                        and all(not technical_nav.nth(i).is_visible() for i in range(technical_nav.count()))})
+                more_summary=page.locator('#nav-more > summary')
+                more_summary.focus();page.keyboard.press('Enter')
+                checks.append({'name':'secondary_navigation_opens_by_keyboard','group':'ui_layout',
+                               'passed':page.locator('#nav-more').evaluate('(element) => element.open')
+                                        and all(technical_nav.nth(i).is_visible() for i in range(technical_nav.count()))})
+                page.keyboard.press('Enter')
                 response = context.request.get(url+'/api/state')
                 checks.append({'name':'unauthenticated_session_rejected', 'passed':response.status==401})
                 authorized = page.evaluate("""async () => {
@@ -238,6 +267,24 @@ def main():
                 page.screenshot(path=str(screenshots/'keyboard-error-after.png'),full_page=False)
                 checks.append({'name':'keyboard_error_enter_recovers','group':'keyboard','passed':True})
                 checks.append({'name':'manual_refresh_recovers_after_network_error','passed':True})
+                navigate(page,'news')
+                page.locator('#view-news').wait_for(state='visible')
+                page.locator('#llm-research-details').evaluate("element => element.open = true")
+                page.locator('#llm-research-run').scroll_into_view_if_needed()
+                page.locator('#llm-research-providers').get_by_text('Google Gemini',exact=True).wait_for()
+                with page.expect_response(lambda response: response.url.endswith('/api/action')) as llm_receipt:
+                    page.locator('#llm-research-run').click()
+                if llm_receipt.value.status != 200:
+                    raise AssertionError(f"LLM shadow action returned HTTP {llm_receipt.value.status}")
+                page.wait_for_function("document.querySelector('#llm-research-status').textContent.includes('آخر تحليل')")
+                checks.append({'name':'llm_research_missing_keys_fail_closed_no_network','group':'llm_shadow',
+                               'passed':len(engine.llm_research.status()['results'])==3
+                                        and all(row['status']=='CONFIG_REQUIRED' for row in engine.llm_research.status()['results'])
+                                        and engine.llm_research.status()['execution_use']=='NONE',
+                               'provider_results':engine.llm_research.status()['results']})
+                checks.append({'name':'llm_research_ui_disclaims_execution_authority','group':'llm_shadow',
+                               'passed':'لا يغيّر قرار اللجنة أو المخاطر أو الأوامر' in page.locator('#llm-research-details').inner_text()})
+                page.screenshot(path=str(screenshots/'llm-shadow-unconfigured.png'),full_page=True)
                 held = []
                 loading_page = context.new_page()
                 loading_page.route('**/api/state', lambda route: held.append(route))
@@ -259,7 +306,7 @@ def main():
                     checks.append({'name':'document_direction_'+language,
                                    'passed':page.locator('html').get_attribute('dir')==expected_dir})
                     for view in ('overview','markets','research','news','positions','performance','knowledge','audit','setup'):
-                        page.locator(f'.nav-item[data-view="{view}"]').click()
+                        navigate(page,view)
                         page.locator('#view-'+view).wait_for(state='visible')
                         checks.append({'name':f'navigation_{language}_{view}', 'passed':True})
                         if view == 'research':
@@ -278,9 +325,9 @@ def main():
                 page.locator('.nav-item[data-view="overview"]').click()
                 for language in ('ar', 'en'):
                     page.locator('#language-select').select_option(language)
-                    for width in (375,768,1440):
+                    for width in (375,768,1024,1440,1920):
                         page.set_viewport_size({'width':width,'height':900})
-                        for theme in ('forest','midnight','graphite','sand','white'):
+                        for theme in ('neural','forest','midnight','graphite','sand','white'):
                             page.locator('#theme-select').select_option(theme)
                             page.evaluate('window.scrollTo(0,0)')
                             page.evaluate('() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))')
@@ -288,6 +335,79 @@ def main():
                             checks.append({'name':f'no_page_overflow_{language}_{width}_{theme}',
                                            'passed':dimensions['scroll']<=dimensions['width']+1,
                                            'dimensions':dimensions})
+                            geometry = page.evaluate("""() => {
+                                const rect = (selector) => {
+                                    const r = document.querySelector(selector).getBoundingClientRect();
+                                    return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width};
+                                };
+                                return {view:rect('#view-overview.active'),row:rect('#view-overview > .overview-bottom'),
+                                    scan:rect('.scan-overview'),decision:rect('.committee-preview'),width:innerWidth};
+                            }""")
+                            row, view = geometry['row'], geometry['view']
+                            scan, decision = geometry['scan'], geometry['decision']
+                            contained = (row['width'] >= view['width'] - 2 and
+                                         row['left'] >= view['left'] - 2 and row['right'] <= view['right'] + 2)
+                            disjoint = (scan['right'] <= decision['left'] + 1 or
+                                        decision['right'] <= scan['left'] + 1 or
+                                        scan['bottom'] <= decision['top'] + 1 or
+                                        decision['bottom'] <= scan['top'] + 1)
+                            if width <= 900:
+                                sized = scan['width'] >= row['width'] - 2 and decision['width'] >= row['width'] - 2
+                            else:
+                                sized = scan['width'] >= 250 and decision['width'] >= 240
+                            checks.append({'name':f'overview_scan_decision_geometry_{language}_{width}_{theme}',
+                                           'passed':contained and disjoint and sized,'geometry':geometry})
+                            integrated_geometry = page.evaluate("""() => {
+                                const body=document.body;
+                                const wasIntegrated=body.classList.contains('demo-integrated');
+                                body.classList.add('demo-integrated');
+                                const activeView=document.querySelector('#view-overview');
+                                let demoPanel=document.querySelector('#demo-execution-panel');
+                                const createdDemoPanel=!demoPanel;
+                                const priorHidden=demoPanel?.hidden;
+                                if(!demoPanel){
+                                    demoPanel=document.createElement('article');
+                                    demoPanel.id='demo-execution-panel';demoPanel.className='panel';
+                                    demoPanel.textContent='حالة تداول تجريبية للاختبار';activeView.append(demoPanel);
+                                }else{demoPanel.hidden=false;}
+                                const rect=(selector)=>{
+                                    const e=document.querySelector(selector),r=e.getBoundingClientRect();
+                                    return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width};
+                                };
+                                const row=rect('#view-overview > .overview-bottom');
+                                const view=rect('#view-overview.active');
+                                const scan=rect('.scan-overview'),decision=rect('.committee-preview');
+                                const execution=rect('#demo-execution-panel');
+                                const account=rect('#view-overview > .account-grid');
+                                const result={display:getComputedStyle(document.querySelector('#view-overview > .overview-bottom')).display,
+                                    hiddenControls:getComputedStyle(document.querySelector('#view-overview > .overview-grid')).display,
+                                    row,view,scan,decision,execution,account,width:innerWidth,wasIntegrated};
+                                if(createdDemoPanel) demoPanel.remove(); else demoPanel.hidden=priorHidden;
+                                if(!wasIntegrated) body.classList.remove('demo-integrated');
+                                return result;
+                            }""")
+                            integrated_contained = (integrated_geometry['display']=='grid' and
+                                integrated_geometry['hiddenControls']=='none' and
+                                integrated_geometry['row']['width']>=integrated_geometry['view']['width']-2)
+                            integrated_disjoint = (
+                                integrated_geometry['scan']['right']<=integrated_geometry['decision']['left']+1 or
+                                integrated_geometry['decision']['right']<=integrated_geometry['scan']['left']+1 or
+                                integrated_geometry['scan']['bottom']<=integrated_geometry['decision']['top']+1 or
+                                integrated_geometry['decision']['bottom']<=integrated_geometry['scan']['top']+1)
+                            integrated_sized = (
+                                integrated_geometry['scan']['width']>=integrated_geometry['row']['width']-2 and
+                                integrated_geometry['decision']['width']>=integrated_geometry['row']['width']-2
+                                if width<=900 else
+                                integrated_geometry['scan']['width']>=250 and
+                                integrated_geometry['decision']['width']>=240)
+                            integrated_execution_sized = (
+                                integrated_geometry['execution']['width']>=integrated_geometry['view']['width']-2 and
+                                integrated_geometry['execution']['left']>=integrated_geometry['view']['left']-2 and
+                                integrated_geometry['execution']['right']<=integrated_geometry['view']['right']+2 and
+                                integrated_geometry['execution']['top']>=integrated_geometry['account']['bottom']-2)
+                            checks.append({'name':f'demo_integrated_overview_geometry_{language}_{width}_{theme}',
+                                'passed':integrated_contained and integrated_disjoint and integrated_sized and integrated_execution_sized,
+                                'geometry':integrated_geometry})
                             geometry = page.evaluate("""() => ({
                                 headerBottom:document.querySelector('.topbar').getBoundingClientRect().bottom,
                                 firstCardTop:document.querySelector('.account-grid .stat-card').getBoundingClientRect().top
@@ -303,7 +423,29 @@ def main():
                                                           'nodes':[{'target':n['target'],'summary':n.get('failureSummary','')} for n in v['nodes']]}
                                                          for v in result['violations']],
                                            'incomplete_count':len(result['incomplete'])})
+                        page.locator('#theme-select').select_option('neural')
+                        page.evaluate('() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))')
                         page.screenshot(path=str(screenshots/f'overview-{language}-{width}.png'), full_page=True)
+                page.locator('#language-select').select_option('ar')
+                page.evaluate("""() => window.renderDemoPanel({running:false,error:null,
+                    stop_reason:'DEMO_ACCOUNT_TRADING_PERMISSION_DISABLED',user_paused:false,
+                    status:{models:58,symbol:'EURUSD',timeframe:'M1',open_positions:0,daily_profit:0},
+                    last_reasons:{NO_TRIGGER:58},last_bar:null})""")
+                checks.append({'name':'executor_status_is_prominent_and_not_duplicated','group':'ui_status',
+                    'passed':page.locator('#header-execution-mode').inner_text()=='التنفيذ متوقف'
+                             and page.locator('#header-execution-mode').get_attribute('title').endswith('DEMO_ACCOUNT_TRADING_PERMISSION_DISABLED')
+                             and page.locator('#demo-runtime').count()==0
+                             and page.locator('#demo-execution-panel .panel-heading').inner_text()=='التداول'})
+                page.evaluate("""() => window.renderDemoPanel({running:true,error:'DEMO_ACCOUNT_TRADING_PERMISSION_DISABLED',
+                    limits:{revision:1,values:{daily_loss_amount:10,daily_profit_amount:10,per_trade_loss_amount:5,per_trade_profit_amount:1}},
+                    status:{},last_reasons:{}})""")
+                checks.append({'name':'unavailable_executor_detail_stays_in_top_accessible_status','group':'ui_status',
+                    'passed':page.locator('#header-execution-mode').inner_text()=='حالة المنفّذ غير متاحة'
+                             and 'DEMO_ACCOUNT_TRADING_PERMISSION_DISABLED' in page.locator('#header-execution-mode').get_attribute('aria-label')
+                             and page.locator('#demo-execution-panel .panel-heading').inner_text()=='التداول'
+                             and page.locator('#demo-toggle').is_disabled()
+                             and page.locator('#demo-limits-form [type="submit"]').is_disabled()
+                             and page.locator('#demo-decision').inner_text().startswith('تعذرت قراءة')})
                 checks.append({'name':'no_javascript_page_errors','passed':not console_errors})
                 page.locator('.nav-item[data-view="setup"]').click()
                 page.locator('#setup-advanced > summary').click()

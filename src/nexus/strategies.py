@@ -16,11 +16,34 @@ import time
 from collections.abc import Callable, Mapping
 from pathlib import Path
 
+from .core_school_specs import CORE_RULE_SPECS
 from .timeframes import PERIODS as PERIODS  # noqa: PLC0414 -- Explicit public re-export or deterministic side-effect model registration; removing it breaks compatibility.
 from .timeframes import bar_close_time
 from .timeframes import month_start as month_start  # noqa: PLC0414 -- Explicit public re-export or deterministic side-effect model registration; removing it breaks compatibility.
 
 REGISTRY: dict[str, dict] = {}
+
+
+def _contract_with_rule_details(meta: dict) -> dict:
+    """Copy the registry contract and add source-derived structured rule details."""
+    contract = copy.deepcopy(meta.get("contract") or {})
+    model_id = meta.get("id")
+    details = CORE_RULE_SPECS.get(model_id) if isinstance(model_id, str) else None
+    if details is None:
+        specialist_module = __import__(f"{__package__}.specialists", fromlist=["SPECS"])
+        details = specialist_module.SPECS.get(model_id) if isinstance(model_id, str) else None
+    if details:
+        definition = contract.setdefault("definition", {})
+        rules = details.get("rules_en") or details.get("rules")
+        if rules:
+            definition.setdefault("rules_en", copy.deepcopy(rules))
+        if details.get("parameters"):
+            definition.setdefault("parameters", copy.deepcopy(details["parameters"]))
+        if details.get("allowed_regimes"):
+            definition.setdefault("allowed_regimes", copy.deepcopy(details["allowed_regimes"]))
+        definition.setdefault("scope", "Explicit bounded local rule derived from the current implementation; not complete canonical school coverage.")
+        contract["definition"] = definition
+    return contract
 
 # The English rule keys remain visible for reproducibility; every common
 # user-facing explanation receives an Arabic description first.
@@ -321,7 +344,25 @@ def registry_manifest() -> list[dict]:
     if 'four_school_confluence' in REGISTRY:
         from .confluence_registry import refresh_contract
         refresh_contract()
-    return [{k: v for k, v in meta.items() if k != "analyzer"} for meta in REGISTRY.values()]
+    rows = []
+    for meta in REGISTRY.values():
+        row = {k: v for k, v in meta.items() if k != "analyzer"}
+        contract = _contract_with_rule_details(meta)
+        row["contract"] = contract
+        row["code_implementation"] = (
+            "RULE_CODE_PRESENT" if row.get("coverage") == "IMPLEMENTED" else
+            "RULE_CODE_PARTIAL" if row.get("coverage") == "PARTIAL" else
+            "RULE_CODE_MISSING"
+        )
+        row["school_scope"] = (
+            "FULL_SCHOOL_CLAIMED" if contract.get("school_complete") is True else
+            "BOUNDED_LOCAL_INTERPRETATION"
+        )
+        row["school_complete"] = contract.get("school_complete") is True
+        row["scope_description"] = (contract.get("definition") or {}).get("scope_ar") or \
+            (contract.get("definition") or {}).get("scope") or ""
+        rows.append(row)
+    return rows
 
 
 def _evidence(kind: str, value, bars: list[dict], label: str, **extra) -> dict:
@@ -1000,6 +1041,20 @@ def analyze_strategy(strategy_id: str, symbol: str, timeframe: str, bars: list[d
                     "synthetic completed OHLC" if data_kind in ("synthetic", "simulation") else
                     "completed OHLC with undeclared provenance")
     card = {k: v for k, v in meta.items() if k != "analyzer"}
+    contract = _contract_with_rule_details(meta)
+    card["contract"] = contract
+    card["code_implementation"] = (
+        "RULE_CODE_PRESENT" if meta.get("coverage") == "IMPLEMENTED" else
+        "RULE_CODE_PARTIAL" if meta.get("coverage") == "PARTIAL" else
+        "RULE_CODE_MISSING"
+    )
+    card["school_scope"] = (
+        "FULL_SCHOOL_CLAIMED" if contract.get("school_complete") is True else
+        "BOUNDED_LOCAL_INTERPRETATION"
+    )
+    card["school_complete"] = contract.get("school_complete") is True
+    card["scope_description"] = (contract.get("definition") or {}).get("scope_ar") or \
+        (contract.get("definition") or {}).get("scope") or ""
     card.update(strategy_id=strategy_id, registry_id=strategy_id, symbol=symbol, timeframe=timeframe, direction="NEUTRAL", status="WAIT", quality="UNKNOWN",
                 scenario=arabic("wait for a complete entry setup"), evidence=[], conditions_met=[], conditions_missing=[],
                 entry=None, invalidation=None, stop=None, targets=[], alternative=arabic("wait or opposing confirmed setup"),

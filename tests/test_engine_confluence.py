@@ -188,8 +188,24 @@ class EngineConfluenceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"stopped new entries"):
             self.engine._fresh_proposal(proposal)
         self.assertEqual(self.analyze()["proposals"],[])
-        self.engine._connect(True);self.engine.broker.is_simulation=False
+        # Same-source verification is now idempotent: it must preserve the
+        # original permission and latched session, without renewing either.
+        permission=self.engine.executor.authorization
+        settings=copy.deepcopy(self.engine.settings)
+        session=copy.deepcopy(self.engine.scalping_state["normal"])
+        reused=self.engine._connect(True)
+        self.assertTrue(reused["connection_reused"])
+        self.assertTrue(reused["authorization_preserved"])
+        self.assertIs(self.engine.executor.authorization,permission)
+        self.assertEqual(self.engine.settings,settings)
+        self.assertEqual(self.engine.scalping_state["normal"],session)
+        # A genuinely different bridge keeps the original fail-closed reset
+        # contract and must still retain the persisted scalp-goal latch.
+        self.engine._connect(True,bridge_path="synthetic-different-goal-bridge")
+        self.engine.broker.is_simulation=False
         self.assertEqual(self.engine.executor.mode,"READ_ONLY")
+        self.assertIsNone(self.engine.executor.authorization)
+        self.assertEqual(self.engine.settings,{})
         self.start(scalping=self.profile(target=.5))
         self.assertEqual(self.engine.scalping_state["normal"]["session_id"],sid)
         self.assertTrue(self.engine.scalping_state["normal"]["latched"])
@@ -247,11 +263,20 @@ class EngineConfluenceTests(unittest.TestCase):
         self.assertEqual(self.engine.executor.mode,"READ_ONLY")
         self.start(scalping=self.profile("normal",10))
         self.engine.broker.is_simulation=True
-        self.engine._connect(True)
+        permission=self.engine.executor.authorization
+        settings=copy.deepcopy(self.engine.settings)
+        reused=self.engine._connect(True)
+        self.assertTrue(reused["connection_reused"])
+        self.assertTrue(reused["authorization_preserved"])
+        self.assertIs(self.engine.executor.authorization,permission)
+        self.assertEqual(self.engine.settings,settings)
+        self.assertEqual(self.engine.executor.mode,"AUTO_DEMO")
+        self.engine._connect(True,bridge_path="synthetic-different-profile-bridge")
         self.assertEqual(self.engine.config["decision_protocol"],"four_school_v1")
         self.assertTrue(self.engine.config["scalping"]["normal"]["enabled"])
         self.assertEqual(self.engine.settings,{})
         self.assertEqual(self.engine.executor.mode,"READ_ONLY")
+        self.assertIsNone(self.engine.executor.authorization)
 
     def test_moving_clock_during_context_and_bar_reads_keeps_current_quote_eligible(self):
         self.start()

@@ -55,19 +55,30 @@ class LocalServer:
                 route=urlsplit(self.path).path
                 if not self.guard(route.startswith("/api/")):return
                 if route=="/api/state":
-                    encoded=getattr(parent.engine,'snapshot_json',None)
-                    self.reply(200,encoded() if callable(encoded) else parent.engine.snapshot());return
+                    try:
+                        encoded=getattr(parent.engine,'snapshot_json',None)
+                        self.reply(200,encoded() if callable(encoded) else parent.engine.snapshot())
+                    except Exception:
+                        LOG.exception("API state unavailable")
+                        self.reply(503,{"ok":False,"error":"حالة الخدمة غير متاحة؛ أعد المحاولة"})
+                    return
                 if route=="/api/action-result":
                     try:
                         query=parse_qs(urlsplit(self.path).query,keep_blank_values=True,max_num_fields=1)
                         if set(query)!={"id"} or len(query["id"])!=1:raise ValueError("معرّف طلب واحد مطلوب")
                     except ValueError:
                         self.reply(400,{"ok":False,"error":"معرّف طلب واحد مطلوب"});return
-                    self.reply(200,parent.engine.action_result(query["id"][0]));return
+                    try:self.reply(200,parent.engine.action_result(query["id"][0]))
+                    except Exception:
+                        LOG.exception("API action result unavailable")
+                        self.reply(503,{"ok":False,"error":"نتيجة الطلب غير متاحة؛ لا تعِد إرساله"})
+                    return
                 files={"/":("index.html","text/html; charset=utf-8"),"/index.html":("index.html","text/html; charset=utf-8"),
                        "/style.css":("style.css","text/css; charset=utf-8"),
+                       "/theme-neural.css":("theme-neural.css","text/css; charset=utf-8"),
                        "/i18n.js":("i18n.js","text/javascript; charset=utf-8"),
                        "/session-view.js":("session-view.js","text/javascript; charset=utf-8"),
+                       "/demo-panel.js":("demo-panel.js","text/javascript; charset=utf-8"),
                        "/app.js":("app.js","text/javascript; charset=utf-8")}
                 if route not in files:self.reply(404,{"error":"غير موجود"});return
                 name,ctype=files[route]
@@ -87,6 +98,7 @@ class LocalServer:
                     if not 0<length<=32768:raise ValueError("حجم طلب غير مسموح")
                     def reject_nonfinite(v):raise ValueError("رقم غير صالح: "+v)
                     payload=json.loads(self.rfile.read(length).decode("utf-8"),parse_constant=reject_nonfinite)
+                    if not isinstance(payload,dict):raise TypeError("كائن JSON مطلوب")
                     result=parent.engine.action(payload)
                     self.reply(200,result)
                 except (ValueError,KeyError,TypeError,UnicodeError) as exc:self.reply(400,{"ok":False,"error":str(exc),"message":str(exc)})
